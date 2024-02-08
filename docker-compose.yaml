@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  nginx: 
+  nginx1: 
     image: nginx:1.25.3
     hostname: nginx
     ports: 
