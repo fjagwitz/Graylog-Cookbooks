@@ -1,0 +1,113 @@
+version: "3.8"
+
+services:
+  nginx: 
+    image: nginx:1.25.3
+    hostname: nginx
+    ports: 
+      # WebUI
+      - 443:443
+      - 80:80
+      # API
+      - 3443:3443
+      - 380:380
+      # Syslog Input
+      - 514:514
+      - 514:514/udp 
+      # Beats Input 5044
+      - 5044:5044
+      # Gelf Inputs
+      - 12201:12201
+      - 12201:12201/udp 
+    restart: "always"
+
+  mongodb1:
+    image: mongo:6.0
+    hostname: "mongodb1"
+    volumes:
+      - "mongodb-data-01:/data/db"
+    restart: "always"
+
+  datanode1:
+    image: opensearchproject/opensearch:2.11.1
+    hostname: "datanode1"
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - "node.name=datanode1"
+      - "cluster.name=os-docker-cluster"
+      - "discovery.seed_hosts=datanode2,datanode3"
+      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
+      - "bootstrap.memory_lock=false"
+      - "action.auto_create_index=false"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.disabled=true"
+    volumes:
+      - "datanode-data-01:/usr/share/opensearch/data"
+    restart: "on-failure"
+
+  datanode2:
+    image: opensearchproject/opensearch:2.11.1
+    hostname: "datanode2"
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - "node.name=datanode2"
+      - "cluster.name=os-docker-cluster"
+      - "discovery.seed_hosts=datanode1,datanode3"
+      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
+      - "bootstrap.memory_lock=false"
+      - "action.auto_create_index=false"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.disabled=true"
+    volumes:
+      - "datanode-data-02:/usr/share/opensearch/data"
+    restart: "on-failure"
+
+  datanode3:
+    image: opensearchproject/opensearch:2.11.1
+    hostname: "datanode3"
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - "node.name=datanode3"
+      - "cluster.name=os-docker-cluster"
+      - "discovery.seed_hosts=datanode1,datanode2"
+      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
+      - "bootstrap.memory_lock=false"
+      - "action.auto_create_index=false"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.disabled=true"
+    volumes:
+      - "datanode-data-03:/usr/share/opensearch/data"
+    restart: "on-failure"
+
+  graylog1:
+    image: graylog/graylog:5.2.4
+    hostname: "graylog1"
+    depends_on:
+      - "mongodb1"
+      - "datanode1"
+      - "datanode2"
+      - "datanode3"
+    entrypoint: "/docker-entrypoint.sh"
+    environment:
+      GRAYLOG_IS_LEADER: "true"
+      GRAYLOG_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
+      GRAYLOG_ROOT_PASSWORD_SHA2: "${GRAYLOG_ROOT_PASSWORD_SHA2}"
+      GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
+      GRAYLOG_HTTP_PUBLISH_URI: "http://graylog1:9000"
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://my.graylog.test"
+      GRAYLOG_ELASTICSEARCH_HOSTS: "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
+      GRAYLOG_MONGODB_URI: "mongodb://mongodb1:27017/graylog"
+      GRAYLOG_TELEMETRY_ENABLED: "false"
+
+    volumes:
+      - "graylog-data-01:/usr/share/graylog/data/data"
+      - "graylog-journal-01:/usr/share/graylog/data/journal"
+    restart: "on-failure"
+
+volumes:
+  datanode-data-01:
+  datanode-data-02:
+  datanode-data-03:
+  graylog-data-01:
+  graylog-journal-01:
+  mongodb-data-01:
