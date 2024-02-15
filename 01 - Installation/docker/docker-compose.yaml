@@ -102,6 +102,8 @@ services:
     volumes:
       - "graylog-data-01:/usr/share/graylog/data/data"
       - "graylog-journal-01:/usr/share/graylog/data/journal"
+      - "/opt/mmdb/GeoLite2-ASN.mmdb:/etc/graylog/server/GeoLite2-ASN.mmdb:ro"
+      - "/opt/mmdb/GeoLite2-City.mmdb:/etc/graylog/server/GeoLite2-City.mmdb:ro"
     restart: "on-failure"
 
 volumes:
