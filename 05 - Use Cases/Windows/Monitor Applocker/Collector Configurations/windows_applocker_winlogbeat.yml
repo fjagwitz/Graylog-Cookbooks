@@ -1,0 +1,21 @@
+# Needed for Graylog
+fields_under_root: true
+fields.collector_node_id: ${sidecar.nodeName}
+fields.gl2_source_collector: ${sidecar.nodeId}
+
+output.logstash:
+  # add the name of your own Graylog Cluster here
+  hosts: ["graylog.demo.io:5044"]
+path:
+  data: ${sidecar.spoolDir!"C:\\Program Files\\Graylog\\sidecar\\cache\\winlogbeat"}\data
+  logs: ${sidecar.spoolDir!"C:\\Program Files\\Graylog\\sidecar"}\logs
+tags:
+  # tag specific for Applocker; additional tags can be added
+  - applocker
+winlogbeat:
+  event_logs:
+   # Applocker Logging
+   - name: Microsoft-Windows-AppLocker/EXE and DLL
+   - name: Microsoft-Windows-AppLocker/MSI and Script
+   - name: Microsoft-Windows-AppLocker/Packaged app-Deployment
+   - name: Microsoft-Windows-AppLocker/Packaged app-Execution
