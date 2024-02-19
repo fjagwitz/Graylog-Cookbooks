@@ -89,6 +89,7 @@ services:
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
     environment:
+      # Graylog Settings (refer to server.conf: https://go2docs.graylog.org/5-0/setting_up_graylog/server.conf.html)      
       GRAYLOG_IS_LEADER: "true"
       GRAYLOG_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_ROOT_PASSWORD_SHA2: "${GRAYLOG_ROOT_PASSWORD_SHA2}"
@@ -98,6 +99,9 @@ services:
       GRAYLOG_ELASTICSEARCH_HOSTS: "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
       GRAYLOG_MONGODB_URI: "mongodb://mongodb1:27017/graylog"
       GRAYLOG_TELEMETRY_ENABLED: "false"
+      # System Proxy Settings
+      HTTPS_PROXY: ""
+      HTTP_PROXY: ""
 
     volumes:
       - "graylog-data-01:/usr/share/graylog/data/data"
