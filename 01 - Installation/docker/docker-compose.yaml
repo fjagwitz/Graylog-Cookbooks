@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  nginx1: 
+  nginx: 
     image: nginx:1.25.3
     hostname: nginx
     ports: 
@@ -13,23 +13,30 @@ services:
       - 380:380
       # Syslog Input
       - 514:514
-      - 514:514/udp 
+      - 514:514/udp
       # Beats Input 5044
       - 5044:5044
+      # RAW UDP Input 
+      - 5555:5555
+      - 5555:5555/udp
       # Gelf Inputs
       - 12201:12201
       - 12201:12201/udp 
+    volumes:
+      - "/opt/nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "/opt/nginx/graylog.conf:/etc/nginx/conf.d/graylog.conf"
+      - "/opt/nginx/ssl:/etc/nginx/ssl"
     restart: "always"
 
   mongodb1:
-    image: mongo:6.0
+    image: "mongo:6.0.13"
     hostname: "mongodb1"
     volumes:
       - "mongodb-data-01:/data/db"
     restart: "always"
 
   datanode1:
-    image: opensearchproject/opensearch:2.11.1
+    image: "opensearchproject/opensearch:2.11.1"
     hostname: "datanode1"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
@@ -46,7 +53,7 @@ services:
     restart: "on-failure"
 
   datanode2:
-    image: opensearchproject/opensearch:2.11.1
+    image: "opensearchproject/opensearch:2.11.1"
     hostname: "datanode2"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
@@ -63,7 +70,7 @@ services:
     restart: "on-failure"
 
   datanode3:
-    image: opensearchproject/opensearch:2.11.1
+    image: "opensearchproject/opensearch:2.11.1"
     hostname: "datanode3"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
@@ -80,7 +87,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: graylog/graylog-enterprise:5.2.4
+    image: "graylog/graylog-enterprise:5.2.4"
     hostname: "graylog1"
     depends_on:
       - "mongodb1"
@@ -89,26 +96,88 @@ services:
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
     environment:
-      # Graylog Settings (refer to server.conf: https://go2docs.graylog.org/5-0/setting_up_graylog/server.conf.html)      
-      GRAYLOG_IS_LEADER: "true"
+      # Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/5-0/setting_up_graylog/server.conf.html)
+      # Work with the .env-example file to configure these values
       GRAYLOG_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_ROOT_PASSWORD_SHA2: "${GRAYLOG_ROOT_PASSWORD_SHA2}"
+      # Adapt these variables to your environment, refer to "server.conf" documentation (see above)
+      GRAYLOG_IS_LEADER: "true"
       GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
       GRAYLOG_HTTP_PUBLISH_URI: "http://graylog1:9000"
-      GRAYLOG_HTTP_EXTERNAL_URI: "http://my.graylog.test"
-      GRAYLOG_ELASTICSEARCH_HOSTS: "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
       GRAYLOG_MONGODB_URI: "mongodb://mongodb1:27017/graylog"
+      GRAYLOG_ELASTICSEARCH_HOSTS: "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
       GRAYLOG_TELEMETRY_ENABLED: "false"
-      # System Proxy Settings
-      HTTPS_PROXY: ""
-      HTTP_PROXY: ""
-
+      GRAYLOG_HTTP_EXTERNAL_URI: "https://my.graylog.test/"
+      # Notification Script Path / API URI
+      GRAYLOG_INTEGRATIONS_SCRIPTS_DIR: "/etc/graylog/server/notifications"
+      GRAYLOG_INTEGRATIONS_WEB_INTERFACE_URI: "https://my.integrated.rest.endpoint:443" 
+      GRAYLOG_ALLOWED_AUXILIARY_PATH: "/etc/graylog/server/notifications,/etc/graylog-server/mmdb"
+      # Graylog Proxy Settings (list of patterns separated by “,” - may start or end with a “*” for wildcards)
+      GRAYLOG_HTTP_PROXY_URI: ""
+      GRAYLOG_HTTP_NON_PROXY_HOSTS: "graylog*, mongodb*, datanode*, *"
+      # Graylog Reporting Configurations
+      GRAYLOG_REPORT_RENDER_URI: "http://my.graylog.test/"
+      GRAYLOG_REPORT_DISABLE_SANDBOX: "true"
+      ## Graylog Content Pack Handling
+      GRAYLOG_CONTENT_PACKS_LOADER_ENABLED: "false"
+      #GRAYLOG_CONTENT_PACKS_DIR: ""
+      #GRAYLOG_CONTENT_PACKS_AUTO_INSTALL: ""      
+      # Email Configurations
+      GRAYLOG_TRANSPORT_EMAIL_ENABLED: "true"
+      GRAYLOG_TRANSPORT_EMAIL_HOSTNAME: "my.email.system"
+      GRAYLOG_TRANSPORT_EMAIL_PORT: "587"
+      GRAYLOG_TRANSPORT_EMAIL_USE_AUTH: "true"
+      GRAYLOG_TRANSPORT_EMAIL_USE_TLS: "true"
+      GRAYLOG_TRANSPORT_EMAIL_USE_SSL: "false"
+      GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME: "my-graylog-mail-account"
+      GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD: "my-very-secure-P@$$w0rd"
+      GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX: ""
+      GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL: ""
+      GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL: "https://my.graylog.test"   
+      # Grafana Metrics Monitoring
+      GRAYLOG_PROMETHEUS_EXPORTER_ENABLED: "true"
+      GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS: "0.0.0.0"
+      # Indices naming
+      GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX: "gl-test-events"
+      GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX: "gl-test-system-events"
     volumes:
       - "graylog-data-01:/usr/share/graylog/data/data"
       - "graylog-journal-01:/usr/share/graylog/data/journal"
-      - "/opt/mmdb/GeoLite2-ASN.mmdb:/etc/graylog/server/GeoLite2-ASN.mmdb:ro"
-      - "/opt/mmdb/GeoLite2-City.mmdb:/etc/graylog/server/GeoLite2-City.mmdb:ro"
+      # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
+      - "/opt/graylog/archives/:/usr/share/graylog/data/archives"
+      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
+      - "/opt/graylog/notifications/:/etc/graylog/server/notifications"
+      # only required if you want to work with Geolocation Data
+      - "/opt/graylog/mmdb:/etc/graylog/server/mmdb:ro"
     restart: "on-failure"
+
+  # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
+  grafana1:
+    image: "grafana/grafana-oss:10.1.7"
+    hostname: "grafana1"
+    environment:
+     GF_SERVER_ROOT_URL: "https://my.graylog.test/grafana"
+     GF_INSTALL_PLUGINS: "grafana-clock-panel"
+    volumes:
+     - "grafana-data-01:/var/lib/grafana"
+    restart: "unless-stopped"
+
+  # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
+  prometheus1:
+    image: "prom/prometheus:v2.50.1"
+    hostname: "prometheus1"
+    environment: 
+      LISTEN_ADDRESS: "0.0.0.0"
+      LISTEN_PORT: '9090'
+    command:
+      - '--config.file=/etc/prometheus/prometheus-gls.yml'
+      - '--web.external-url=/prometheus/'
+      - '--web.route-prefix=/prometheus/'
+      - '--web.listen-address=0.0.0.0:9090'
+    volumes:
+      - "prometheus-data-01:/prometheus"
+      - "/opt/prometheus/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
+    restart: unless-stopped
 
 volumes:
   datanode-data-01:
@@ -117,3 +186,5 @@ volumes:
   graylog-data-01:
   graylog-journal-01:
   mongodb-data-01:
+  grafana-data-01:
+  prometheus-data-01:
