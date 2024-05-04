@@ -29,6 +29,7 @@ sudo mkdir -p /opt/opensearch/{datanode1,datanode2,datanode3}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
 
 # Set Folder permissions
+sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)

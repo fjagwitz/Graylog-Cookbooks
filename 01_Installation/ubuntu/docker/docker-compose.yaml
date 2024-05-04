@@ -38,14 +38,15 @@ services:
     image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode1"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="TbY1E$jV#5sfs!#u9;I0@3%9m7i520g3"
+      - OPENSEARCH_JAVA_OPTS="-Xms2048m -Xmx2048m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
       - "node.name=datanode1"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode2,datanode3"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
+      - "action.auto_create_index=false"openssl req -new -key cert.key -out cert.csr
+
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
@@ -56,8 +57,8 @@ services:
     image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode2"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="TbY1E$jV#5sfs!#u9;I0@3%9m7i520g3"
+      - OPENSEARCH_JAVA_OPTS="-Xms2048m -Xmx2048m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
       - "node.name=datanode2"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode3"
@@ -74,8 +75,8 @@ services:
     image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode3"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="TbY1E$jV#5sfs!#u9;I0@3%9m7i520g3"
+      - OPENSEARCH_JAVA_OPTS="-Xms2048m -Xmx2048m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
       - "node.name=datanode3"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode2"
@@ -85,7 +86,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
+      - ${GL_OPENSEARCH_DATA}/datanode3:"/usr/share/opensearch/data"
     restart: "on-failure"
 
   graylog1:
