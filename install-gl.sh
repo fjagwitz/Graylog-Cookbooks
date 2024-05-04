@@ -1,4 +1,5 @@
 #!/bin/bash
+installpath="${pwd}/01_Installation/ubuntu/docker"
 sourcerepo="https://github.com/fjagwitz/Graylog-Cookbooks.git"
 targetrepo="/opt"
 
@@ -27,3 +28,10 @@ sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLO
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
+
+# Move Files into the proper directories
+sudo mv ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
+sudo mv ${installpath}/docker-compose.yaml /opt/graylog
+sudo mv ${installpath}/env.example /opt/graylog/.env
+
+
