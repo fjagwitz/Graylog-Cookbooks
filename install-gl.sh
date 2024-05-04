@@ -25,7 +25,8 @@ echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile}
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
-sudo mkdir -p /opt/opensearch/{datanode1,datanode2,datanode3}
+sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
+sudo mkdir -p ${GL_GRAYLOG_PROMETHEUS}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
 
 # Set Folder permissions
@@ -45,6 +46,6 @@ sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
 # Start Graylog
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
+#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
 
 
