@@ -113,7 +113,7 @@ services:
       GRAYLOG_HTTP_EXTERNAL_URI: "https://my.graylog.test/"
       # Notification Script Path / API URI
       GRAYLOG_INTEGRATIONS_SCRIPTS_DIR: "/etc/graylog/server/notifications"
-      GRAYLOG_INTEGRATIONS_WEB_INTERFACE_URI: "https://my.integrated.rest.endpoint:443" 
+      GRAYLOG_INTEGRATIONS_WEB_INTERFACE_URI: "https://my.firewall.rest.endpoint:443" 
       GRAYLOG_ALLOWED_AUXILIARY_PATH: "/etc/graylog/server"
       # Graylog Proxy Settings (list of patterns separated by “,” - may start or end with a “*” for wildcards)
       GRAYLOG_HTTP_PROXY_URI: ""
