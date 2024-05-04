@@ -3,10 +3,6 @@ sourcerepo="https://github.com/fjagwitz/Graylog-Cookbooks.git"
 targetrepo="/opt"
 
 # Create required Folders in the Filesystem
-mkdir -p "/opt/graylog/archives" \
-         "/opt/graylog/contentpacks" \ 
-         "/opt/graylog/maxmind" \
-         "/opt/graylog/nginx" \
-         "/opt/graylog/prometheus" 
+mkdir -p /opt/graylog/{archives,contentpacks,maxmind,nginx,prometheus}
 
 # Create Environment Variables
