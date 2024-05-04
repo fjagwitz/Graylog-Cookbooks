@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   nginx: 
     image: nginx:latest
@@ -98,7 +96,7 @@ services:
     entrypoint: "/docker-entrypoint.sh"
     environment:
       # Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/5-0/setting_up_graylog/server.conf.html)
-      # Work with the .env-example file to configure these values
+      # Work with the .env-example file to configure these values - preconfigured value for ROOT_PASSWORD is "Secret2024!"
       GRAYLOG_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_ROOT_PASSWORD_SHA2: "${GRAYLOG_ROOT_PASSWORD_SHA2}"
       # Adapt these variables to your environment, refer to "server.conf" documentation (see above)
