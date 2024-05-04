@@ -7,6 +7,10 @@ targetrepo="/opt"
 sudo mkdir -p /opt/opensearch/{datanode1,datanode2,datanode3}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
 
+# Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
 # Create Environment Variables
 environmentfile="/etc/environment"
 
@@ -27,17 +31,17 @@ source ${environmentfile}
 # Set Folder permissions
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
-# Download Maxmind Files
+# Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
 
-# Move Files into the proper directories
+# Copy Files into the proper directories
 sudo cp ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
 sudo cp ${installpath}/docker-compose.yaml /opt/graylog
 sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
 
 # Start Graylog
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yml up -d
+sudo docker compose up -d -f ${GL_GRAYLOG}/docker-compose.yaml 
 
 
