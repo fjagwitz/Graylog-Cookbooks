@@ -3,10 +3,6 @@ installpath="$(pwd)/01_Installation/ubuntu/docker"
 sourcerepo="https://github.com/fjagwitz/Graylog-Cookbooks.git"
 targetrepo="/opt"
 
-# Create required Folders in the Filesystem
-sudo mkdir -p /opt/opensearch/{datanode1,datanode2,datanode3}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
-
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
@@ -27,6 +23,10 @@ echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${enviro
 
 echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile}
 source ${environmentfile}
+
+# Create required Folders in the Filesystem
+sudo mkdir -p /opt/opensearch/{datanode1,datanode2,datanode3}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
 
 # Set Folder permissions
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
