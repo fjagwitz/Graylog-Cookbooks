@@ -39,7 +39,7 @@ services:
     hostname: "datanode1"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=Secr3t2024!"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=tby1e$j%^5sfs!#u%s^0@3%9m7i520g3"
       - "node.name=datanode1"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode2,datanode3"
@@ -57,7 +57,7 @@ services:
     hostname: "datanode2"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=Secr3t2024!"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=tby1e$j%^5sfs!#u%s^0@3%9m7i520g3"
       - "node.name=datanode2"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode3"
@@ -75,7 +75,7 @@ services:
     hostname: "datanode3"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=Secr3t2024!"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=tby1e$j%^5sfs!#u%s^0@3%9m7i520g3"
       - "node.name=datanode3"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode2"
