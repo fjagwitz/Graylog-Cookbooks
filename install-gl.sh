@@ -17,6 +17,8 @@ echo "GL_GRAYLOG_MAXMIND=\"/opt/graylog/maxmind\"" | sudo tee -a ${environmentfi
 echo "GL_GRAYLOG_NGINX=\"/opt/graylog/nginx\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_PROMETHEUS=\"/opt/graylog/prometheus\"" | sudo tee -a ${environmentfile}
 
+source ${environmentfile}
+
 # Set Folder permissions
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
