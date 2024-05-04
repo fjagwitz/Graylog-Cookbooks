@@ -86,7 +86,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - ${GL_OPENSEARCH_DATA}/datanode3:"/usr/share/opensearch/data"
+      - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
 
   graylog1:
