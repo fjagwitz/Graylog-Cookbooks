@@ -7,6 +7,6 @@ mkdir   "/opt/graylog/archives" \
         "/opt/graylog/contentpacks" \ 
         "/opt/graylog/maxmind" \
         "/opt/graylog/nginx" \
-        "/opt/graylog/prometheus"
+        "/opt/graylog/prometheus" -p
 
 # Create Environment Variables
