@@ -45,7 +45,7 @@ services:
       - "discovery.seed_hosts=datanode2,datanode3"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"openssl req -new -key cert.key -out cert.csr
+      - "action.auto_create_index=false"
 
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
