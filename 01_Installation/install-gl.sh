@@ -20,7 +20,7 @@ echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile}
 
 echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile}
-echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=T#bY1EjV5sfs!u9;I0@3%9m7i520g#3s" | sudo tee -a ${environmentfile}
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD='T#bY1EjV5sfs!u9;I0@3%9m7i520g#3s'" | sudo tee -a ${environmentfile}
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
