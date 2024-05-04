@@ -4,7 +4,7 @@ targetrepo="/opt"
 
 # Create required Folders in the Filesystem
 sudo mkdir -p /opt/opensearch/{datanode1,datanode2,datanode3}
-sudo mkdir -p /opt/graylog/{archives,contentpacks,journal,maxmind,nginx,prometheus}
+sudo mkdir -p /opt/graylog/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
 
 # Create Environment Variables
 environmentfile="/etc/environment"
@@ -15,6 +15,7 @@ echo "GL_GRAYLOG_CONTENTPACKS=\"/opt/graylog/contentpacks\"" | sudo tee -a ${env
 echo "GL_GRAYLOG_JOURNAL=\"/opt/graylog/journal\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_MAXMIND=\"/opt/graylog/maxmind\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_NGINX=\"/opt/graylog/nginx\"" | sudo tee -a ${environmentfile}
+echo "GL_GRAYLOG_NOTIFICATIONS=\"/opt/graylog/notifications\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_PROMETHEUS=\"/opt/graylog/prometheus\"" | sudo tee -a ${environmentfile}
 
 source ${environmentfile}
