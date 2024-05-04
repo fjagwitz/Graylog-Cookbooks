@@ -22,6 +22,7 @@ echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile}
 
 echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile}
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"T#bY1EjV5sfs!u9;I0@3%9m7i520g#3s\"" | sudo tee -a ${environmentfile}
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
@@ -34,9 +35,9 @@ sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-#sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
-#sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
-#sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
+sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
+sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
+sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
 
 # Copy Files into the proper directories
 sudo cp ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
@@ -46,6 +47,6 @@ sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
 # Start Graylog
-#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
 
 

@@ -39,7 +39,7 @@ services:
     hostname: "datanode1"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode1"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode2,datanode3"
@@ -58,7 +58,7 @@ services:
     hostname: "datanode2"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode2"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode3"
@@ -76,7 +76,7 @@ services:
     hostname: "datanode3"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode3"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode2"
@@ -114,7 +114,7 @@ services:
       # Notification Script Path / API URI
       GRAYLOG_INTEGRATIONS_SCRIPTS_DIR: "/etc/graylog/server/notifications"
       GRAYLOG_INTEGRATIONS_WEB_INTERFACE_URI: "https://my.integrated.rest.endpoint:443" 
-      GRAYLOG_ALLOWED_AUXILIARY_PATH: "/etc/graylog/server/notifications,/etc/graylog-server/mmdb"
+      GRAYLOG_ALLOWED_AUXILIARY_PATH: "/etc/graylog/server"
       # Graylog Proxy Settings (list of patterns separated by “,” - may start or end with a “*” for wildcards)
       GRAYLOG_HTTP_PROXY_URI: ""
       GRAYLOG_HTTP_NON_PROXY_HOSTS: "graylog*, mongodb*, datanode*, *"
@@ -123,7 +123,7 @@ services:
       GRAYLOG_REPORT_DISABLE_SANDBOX: "true"
       ## Graylog Content Pack Handling
       GRAYLOG_CONTENT_PACKS_LOADER_ENABLED: "false"
-      #GRAYLOG_CONTENT_PACKS_DIR: ""
+      GRAYLOG_CONTENT_PACKS_DIR: "/etc/graylog/server/contentpacks"
       #GRAYLOG_CONTENT_PACKS_AUTO_INSTALL: ""      
       # Email Configurations
       GRAYLOG_TRANSPORT_EMAIL_ENABLED: "true"
@@ -141,8 +141,8 @@ services:
       GRAYLOG_PROMETHEUS_EXPORTER_ENABLED: "true"
       GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS: "0.0.0.0"
       # Indices naming
-      GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX: "gl-test-events"
-      GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX: "gl-test-system-events"
+      GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX: "gl-non-production-events"
+      GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX: "gl-non-production-system-events"
     volumes:
       - "graylog-data-01:/usr/share/graylog/data/data"
       - "${GL_GRAYLOG_JOURNAL}:/usr/share/graylog/data/journal"
@@ -150,6 +150,8 @@ services:
       - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
+      # only required if you want to use predefined content packs
+      - "${GL_GRAYLOG_CONTENTPACKS}:/etc/graylog/server/contentpacks:ro"
       # only required if you want to work with Geolocation Data
       - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
     restart: "on-failure"
