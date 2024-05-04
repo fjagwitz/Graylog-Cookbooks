@@ -86,7 +86,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/graylog-enterprise:latest"
+    image: "graylog/graylog-enterprise:5.2"
     hostname: "graylog1"
     depends_on:
       - "mongodb1"
