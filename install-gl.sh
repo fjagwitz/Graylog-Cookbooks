@@ -42,6 +42,6 @@ sudo cp ${installpath}/docker-compose.yaml /opt/graylog
 sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
 
 # Start Graylog
-sudo docker compose up -d -f ${GL_GRAYLOG}/docker-compose.yaml 
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
 
 
