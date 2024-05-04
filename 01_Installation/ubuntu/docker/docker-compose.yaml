@@ -35,7 +35,7 @@ services:
     restart: "always"
 
   datanode1:
-    image: "opensearchproject/opensearch:2.13"
+    image: "opensearchproject/opensearch:2.13.0"
     hostname: "datanode1"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
@@ -52,7 +52,7 @@ services:
     restart: "on-failure"
 
   datanode2:
-    image: "opensearchproject/opensearch:2.13"
+    image: "opensearchproject/opensearch:2.13.0"
     hostname: "datanode2"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
@@ -69,7 +69,7 @@ services:
     restart: "on-failure"
 
   datanode3:
-    image: "opensearchproject/opensearch:2.13"
+    image: "opensearchproject/opensearch:2.13.0"
     hostname: "datanode3"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
