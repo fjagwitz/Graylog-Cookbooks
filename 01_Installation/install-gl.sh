@@ -1,7 +1,5 @@
 #!/bin/bash
-installpath="$(pwd)/01_Installation/compose"
-sourcerepo="https://github.com/fjagwitz/Graylog-Cookbooks.git"
-targetrepo="/opt"
+installpath="$(pwd)/compose"
 
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
