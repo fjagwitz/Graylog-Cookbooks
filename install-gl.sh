@@ -38,7 +38,7 @@ sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/do
 
 # Copy Files into the proper directories
 sudo cp ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
-sudo cp ${installpath}/docker-compose.yaml /opt/graylog
+sudo cp ${installpath}/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
 
 # Start Graylog
