@@ -38,8 +38,8 @@ services:
     image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode1"
     environment:
-      - OPENSEARCH_JAVA_OPTS="-Xms2048m -Xmx2048m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
+      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
       - "node.name=datanode1"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode2,datanode3"
@@ -57,8 +57,8 @@ services:
     image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode2"
     environment:
-      - OPENSEARCH_JAVA_OPTS="-Xms2048m -Xmx2048m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
+      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
       - "node.name=datanode2"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode3"
@@ -75,8 +75,8 @@ services:
     image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode3"
     environment:
-      - OPENSEARCH_JAVA_OPTS="-Xms2048m -Xmx2048m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD="T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
+      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=T#bY1EjV5sfs!u9;I0@3%9m7i520g#3"
       - "node.name=datanode3"
       - "cluster.name=os-docker-cluster"
       - "discovery.seed_hosts=datanode1,datanode2"
@@ -179,7 +179,7 @@ services:
       - '--web.listen-address=0.0.0.0:9090'
     volumes:
       - "prometheus-data-01:/prometheus"
-      - "/opt/prometheus/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
+      - "${GL_GRAYLOG_PROMETHEUS}/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
     restart: unless-stopped
 
 volumes:
