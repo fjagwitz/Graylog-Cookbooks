@@ -21,10 +21,10 @@ services:
       - 12201:12201
       - 12201:12201/udp 
     volumes:
-      - "/opt/graylog/nginx/nginx.conf:/etc/nginx/nginx.conf"
-      - "/opt/graylog/nginx/http.conf:/etc/nginx/conf.d/http.conf"
-      - "/opt/graylog/nginx/stream.conf:/etc/nginx/conf.d/stream.conf"
-      - "/opt/graylog/nginx/ssl:/etc/nginx/ssl"
+      - "${GL_GRAYLOG_NGINX}/nginx.conf:/etc/nginx/nginx.conf"
+      - "${GL_GRAYLOG_NGINX}/http.conf:/etc/nginx/conf.d/http.conf"
+      - "${GL_GRAYLOG_NGINX}/stream.conf:/etc/nginx/conf.d/stream.conf"
+      - "${GL_GRAYLOG_NGINX}/ssl:/etc/nginx/ssl"
     restart: "always"
 
   mongodb1:
@@ -48,7 +48,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - "GL_OPENSEARCH_DATA/datanode1:/usr/share/opensearch/data"
+      - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode2:
@@ -65,7 +65,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - "GL_OPENSEARCH_DATA/datanode2:/usr/share/opensearch/data"
+      - "${GL_OPENSEARCH_DATA}/datanode2:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode3:
@@ -82,7 +82,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - "GL_OPENSEARCH_DATA/datanode3:/usr/share/opensearch/data"
+      - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
 
   graylog1:
@@ -141,13 +141,13 @@ services:
       GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX: "gl-test-system-events"
     volumes:
       - "graylog-data-01:/usr/share/graylog/data/data"
-      - "graylog-journal-01:/usr/share/graylog/data/journal"
+      - "${GL_GRAYLOG_JOURNAL}:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "/opt/graylog/archives/:/usr/share/graylog/data/archives"
+      - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
-      - "/opt/graylog/notifications/:/etc/graylog/server/notifications"
+      - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
       # only required if you want to work with Geolocation Data
-      - "/opt/graylog/mmdb:/etc/graylog/server/mmdb:ro"
+      - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
@@ -179,11 +179,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  datanode-data-01:
-  datanode-data-02:
-  datanode-data-03:
   graylog-data-01:
-  graylog-journal-01:
   mongodb-data-01:
   grafana-data-01:
   prometheus-data-01:
