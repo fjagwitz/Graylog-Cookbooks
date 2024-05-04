@@ -1,5 +1,5 @@
 #!/bin/bash
-installpath="$(pwd)/01_Installation/ubuntu/docker"
+installpath="$(pwd)/01_Installation/compose"
 sourcerepo="https://github.com/fjagwitz/Graylog-Cookbooks.git"
 targetrepo="/opt"
 
