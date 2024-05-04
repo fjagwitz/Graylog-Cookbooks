@@ -18,5 +18,5 @@ echo "GL_GRAYLOG_NGINX=\"/opt/graylog/nginx\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_PROMETHEUS=\"/opt/graylog/prometheus\"" | sudo tee -a ${environmentfile}
 
 # Set Folder permissions
-chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
+sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
