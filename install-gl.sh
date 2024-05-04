@@ -39,8 +39,10 @@ sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLO
 
 # Copy Files into the proper directories
 sudo cp ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
+sudo cp ${installpath}/nginx/ssl ${GL_GRAYLOG_NGINX} -R
 sudo cp ${installpath}/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
+sudo cp ${installpath}/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
 # Start Graylog
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
