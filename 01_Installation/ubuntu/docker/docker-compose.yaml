@@ -48,7 +48,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - "datanode-data-01:/usr/share/opensearch/data"
+      - "GL_OPENSEARCH_DATA/datanode1:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode2:
@@ -65,7 +65,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - "datanode-data-02:/usr/share/opensearch/data"
+      - "GL_OPENSEARCH_DATA/datanode2:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode3:
@@ -82,7 +82,7 @@ services:
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
     volumes:
-      - "datanode-data-03:/usr/share/opensearch/data"
+      - "GL_OPENSEARCH_DATA/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
 
   graylog1:
