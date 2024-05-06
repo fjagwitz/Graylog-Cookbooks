@@ -1,5 +1,4 @@
 #!/bin/bash
-export DEBIAN_FRONTEND=noninteractive
 # Removing preconfigured Docker Installation from Ubuntu (just in case)
 for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg; done
 

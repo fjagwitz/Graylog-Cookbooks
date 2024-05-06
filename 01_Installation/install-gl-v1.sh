@@ -1,7 +1,6 @@
 #!/bin/bash
 echo "[INFO] - PREPARING THE SYSTEM "
 # Installing additional Tools on Ubuntu
-export DEBIAN_FRONTEND=noninteractive
 sudo apt-get -qq install -y --no-install-recommends apt-utils vim git < /dev/null > /dev/null
 
 # Check Minimum Requirements on Linux Server
