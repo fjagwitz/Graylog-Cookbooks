@@ -29,7 +29,11 @@ else
 fi
 
 # Removing preconfigured Docker Installation from Ubuntu (just in case)
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg; done
+
+
+# Installing additional Tools on Ubuntu
+sudo apt-get -qq install apt-utils vim git
 
 # Adding Docker Repository
 sudo apt-get -qq update
@@ -46,9 +50,6 @@ sudo apt-get -qq update
 
 # Installing Docker on Ubuntu
 sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# Installing additional Tools on Ubuntu
-sudo apt-get -qq install vim git
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
