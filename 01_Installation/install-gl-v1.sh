@@ -12,9 +12,9 @@ else
   exit
 fi
 
-if [[ $numberCores -lt 16 ]]
+if [[ $numberCores -lt 8 ]]
 then
-  echo "[INFO] - THIS SYSTEM NEEDS AT LEAST 16 CPU CORES - EXIT "
+  echo "[INFO] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXIT "
   exit
 else
   echo "[INFO] - CPU CHECK SUCCESSFUL: $numberCores CORES "
