@@ -4,7 +4,7 @@ numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }')
 operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}')
 
-if [[ $operatingSystem == Ubuntu ]]
+if [[ "$operatingSystem" == Ubuntu ]]
 then
   echo "[INFO] - $(lsb_release -a | grep Description) "
 else
