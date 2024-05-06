@@ -12,6 +12,14 @@ else
   exit
 fi
 
+if [[ $(command -v docker) -ne "" ]]
+then
+  echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
+else
+  echo "[INFO] - DOCKER CHECK FAILED, PLEASE INSTALL DOCKER FIRST "
+  exit
+fi
+
 if [[ $numberCores -lt 8 ]]
 then
   echo "[INFO] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXIT "
@@ -99,4 +107,4 @@ sudo rm -rf ${installpath}
 echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull
 
-echo "[INFO] - GRAYLOG INSTALLATION READY FOR TESTING "
+echo "[INFO] - GRAYLOG INSTALLATION SHOULD BE READY FOR TESTING "
