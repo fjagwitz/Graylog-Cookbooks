@@ -61,4 +61,4 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 sudo rm -rf ${installpath}
 
 # Start Graylog
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull
