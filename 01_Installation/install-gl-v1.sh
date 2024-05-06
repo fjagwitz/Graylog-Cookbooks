@@ -17,7 +17,7 @@ then
   echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
 else
   echo "[INFO] - DOCKER CHECK FAILED, PLEASE INSTALL DOCKER FIRST "
-  wget -qP https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh 
+  wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh 
   chmod +x ./install-docker-v1.sh
   ./install-docker-v1.sh
 fi
