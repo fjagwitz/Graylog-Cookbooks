@@ -47,6 +47,9 @@ sudo apt-get -qq update
 # Installing Docker on Ubuntu
 sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+# Installing additional Tools on Ubuntu
+sudo apt-get -qq install vim git
+
 # Configure temporary installpath
 installpath="/tmp/graylog"
 
