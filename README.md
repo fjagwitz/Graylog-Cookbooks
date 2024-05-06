@@ -4,4 +4,4 @@ This Repo is intended to help anyone who wants to give Graylog Operations and Se
 
 Get the Installation Script and start from here:
 
-```wget https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-gl-v1.sh && chmod +x install-gl-v1.sh && ./install-gl-v1.sh```
+```wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-gl-v1.sh && chmod +x install-gl-v1.sh && ./install-gl-v1.sh```
