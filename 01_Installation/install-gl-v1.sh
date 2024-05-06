@@ -1,4 +1,7 @@
 #!/bin/bash
+#sudo apt install git vim 
+
+
 installpath="/opt/installpath"
 
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
