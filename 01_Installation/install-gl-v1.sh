@@ -1,4 +1,7 @@
 #!/bin/bash
+# Installing additional Tools on Ubuntu
+sudo apt-get -qq install apt-utils vim git 
+
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }')
@@ -37,9 +40,6 @@ then
 else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
-
-# Installing additional Tools on Ubuntu
-sudo apt-get -qq install apt-utils vim git < /dev/null > /dev/null
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
