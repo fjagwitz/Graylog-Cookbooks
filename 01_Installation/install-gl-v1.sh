@@ -38,7 +38,7 @@ sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/do
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
 
 # Cloning Git Repo containing prepared content
-git clone https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
+sudo git clone https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files into the proper directories
 sudo cp ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
