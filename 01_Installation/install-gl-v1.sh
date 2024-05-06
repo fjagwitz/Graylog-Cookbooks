@@ -37,7 +37,7 @@ else
 fi
 
 # Installing additional Tools on Ubuntu
-sudo apt-get -qq install apt-utils vim git
+sudo apt-get -qq install apt-utils vim git < /dev/null > /dev/null
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
