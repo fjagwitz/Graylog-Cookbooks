@@ -25,6 +25,7 @@ echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile}
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
+sudo mkdir -p ${installpath}
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
 
@@ -33,9 +34,9 @@ sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
-sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
-sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
+#sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb
+#sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb
+#sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
 
 # Cloning Git Repo containing prepared content
 sudo git clone https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
@@ -56,6 +57,8 @@ echo GRAYLOG_ROOT_PASSWORD_SHA2"=dfd0ac1ed1ea5d28e136edcec863b3cd7c7d868827e1611
 echo GRAYLOG_PASSWORD_SECRET="ob4xd0sdLM2yY4dUVcLgV81fU7RiWoblgxCz03YmoKcdTnMFvhx9HTnvVg82ckfWOfCljQqvYdzT6Adgx1pf6Xp1CaIshEfj" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD="TbY1EjV5sfs!u9;I0@3%9m7i520g3s" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+
+#sudo rm -rf ${installpath}
 
 # Start Graylog
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
