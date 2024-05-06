@@ -42,11 +42,11 @@ sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLO
 sudo git clone https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files into the proper directories
-sudo cp ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
-sudo cp ${installpath}/nginx/ssl ${GL_GRAYLOG_NGINX} -R
-sudo cp ${installpath}/docker-compose.yaml ${GL_GRAYLOG}
-sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
-sudo cp ${installpath}/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
+sudo cp ${installpath}/01_Installation/compose/nginx/*.conf ${GL_GRAYLOG_NGINX}
+sudo cp ${installpath}/01_Installation/compose/nginx/ssl ${GL_GRAYLOG_NGINX} -R
+sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
+sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
+sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
 # Add Environment Variables for Docker Compose 
 # Reusing credentials is not a best practice and CAN ONLY be done for testing purposes; feel free to adapt those values for your purposes
@@ -62,6 +62,3 @@ echo GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD="TbY1EjV5sfs!u9;I0@3%9m7i520g3s" | sud
 
 # Start Graylog
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
-
-
-
