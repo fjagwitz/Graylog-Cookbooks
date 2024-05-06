@@ -6,7 +6,7 @@ operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}' | x
 
 if [[ "$operatingSystem" == Ubuntu ]]
 then
-  echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(awk '{ print toupper($(lsb_release -a | grep Distributor)) }' | xargs) "
+  echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
 else
   echo "[INFO] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
   exit
