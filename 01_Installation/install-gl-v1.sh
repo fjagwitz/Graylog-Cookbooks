@@ -1,6 +1,8 @@
 #!/bin/bash
 installpath="/opt/installpath"
 
+echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
+
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf >/dev/null
 sudo sysctl -p >/dev/null
@@ -62,3 +64,5 @@ sudo rm -rf ${installpath}
 
 # Start Graylog
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull
+
+echo "[INFO] - GRAYLOG INSTALLATION READY FOR TESTING "
