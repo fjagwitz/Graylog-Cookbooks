@@ -8,7 +8,8 @@ if [[ "$operatingSystem" == Ubuntu ]]
 then
   echo "[INFO] - $(lsb_release -a | grep Description) "
 else
-  echo "[INFO] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description) "
+  #echo "[INFO] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description) "
+  echo "[INFO] - OPERATING SYSTEM CHECK FAILED: $operatingSystem
   exit
 fi
 
