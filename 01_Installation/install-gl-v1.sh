@@ -16,7 +16,7 @@ if [[ $(command -v docker) -ne "" ]]
 then
   echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
 else
-  echo "[INFO] - DOCKER CHECK FAILED, PLEASE INSTALL DOCKER FIRST "
+  echo "[INFO] - DOCKER CHECK FAILED, PLEASE INSTALL DOCKER FIRST (https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh)"
   exit
 fi
 
@@ -104,7 +104,7 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 sudo rm -rf ${installpath}
 
 # Start Graylog Stack
-echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED "
+echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull
 
 echo "[INFO] - GRAYLOG INSTALLATION SHOULD BE READY FOR TESTING "
