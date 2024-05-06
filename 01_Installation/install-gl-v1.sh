@@ -2,7 +2,7 @@
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }')
-operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}')
+operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}' | xargs)
 
 if [[ "$operatingSystem" == Ubuntu ]]
 then
