@@ -8,20 +8,20 @@ sudo sysctl -p
 # Create Environment Variables
 environmentfile="/etc/environment"
 
-echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile}
+echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile} >/dev/null 
 source ${environmentfile}
 
-echo "GL_GRAYLOG_COMPOSE_ENV=${GL_GRAYLOG}/.env" | sudo tee -a ${environmentfile}
+echo "GL_GRAYLOG_COMPOSE_ENV=${GL_GRAYLOG}/.env" | sudo tee -a ${environmentfile} >/dev/null
 
-echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile}
-echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile}
-echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile}
-echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG}/maxmind\"" | sudo tee -a ${environmentfile}
-echo "GL_GRAYLOG_NGINX=\"${GL_GRAYLOG}/nginx\"" | sudo tee -a ${environmentfile}
-echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile}
-echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile}
+echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} >/dev/null
+echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} >/dev/null
+echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile} >/dev/null
+echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG}/maxmind\"" | sudo tee -a ${environmentfile} >/dev/null
+echo "GL_GRAYLOG_NGINX=\"${GL_GRAYLOG}/nginx\"" | sudo tee -a ${environmentfile} >/dev/null
+echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} >/dev/null
+echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} >/dev/null
 
-echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile}
+echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile} >/dev/null
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
@@ -52,13 +52,13 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 # Reusing credentials is not a best practice and CAN ONLY be done for testing purposes; feel free to adapt those values for your purposes
 # Predefined Root / admin Password is: "Secr3t2024!"
 # Create your own Secret by using for example: echo -n yourpassword | shasum -a 256 
-echo "GRAYLOG_ROOT_PASSWORD_SHA2=\"dfd0ac1ed1ea5d28e136edcec863b3cd7c7d868827e161152abb8d367182b2b7\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+echo "GRAYLOG_ROOT_PASSWORD_SHA2=\"dfd0ac1ed1ea5d28e136edcec863b3cd7c7d868827e161152abb8d367182b2b7\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} >/dev/null
 # Create your own Secret by using for example: pwgen -N 1 -s 96
-echo "GRAYLOG_PASSWORD_SECRET=\"ob4xd0sdLM2yY4dUVcLgV81fU7RiWoblgxCz03YmoKcdTnMFvhx9HTnvVg82ckfWOfCljQqvYdzT6Adgx1pf6Xp1CaIshEfj\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+echo "GRAYLOG_PASSWORD_SECRET=\"ob4xd0sdLM2yY4dUVcLgV81fU7RiWoblgxCz03YmoKcdTnMFvhx9HTnvVg82ckfWOfCljQqvYdzT6Adgx1pf6Xp1CaIshEfj\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} >/dev/null
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
-echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} >/dev/null
 
-#sudo rm -rf ${installpath}
+sudo rm -rf ${installpath}
 
 # Start Graylog
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
