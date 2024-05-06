@@ -11,7 +11,7 @@ environmentfile="/etc/environment"
 echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile}
 source ${environmentfile}
 
-echo "GL_GRAYLOG_COMPOSE_ENV=${installpath}/env.example ${GL_GRAYLOG}/.env"
+echo "GL_GRAYLOG_COMPOSE_ENV=${GL_GRAYLOG}/.env"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile}
