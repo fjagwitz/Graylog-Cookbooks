@@ -1,4 +1,5 @@
 #!/bin/bash
+installpath="/opt/installfolder"
 
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
@@ -37,8 +38,7 @@ sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/do
 sudo wget -P ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb
 
 # Cloning Git Repo containing prepared content
-git clone https://github.com/fjagwitz/Graylog-Cookbooks.git
-installpath="$(pwd)/01_Installation/compose"
+git clone https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files into the proper directories
 sudo cp ${installpath}/nginx/*.conf ${GL_GRAYLOG_NGINX}
