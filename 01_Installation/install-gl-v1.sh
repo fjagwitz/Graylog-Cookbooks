@@ -11,6 +11,8 @@ environmentfile="/etc/environment"
 echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile}
 source ${environmentfile}
 
+echo "GL_GRAYLOG_COMPOSE_ENV=${installpath}/env.example ${GL_GRAYLOG}/.env"
+
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile}
 echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile}
@@ -20,12 +22,10 @@ echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile}
 
 echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile}
-echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD='TbY1EjV5sfs!u9;I0@3%9m7i520g3s'" | sudo tee -a ${environmentfile}
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
-sudo mkdir -p ${GL_GRAYLOG_PROMETHEUS}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
 
 # Set Folder permissions
@@ -44,7 +44,18 @@ sudo cp ${installpath}/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
+# Add Environment Variables for Docker Compose 
+# Reusing credentials is not a best practice and CAN ONLY be done for testing purposes; feel free to adapt those values for your purposes
+# Predefined Root / admin Password is: "Secr3t2024!"
+# Create your own Secret by using for example: echo -n yourpassword | shasum -a 256 
+echo GRAYLOG_ROOT_PASSWORD_SHA2"=dfd0ac1ed1ea5d28e136edcec863b3cd7c7d868827e161152abb8d367182b2b7" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+# Create your own Secret by using for example: pwgen -N 1 -s 96
+echo GRAYLOG_PASSWORD_SECRET="ob4xd0sdLM2yY4dUVcLgV81fU7RiWoblgxCz03YmoKcdTnMFvhx9HTnvVg82ckfWOfCljQqvYdzT6Adgx1pf6Xp1CaIshEfj" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+# This can be kept as-is, because Opensearch will not be available except inside the Docker Network
+echo GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD="TbY1EjV5sfs!u9;I0@3%9m7i520g3s" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+
 # Start Graylog
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
+
 
 
