@@ -16,8 +16,10 @@ if [[ $(command -v docker) -ne "" ]]
 then
   echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
 else
-  echo "[INFO] - DOCKER CHECK FAILED, PLEASE INSTALL DOCKER FIRST (https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh)"
-  exit
+  echo "[INFO] - DOCKER CHECK FAILED, PLEASE INSTALL DOCKER FIRST "
+  wget -qP https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh 
+  chmod +x ./install-docker-v1.sh
+  ./install-docker-v1.sh
 fi
 
 if [[ $numberCores -lt 8 ]]
