@@ -1,6 +1,7 @@
 #!/bin/bash
+echo "[INFO] - PREPARING THE SYSTEM "
 # Installing additional Tools on Ubuntu
-sudo apt-get -qq install apt-utils vim git 
+sudo apt-get -qq install apt-utils vim git < /dev/null > /dev/nul
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
@@ -13,16 +14,6 @@ then
 else
   echo "[INFO] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
   exit
-fi
-
-if [[ $(command -v docker) -ne "" ]]
-then
-  echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
-else
-  echo "[INFO] - DOCKER CHECK FAILED, PLEASE INSTALL DOCKER FIRST "
-  wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh 
-  chmod +x ./install-docker-v1.sh
-  ./install-docker-v1.sh
 fi
 
 if [[ $numberCores -lt 8 ]]
@@ -40,6 +31,17 @@ then
 else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
+
+if [[ $(command -v docker) -ne "" ]]
+then
+  echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
+else
+  echo "[INFO] - DOCKER CHECK FAILED, WILL BE INSTALLED NOW "
+  wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh 
+  chmod +x ./install-docker-v1.sh
+  ./install-docker-v1.sh
+fi
+
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
