@@ -1,14 +1,14 @@
 #!/bin/bash
 installpath="/opt/installpath"
 
-echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
-
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf >/dev/null
 sudo sysctl -p >/dev/null
 
 # Create Environment Variables
 environmentfile="/etc/environment"
+
+echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 
 echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile} >/dev/null 
 source ${environmentfile}
@@ -62,7 +62,8 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 
 sudo rm -rf ${installpath}
 
-# Start Graylog
+# Start Graylog Stack
+echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull
 
 echo "[INFO] - GRAYLOG INSTALLATION READY FOR TESTING "
