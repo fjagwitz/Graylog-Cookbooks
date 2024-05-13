@@ -74,7 +74,7 @@ source ${environmentfile}
 # Create required Folders in the Filesystem
 sudo mkdir -p ${installpath}
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,journal,maxmind,nginx,notifications,prometheus}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx,notifications,prometheus}
 
 # Set Folder permissions
 sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}

@@ -154,6 +154,8 @@ services:
       - "${GL_GRAYLOG_CONTENTPACKS}:/etc/graylog/server/contentpacks:ro"
       # only required if you want to work with Geolocation Data
       - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
+      # only required if you want to work with Lookup Tables for Enrichment
+      - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
