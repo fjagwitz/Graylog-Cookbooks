@@ -3,7 +3,7 @@ echo "[INFO] - PREPARING THE SYSTEM "
 # Installing additional Tools on Ubuntu
 sudo apt-get -qq install apt-utils vim git < /dev/null > /dev/null
 
-# Install Qemu-Guest-Agent for Ubuntu on Proxmox
+# Install Qemu-Guest-Agent for Ubuntu on Proxmox - just for testing, can be skipped
 if [[ "$vmType" == 'Standard PC (i440FX + PIIX, 1996)'
  ]]
 then
