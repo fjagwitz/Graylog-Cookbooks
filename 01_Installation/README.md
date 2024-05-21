@@ -18,10 +18,17 @@ Get the Installation Script and start from here:
 
     wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6-v1.sh && chmod +x install-graylog6-v1.sh && ./install-graylog6-v1.sh
 
+The Script finishes displaying the admin user, password and Cluster-ID:
+```[INFO] - USER: "gladmin" || PASSWORD: "VarYS3cr@t!" || CLUSTER-ID: "C5FF1E24-14AC-4692-8E91-85867524A599"```
+
 The system is accessible via
 
 - http(s)://ipaddress
 - http(s)://fqdn
+
+## Get a license
+
+For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID to your local Graylog Solution Engineer and get it within a few days.
 
 Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl``` and can be replaced:
 
