@@ -10,7 +10,7 @@ Create a virtual machine:
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 
-Depending on your setup, you might want to add hypervisor-specific guest tools, potentially additional agents required by organizational policy.
+Depending on your setup, you might want to add hypervisor-specific guest tools and additional software required by organizational policy.
 
 ## Install Graylog
 
