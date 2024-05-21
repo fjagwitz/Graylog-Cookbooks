@@ -1,6 +1,6 @@
 # Graylog Installation
 
-## Install Ubuntu LTS
+## Prepare Server System
 
 Create a virtual machine:
 
