@@ -100,7 +100,7 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 # echo "Please add the name of your central Administration User: "
 # read GL_GRAYLOG_ADMIN
 echo "Please add the central Administration Password: "
-read GL_GRAYLOG_PASSWORD
+read -s GL_GRAYLOG_PASSWORD
 
 # echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 #echo "GL_ROOT_PASSWORD_SHA2=\"$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | awk '{print $1}')\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
