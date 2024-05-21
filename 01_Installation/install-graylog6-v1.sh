@@ -119,7 +119,6 @@ clear
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION "
 sleep 9s
 
-curl $(hostname)/api/system/lbstatus
 while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
   echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
