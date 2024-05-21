@@ -4,11 +4,11 @@
 
 Create a virtual machine:
 
-    - CPU Cores: at least 8
-    - Memory: at least 32 GB
-    - Storage: at least 480 GB
-    - Operating System: Ubuntu LTS, Standard Setup without additional packages
-    - Configured IP-Address, DNS resolution and Access to the Internet
+- CPU Cores: at least 8
+- Memory: at least 32 GB
+- Storage: at least 480 GB
+- Operating System: Ubuntu LTS, Standard Setup without additional packages
+- Configured IP-Address, DNS resolution and Access to the Internet
 
 Depending on your setup, you might want to add hypervisor-specific guest tools, potentially additional agents required by organizational policy.
 
@@ -20,16 +20,19 @@ Get the Installation Script and start from here:
 
 The system is accessible via
 
-    - http://ipaddress
-    - https://ipaddress (invalid certificate being used, you may change it after the installation)
-    - http://fqdn
-    - https://fqdn (invalid certificate being used, you may change it after the installation)
+- http://ipaddress
+- https://ipaddress (invalid certificate being used, you may change it after the installation)
+- http://fqdn
+- https://fqdn (invalid certificate being used, you may change it after the installation)
 
 Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl```:
 
-    - the easy way: 
-      - store your certificates under /opt/graylog/nginx/ssl
-      - rename your own certificate to cert.crt and cert.key 
-    - the flexible way: 
-      - store your certificates under /opt/graylog/nginx/ssl
-      - change the corresponding settings in /opt/graylog/nginx/http.conf
+the easy way:
+
+- store your certificates under /opt/graylog/nginx/ssl
+- rename your own certificate to cert.crt and cert.key 
+
+the flexible way:
+
+- store your certificates under /opt/graylog/nginx/ssl
+- change the corresponding settings in /opt/graylog/nginx/http.conf
