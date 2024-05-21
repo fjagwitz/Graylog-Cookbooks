@@ -23,7 +23,7 @@ The system is accessible via
 - http(s)://ipaddress
 - http(s)://fqdn
 
-Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl```:
+Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl``` and can be replaced:
 
 the easy way:
 
