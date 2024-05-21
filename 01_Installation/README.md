@@ -26,3 +26,6 @@ The system is accessible via
     - https://fqdn (invalid certificate being used, you may change it after the installation)
 
 Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl```
+
+    - you can simply rename your own certificate to cert.crt and cert.key or
+    - you store your certificates under ```/opt/graylog/nginx/ssl``` and change the corresponding settings in ```/opt/graylog/nginx/http.conf```
