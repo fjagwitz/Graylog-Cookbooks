@@ -116,7 +116,12 @@ echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
 clear
 
-echo "[INFO] - VALIDATING GRAYLOG INSTALLATION, WAIT FOR ANOTHER FEW SECONDS "
-sleep 90s
+echo "[INFO] - VALIDATING GRAYLOG INSTALLATION "
+curl $(hostname)/api/system/lbstatus
+while [ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]
+do
+  echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
+  sleep 3s
+done
 
-echo "[INFO] - USER: ${GL_GRAYLOG_ADMIN} || PASSWORD: ${GL_GRAYLOG_PASSWORD} || CLUSTER-ID: $(curl $(hostname)/api | jq '.cluster_id' | tr a-z A-Z) "
+echo "[INFO] - USER: ${GL_GRAYLOG_ADMIN} || PASSWORD: ${GL_GRAYLOG_PASSWORD} || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )"
