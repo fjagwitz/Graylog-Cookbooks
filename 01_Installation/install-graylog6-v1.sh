@@ -114,7 +114,6 @@ sudo rm -rf ${installpath}
 # Start Graylog Stack
 echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
-clear
 
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION "
 sleep 9s
