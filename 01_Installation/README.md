@@ -20,17 +20,15 @@ Get the Installation Script and start from here:
 
 The system is accessible via
 
-- http://ipaddress
-- https://ipaddress (invalid certificate being used, you may change it after the installation)
-- http://fqdn
-- https://fqdn (invalid certificate being used, you may change it after the installation)
+- http(s)://ipaddress
+- http(s)://fqdn
 
 Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl```:
 
 the easy way:
 
 - store your certificates under /opt/graylog/nginx/ssl
-- rename your own certificate to cert.crt and cert.key 
+- rename your own certificate to cert.crt and cert.key
 
 the flexible way:
 
