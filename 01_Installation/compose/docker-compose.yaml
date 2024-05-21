@@ -101,9 +101,9 @@ services:
     environment:
       # Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/5-0/setting_up_graylog/server.conf.html)
       # Work with the .env-example file to configure these values - preconfigured value for ROOT_PASSWORD is "Secr3t2024!"
-      GRAYLOG_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
-      GRAYLOG_ROOT_USERNAME: "${GRAYLOG_ROOT_USERNAME}"
-      GRAYLOG_ROOT_PASSWORD_SHA2: "${GRAYLOG_ROOT_PASSWORD_SHA2}"
+      GRAYLOG_PASSWORD_SECRET: "${GL_PASSWORD_SECRET}"
+      GRAYLOG_ROOT_USERNAME: "${GL_ROOT_USERNAME}"
+      GRAYLOG_ROOT_PASSWORD_SHA2: "${GL_ROOT_PASSWORD_SHA2}"
       # Adapt these variables to your environment, refer to "server.conf" documentation (see above)
       GRAYLOG_IS_LEADER: "true"
       GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"

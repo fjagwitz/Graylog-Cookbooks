@@ -102,9 +102,9 @@ read GL_GRAYLOG_ADMIN
 echo "Please add the central Administration Password: "
 read GL_GRAYLOG_PASSWORD
 
-echo "GRAYLOG_ROOT_USERNAME=$(echo ${GL_GRAYLOG_ADMIN})" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-echo "GRAYLOG_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | awk '{print $1}')" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-echo "GRAYLOG_PASSWORD_SECRET=$(pwgen -N 1 -s 96)" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GL_ROOT_PASSWORD_SHA2=\"$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | awk '{print $1}')\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
