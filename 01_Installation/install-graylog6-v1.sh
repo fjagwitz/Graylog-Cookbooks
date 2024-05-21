@@ -101,11 +101,11 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 # Reusing credentials is not a best practice and CAN ONLY be done for testing purposes; feel free to adapt those values for your purposes
 # Predefined Root / admin Password is: "Secr3t2024!"
 # Create your own Secret by using for example: echo -n yourpassword | shasum -a 256 
-echo "GRAYLOG_ROOT_PASSWORD_SHA2=\"dfd0ac1ed1ea5d28e136edcec863b3cd7c7d868827e161152abb8d367182b2b7\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GRAYLOG_ROOT_PASSWORD_SHA2=\"dfd0ac1ed1ea5d28e136edcec863b3cd7c7d868827e161152abb8d367182b2b7\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} 
 # Create your own Secret by using for example: pwgen -N 1 -s 96
-echo "GRAYLOG_PASSWORD_SECRET=\"ob4xd0sdLM2yY4dUVcLgV81fU7RiWoblgxCz03YmoKcdTnMFvhx9HTnvVg82ckfWOfCljQqvYdzT6Adgx1pf6Xp1CaIshEfj\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GRAYLOG_PASSWORD_SECRET=\"ob4xd0sdLM2yY4dUVcLgV81fU7RiWoblgxCz03YmoKcdTnMFvhx9HTnvVg82ckfWOfCljQqvYdzT6Adgx1pf6Xp1CaIshEfj\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
-echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} 
 
 sudo rm -rf ${installpath}
 
