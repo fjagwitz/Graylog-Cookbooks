@@ -115,4 +115,4 @@ sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull
 
 echo "[INFO] - GRAYLOG INSTALLATION SHOULD BE READY FOR TESTING "
 
-echo "[INFO] - USER: "admin" || PASSWORD: $(cat /opt/graylog/docker-compose.yaml | grep "preconfigured value for ROOT_PASSWORD" | awk '{ print $17 }') " || CLUSTER-ID: $(curl $(hostname)/api | jq '.cluster_id' | tr a-z A-Z)
+echo "[INFO] - USER: \"admin\" || PASSWORD: $(cat /opt/graylog/docker-compose.yaml | grep "preconfigured value for ROOT_PASSWORD" | awk '{ print $17 }') || CLUSTER-ID: $(curl $(hostname)/api | jq '.cluster_id' | tr a-z A-Z) "
