@@ -14,12 +14,11 @@ Depending on your setup, you might want to add hypervisor-specific guest tools a
 
 ## Install Graylog
 
-Get the Installation Script and start from here:
+Before you start, make a Snapshot of your Ubuntu machine; the Installation Script contains practically no error handling; in case it breaks at some point you can revert the machine to the initial state and restart the Installation Script.
+
+Get it from here:
 
     wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6-v1.sh && chmod +x install-graylog6-v1.sh && ./install-graylog6-v1.sh
-
-The Script finishes displaying the admin user, password and Cluster-ID:
-```[INFO] - USER: "gladmin" || PASSWORD: "VarYS3cr@t!" || CLUSTER-ID: "C5FF1E24-14AC-4692-8E91-85867524A599"```
 
 The system is accessible via
 
@@ -28,7 +27,11 @@ The system is accessible via
 
 ## Get a license
 
-For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID to your local Graylog Solution Engineer and get it within a few days.
+For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days: 
+
+```[INFO] - USER: "rfox" || PASSWORD: "Geheim1990!" || CLUSTER-ID: "C5FF1E24-14AC-4692-8E91-85867524A599"```
+
+## Configure Nginx
 
 Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl``` and can be replaced:
 
