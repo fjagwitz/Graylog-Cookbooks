@@ -127,6 +127,4 @@ do
 done
 
 echo "[INFO] - SYSTEM READY FOR TESTING "
-
-# echo "[INFO] - USER: ${GL_GRAYLOG_ADMIN} || PASSWORD: ${GL_GRAYLOG_PASSWORD} || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )"
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )"
