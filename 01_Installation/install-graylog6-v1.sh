@@ -117,8 +117,10 @@ sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /d
 clear
 
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION "
+sleep 9s
+
 curl $(hostname)/api/system/lbstatus
-while [ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]
+while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
   echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
   sleep 3s
