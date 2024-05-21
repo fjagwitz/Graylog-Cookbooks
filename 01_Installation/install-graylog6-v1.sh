@@ -72,9 +72,6 @@ echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${enviro
 echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
 
-# Create Secrets
-GL_ 
-
 # Create required Folders in the Filesystem
 sudo mkdir -p ${installpath}
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
