@@ -3,13 +3,6 @@ echo "[INFO] - PREPARING THE SYSTEM "
 # Installing additional Tools on Ubuntu
 sudo apt-get -qq install apt-utils vim git < /dev/null > /dev/null
 
-# Install Qemu-Guest-Agent for Ubuntu on Proxmox - just for testing, can be skipped
-if [[ "$vmType" == 'Standard PC (i440FX + PIIX, 1996)'
- ]]
-then
-  echo "[INFO] - VM Agent for KVM being installed "
-  sudo apt-get -qq install qemu-guest-agent < /dev/null > /dev/null
-fi
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
