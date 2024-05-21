@@ -27,9 +27,7 @@ The system is accessible via
 
 ## Get a license
 
-For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days: 
-
-```[INFO] - USER: "gladmin" || PASSWORD: "v@ryS3crit!" || CLUSTER-ID: "C5FF1E24-14AC-4692-8E91-85867524A599"```
+For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days.
 
 ## Configure Nginx
 
