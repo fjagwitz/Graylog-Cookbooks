@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "[INFO] - PREPARING THE SYSTEM "
 # Installing additional Tools on Ubuntu
-sudo apt-get -qq install apt-utils vim git < /dev/null > /dev/null
+sudo apt-get -qq install apt-utils vim git jq pwgen < /dev/null > /dev/null
 
 
 # Check Minimum Requirements on Linux Server
@@ -43,7 +43,6 @@ else
   ./install-docker-v1.sh
 fi
 
-
 # Configure temporary installpath
 installpath="/tmp/graylog"
 
@@ -73,6 +72,9 @@ echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${enviro
 echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
 
+# Create Secrets
+GL_ 
+
 # Create required Folders in the Filesystem
 sudo mkdir -p ${installpath}
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
@@ -98,12 +100,12 @@ sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
 # Add Environment Variables for Docker Compose 
-# Reusing credentials is not a best practice and CAN ONLY be done for testing purposes; feel free to adapt those values for your purposes
-# Predefined Root / admin Password is: "Secr3t2024!"
-# Create your own Secret by using for example: echo -n yourpassword | shasum -a 256 
-echo "GRAYLOG_ROOT_PASSWORD_SHA2=\"dfd0ac1ed1ea5d28e136edcec863b3cd7c7d868827e161152abb8d367182b2b7\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-# Create your own Secret by using for example: pwgen -N 1 -s 96
-echo "GRAYLOG_PASSWORD_SECRET=\"ob4xd0sdLM2yY4dUVcLgV81fU7RiWoblgxCz03YmoKcdTnMFvhx9HTnvVg82ckfWOfCljQqvYdzT6Adgx1pf6Xp1CaIshEfj\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "Please add the central Administration Password: "
+read GL_GRAYLOG_PASSWORD
+
+echo "GRAYLOG_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | awk '{print $1}')" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GRAYLOG_PASSWORD_SECRET=$(pwgen -N 1 -s 96)" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
@@ -114,7 +116,7 @@ echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
 clear
 
-echo "[INFO] - VALIDATING GRAYLOG INSTALLATION, WAIT FOR ANOTHER 90 SECONDS "
+echo "[INFO] - VALIDATING GRAYLOG INSTALLATION, WAIT FOR ANOTHER FEW SECONDS "
 sleep 90s
 
 echo "[INFO] - USER: \"admin\" || PASSWORD: $(cat /opt/graylog/docker-compose.yaml | grep "preconfigured value for ROOT_PASSWORD" | awk '{ print $17 }') || CLUSTER-ID: $(curl $(hostname)/api | jq '.cluster_id' | tr a-z A-Z) "
