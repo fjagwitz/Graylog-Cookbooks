@@ -28,14 +28,14 @@ services:
     restart: "always"
 
   mongodb1:
-    image: "containers/mongo:7"
+    image: "mongo:7"
     hostname: "mongodb1"
     volumes:
       - "mongodb-data-01:/data/db"
     restart: "always"
 
   datanode1:
-    image: "containers/opensearchproject/opensearch:2.13.0"
+    image: "opensearchproject/opensearch:2.13.0"
     hostname: "datanode1"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
@@ -54,7 +54,7 @@ services:
     restart: "on-failure"
 
   datanode2:
-    image: "containers/opensearchproject/opensearch:2.13.0"
+    image: "opensearchproject/opensearch:2.13.0"
     hostname: "datanode2"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
@@ -72,7 +72,7 @@ services:
     restart: "on-failure"
 
   datanode3:
-    image: "containers/opensearchproject/opensearch:2.13.0"
+    image: "opensearchproject/opensearch:2.13.0"
     hostname: "datanode3"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
@@ -90,7 +90,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: "containers/graylog/graylog-enterprise:6.0"
+    image: "graylog/graylog-enterprise:6.0"
     hostname: "graylog1"
     depends_on:
       - "mongodb1"
@@ -160,7 +160,7 @@ services:
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
   grafana1:
-    image: "containers/grafana/grafana-oss:latest"
+    image: "grafana/grafana-oss:latest"
     hostname: "grafana1"
     environment:
      GF_SERVER_ROOT_URL: "https://my.graylog.test/grafana"
@@ -171,7 +171,7 @@ services:
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
   prometheus1:
-    image: "containers/prom/prometheus:latest"
+    image: "prom/prometheus:latest"
     hostname: "prometheus1"
     environment: 
       LISTEN_ADDRESS: "0.0.0.0"
