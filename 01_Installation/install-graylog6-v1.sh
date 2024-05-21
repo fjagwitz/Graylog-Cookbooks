@@ -97,9 +97,12 @@ sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
 # Add Environment Variables for Docker Compose 
+echo "Please add the name of your central Administration User: "
+read GL_GRAYLOG_ADMIN
 echo "Please add the central Administration Password: "
 read GL_GRAYLOG_PASSWORD
 
+echo "GRAYLOG_ROOT_USERNAME=$(echo ${GL_GRAYLOG_ADMIN})" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GRAYLOG_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | awk '{print $1}')" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GRAYLOG_PASSWORD_SECRET=$(pwgen -N 1 -s 96)" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
@@ -116,4 +119,4 @@ clear
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION, WAIT FOR ANOTHER FEW SECONDS "
 sleep 90s
 
-echo "[INFO] - USER: \"admin\" || PASSWORD: $(cat /opt/graylog/docker-compose.yaml | grep "preconfigured value for ROOT_PASSWORD" | awk '{ print $17 }') || CLUSTER-ID: $(curl $(hostname)/api | jq '.cluster_id' | tr a-z A-Z) "
+echo "[INFO] - USER: ${GL_GRAYLOG_ADMIN} || PASSWORD: ${GL_GRAYLOG_PASSWORD} || CLUSTER-ID: $(curl $(hostname)/api | jq '.cluster_id' | tr a-z A-Z) "

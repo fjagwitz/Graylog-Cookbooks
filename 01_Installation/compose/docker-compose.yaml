@@ -28,14 +28,14 @@ services:
     restart: "always"
 
   mongodb1:
-    image: "jcr.fritzdata.de/containers/jcr.fritzdata.de/containers/mongo:7"
+    image: "jcr.fritzdata.de/containers/mongo:7"
     hostname: "mongodb1"
     volumes:
       - "mongodb-data-01:/data/db"
     restart: "always"
 
   datanode1:
-    image: "jcr.fritzdata.de/containers/jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
+    image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode1"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
@@ -54,7 +54,7 @@ services:
     restart: "on-failure"
 
   datanode2:
-    image: "jcr.fritzdata.de/containers/jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
+    image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode2"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
@@ -72,7 +72,7 @@ services:
     restart: "on-failure"
 
   datanode3:
-    image: "jcr.fritzdata.de/containers/jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
+    image: "jcr.fritzdata.de/containers/opensearchproject/opensearch:2.13.0"
     hostname: "datanode3"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
@@ -90,7 +90,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: "jcr.fritzdata.de/containers/jcr.fritzdata.de/containers/graylog/graylog-enterprise:6.0"
+    image: "jcr.fritzdata.de/containers/graylog/graylog-enterprise:6.0"
     hostname: "graylog1"
     depends_on:
       - "mongodb1"
@@ -102,6 +102,7 @@ services:
       # Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/5-0/setting_up_graylog/server.conf.html)
       # Work with the .env-example file to configure these values - preconfigured value for ROOT_PASSWORD is "Secr3t2024!"
       GRAYLOG_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
+      GRAYLOG_ROOT_USERNAME: "${GRAYLOG_ROOT_USERNAME}"
       GRAYLOG_ROOT_PASSWORD_SHA2: "${GRAYLOG_ROOT_PASSWORD_SHA2}"
       # Adapt these variables to your environment, refer to "server.conf" documentation (see above)
       GRAYLOG_IS_LEADER: "true"
@@ -160,7 +161,7 @@ services:
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
   grafana1:
-    image: "jcr.fritzdata.de/containers/jcr.fritzdata.de/containers/grafana/grafana-oss:latest"
+    image: "jcr.fritzdata.de/containers/grafana/grafana-oss:latest"
     hostname: "grafana1"
     environment:
      GF_SERVER_ROOT_URL: "https://my.graylog.test/grafana"
@@ -171,7 +172,7 @@ services:
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
   prometheus1:
-    image: "jcr.fritzdata.de/containers/jcr.fritzdata.de/containers/prom/prometheus:latest"
+    image: "jcr.fritzdata.de/containers/prom/prometheus:latest"
     hostname: "prometheus1"
     environment: 
       LISTEN_ADDRESS: "0.0.0.0"
