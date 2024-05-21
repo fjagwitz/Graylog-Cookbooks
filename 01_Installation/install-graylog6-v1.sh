@@ -104,7 +104,8 @@ read -s GL_GRAYLOG_PASSWORD
 
 # echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 #echo "GL_ROOT_PASSWORD_SHA2=\"$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | awk '{print $1}')\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-echo "GL_ROOT_PASSWORD_SHA2=\"$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | cut -d" " -f1)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | shasum -a 256 | cut -d" " -f1)
+echo "\"${GL_ROOT_PASSWORD_SHA2}\" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
