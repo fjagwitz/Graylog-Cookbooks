@@ -104,16 +104,14 @@ sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
-# Add Environment Variables for Docker Compose 
+# Create Login Credentials
 echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
 echo "[INPUT] - Please add the central Administration Password: "
-read -s GL_GRAYLOG_PASSWORD
-
+read GL_GRAYLOG_PASSWORD
 echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-
 echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
@@ -137,12 +135,4 @@ done
 clear
 
 echo "[INFO] - SYSTEM READY FOR TESTING "
-# Adding warning message to prevent this System to be used in Production
-curl http://$(hostname)/api/plugins/org.graylog.plugins.customization/notifications \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H 'X-Requested-By: $(hostname)' \
-  -H 'Content-Type: application/json' \
-  -d '{"atLogin": true, "isGlobal": true, "shortMessage": "Evaluation System", "hiddenTitle": false, "isDismissible": false, "isActive": true, "title": "WARNING", "longMessage": "This is an Evaluation System and MUST NOT be used in Producation Environments"}' 
-
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )"
