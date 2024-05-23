@@ -104,7 +104,7 @@ sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
-# Create Login Credentials
+# Add System Credentials
 echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
 echo "[INPUT] - Please add the central Administration Password: "
@@ -117,6 +117,7 @@ echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COM
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
+# Installation Cleanup
 sudo rm -rf ${installpath}
 
 # Start Graylog Stack
@@ -134,5 +135,72 @@ done
 
 clear
 
-echo "[INFO] - SYSTEM READY FOR TESTING "
+echo "[INFO] - SYSTEM READY FOR TESTING, PREPARING BASIC CONFIGURATIONS "
+
+
+org.graylog2.inputs.syslog.udp.SyslogUDPInput
+
+
+# Adding Inputs to make sure Ports map to Nginx configuration
+# Beats Input for Winlogbeat, Auditbeat, Filebeat
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H 'X-Requested-By: $(hostname)' \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5044 Beats | Evaluation Input",
+        "type": "org.graylog.plugins.beats.Beats2Input",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5044,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+# Syslog UDP Input for Network Devices
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H 'X-Requested-By: $(hostname)' \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 514 UDP Syslog | Evaluation Input",
+        "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 514,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# Syslog TCP Input for Network Devices
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H 'X-Requested-By: $(hostname)' \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 514 TCP Syslog | Evaluation Input",
+        "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 514,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+
+
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )"
