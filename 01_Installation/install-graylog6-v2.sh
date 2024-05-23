@@ -44,7 +44,7 @@ else
 fi
 
 # Checking Docker Installation Success
-if [[ $(docker -v | awk '{ print $1 $2}') == "Dockerversion" ]]
+if [[ $(docker -v | awk '{ print $1 $2}') -eq "Dockerversion" ]]
 then
   echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
 else
@@ -105,9 +105,9 @@ sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 
 # Add Environment Variables for Docker Compose 
-echo "Please add the name of your central Administration User: "
+echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
-echo "Please add the central Administration Password: "
+echo "[INPUT] - Please add the central Administration Password: "
 read -s GL_GRAYLOG_PASSWORD
 
 echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
@@ -125,14 +125,24 @@ sudo rm -rf ${installpath}
 echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
 
-echo "[INFO] - VALIDATING GRAYLOG INSTALLATION "
-sleep 9s
+echo "[INFO] - VALIDATING GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
+sleep 15s
 
 while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
   echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
-  sleep 3s
+  sleep 5s
 done
 
+clear
+
 echo "[INFO] - SYSTEM READY FOR TESTING "
+# Adding warning message to prevent this System to be used in Production
+curl http://$(hostname)/api/plugins/org.graylog.plugins.customization/notifications \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H 'X-Requested-By: $(hostname)' \
+  -H 'Content-Type: application/json' \
+  -d '{"atLogin": true, "isGlobal": true, "shortMessage": "Evaluation System", "hiddenTitle": false, "isDismissible": false, "isActive": true, "title": "WARNING", "longMessage": "This is an Evaluation System and MUST NOT be used in Producation Environments"}' 
+
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )"

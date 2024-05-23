@@ -29,6 +29,8 @@ The system is accessible via
 
 For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days.
 
+## Folder Structure
+
 ## Configure Nginx
 
 Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl``` and can be replaced:

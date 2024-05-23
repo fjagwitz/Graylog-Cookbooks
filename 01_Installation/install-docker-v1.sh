@@ -17,4 +17,6 @@ sudo apt-get -qq update < /dev/null > /dev/null
 # Installing Docker on Ubuntu
 sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin < /dev/null > /dev/null
 
-echo "[INFO] - DOCKER INSTALLATION FINISHED "
+sleep 3s
+
+exit
