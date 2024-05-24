@@ -23,6 +23,7 @@ Get it from here:
 The system is accessible via
 
 - http(s)://ipaddress
+- http(s)://hostname
 - http(s)://fqdn
 
 ## Get a license
