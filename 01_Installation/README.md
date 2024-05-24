@@ -71,7 +71,7 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--datanode3
 
-/opt/graylog:
+**/opt/graylog**:
 
 - **/archives** _(must be owned by the user:group with the id 1100)_: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
 - **/contentpacks**: this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
@@ -83,7 +83,7 @@ The installation script will create a few folders and populate these with helpfu
 - **/notifications** _(must be owned by the user:group with the id 1100)_: this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
 - **/prometheus**: this folder contains configuration data to get metrics from Graylog to Grafana.
 
-/opt/opensearch _(must be owned by the user:group with the id 1000)_:
+**/opt/opensearch** _(must be owned by the user:group with the id 1000)_:
 
 - **datanode[1-3]**: these folders contain the Opensearch Data. You can mount any remote storage to that folder.
 
