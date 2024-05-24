@@ -33,7 +33,7 @@ else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
 
-if [[ echo "$(command -v docker)" -ne "/usr/bin/docker" ]]; 
+if [[ "$(command -v docker)" == "/usr/bin/docker" ]]; 
 then
   echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
 else
@@ -150,7 +150,7 @@ sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /d
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
 sleep 15s
 
-#while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
+while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
   echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
   sleep 5s
