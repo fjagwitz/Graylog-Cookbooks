@@ -119,7 +119,7 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 
 # Install Samba to make local Data Adapters accessible
 sudo adduser ${GL_GRAYLOG_ADMIN} --system
-sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rw ${GL_GRAYLOG_LOOKUPTABLES}
+sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES}
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
 sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
 echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN}
