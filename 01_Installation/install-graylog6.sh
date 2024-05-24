@@ -118,6 +118,7 @@ sudo cp ${installpath}/01_Installation/compose/nginx/ssl ${GL_GRAYLOG_NGINX} -R
 sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
+sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 
 # Add System Credentials
 echo "[INPUT] - Please add the name of your central Administration User: "
