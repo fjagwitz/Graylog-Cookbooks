@@ -71,7 +71,6 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--datanode3
 
-
 **/opt/graylog**:
 
 - **/archives** _(must be owned by the user:group with the id 1100)_: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
@@ -83,7 +82,6 @@ The installation script will create a few folders and populate these with helpfu
 - **/nginx/ssl**: this folder contains the nginx certificates for https connections.
 - **/notifications** _(must be owned by the user:group with the id 1100)_: this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
 - **/prometheus**: this folder contains configuration data to get metrics from Graylog to Grafana.
-
 
 **/opt/opensearch** _(must be owned by the user:group with the id 1000)_:
 
