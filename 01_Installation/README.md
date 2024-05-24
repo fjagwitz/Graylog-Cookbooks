@@ -88,17 +88,3 @@ The installation script will create a few folders and populate these with helpfu
 **/opt/opensearch** _(must be owned by the user:group with the id 1000)_:
 
 - **datanode[1-3]**: these folders contain the Opensearch Data. You can mount any remote storage to that folder.
-
-## Configure Nginx
-
-Nginx certificates are stored in the Ubuntu machine under ```/opt/graylog/nginx/ssl``` and can be replaced:
-
-the easy way:
-
-- store your certificates under /opt/graylog/nginx/ssl
-- rename your own certificate to cert.crt and cert.key
-
-the flexible way:
-
-- store your certificates under /opt/graylog/nginx/ssl
-- change the corresponding settings in /opt/graylog/nginx/http.conf
