@@ -34,42 +34,42 @@ Once set up, the system can be used without a license but limited functionality.
 
 The installation script will create a few folders and populate these with helpful content to understand the Graylog capabilities:
 
-        /opt
-            |
-            |--/graylog
-            |       |
-            |       |--/archives
-            |       |
-            |       |--/contentpacks
-            |       |
-            |       |--/journal
-            |       |
-            |       |--/lookuptables
-            |       |
-            |       |--/maxmind
-            |       |
-            |       |--/nginx
-            |       |     |
-            |       |     |--http.conf
-            |       |     |--nginx.conf
-            |       |     |--stream.conf
-            |       |     |
-            |       |     |--ssl
-            |       |         |--cert.crt
-            |       |         |--cert.key
-            |       |
-            |       |--/notifications
-            |       |
-            |       |--/prometheus
-            |
-            |
-            |--/opensearch
-                    |
-                    |--datanode1
-                    |
-                    |--datanode2
-                    |
-                    |--datanode3
+    /opt
+        |
+        |--/graylog
+        |       |
+        |       |--/archives
+        |       |
+        |       |--/contentpacks
+        |       |
+        |       |--/journal
+        |       |
+        |       |--/lookuptables
+        |       |
+        |       |--/maxmind
+        |       |
+        |       |--/nginx
+        |       |     |
+        |       |     |--http.conf
+        |       |     |--nginx.conf
+        |       |     |--stream.conf
+        |       |     |
+        |       |     |--ssl
+        |       |         |--cert.crt
+        |       |         |--cert.key
+        |       |
+        |       |--/notifications
+        |       |
+        |       |--/prometheus
+        |
+        |
+        |--/opensearch
+                |
+                |--datanode1
+                |
+                |--datanode2
+                |
+                |--datanode3
 
 - /archives: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
 - /contentpacks: this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
