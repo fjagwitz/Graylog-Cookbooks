@@ -37,6 +37,8 @@ The installation script will create a few folders and populate these with helpfu
     /opt
         |
         |--/graylog
+        |       |--docker-compose.yaml
+        |       |--.env
         |       |
         |       |--/archives
         |       |
