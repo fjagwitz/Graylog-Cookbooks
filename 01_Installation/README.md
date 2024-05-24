@@ -71,13 +71,23 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--datanode3
 
-- /archives: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
+/opt/graylog:
+
+- /archives (must be owned by the user:group with the id 1100): this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
 - /contentpacks: this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
-- /journal: this folder is used for the Graylog Journal. It must provide at least 5GB of Storage. You can mount any remote storage to that folder.
+- /journal (must be owned by the user:group with the id 1100): this folder is used for the Graylog Journal. It must provide at least 5GB of Storage. You can mount any remote storage to that folder.
 - /lookuptables: this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - /maxmind: this folder contains the GeoIP databases to be used by the Graylog Geo-Location Processor.
 - /nginx: this folder contains the nginx configuration files for the nginx container.
 - /nginx/ssl: this folder contains the nginx certificates for https connections.
+- /notifications (must be owned by the user:group with the id 1100): this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
+- /prometheus: this folder contains configuration data to get metrics from Graylog to Grafana.
+
+/opt/opensearch (must be owned by the user:group with the id 1000):
+
+- datanode1: this folder contains the Opensearch Data. You can mount any remote storage to that folder.
+- datanode2: this folder contains the Opensearch Data. You can mount any remote storage to that folder.
+- datanode3: this folder contains the Opensearch Data. You can mount any remote storage to that folder.
 
 ## Configure Nginx
 
