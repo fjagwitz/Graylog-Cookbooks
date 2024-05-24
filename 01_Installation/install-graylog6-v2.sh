@@ -33,7 +33,7 @@ else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
 
-if [[ $(command -v docker) -ne "" ]]; 
+if [[ echo "$(command -v docker)" -ne "/usr/bin/docker" ]]; 
 then
   echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
 else
