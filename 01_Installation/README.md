@@ -18,7 +18,7 @@ Before you start, make a Snapshot of your Ubuntu machine; the Installation Scrip
 
 Get it from here:
 
-    wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6.sh && chmod +x install-graylog6.sh && ./install-graylog6.sh
+    wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6.sh && chmod +x install-graylog6.sh && sudo ./install-graylog6.sh
 
 The system is accessible via
 
@@ -27,7 +27,7 @@ The system is accessible via
 
 ## Get a license
 
-For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days.
+Once set up, the system can be used without a license but limited functionality. For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days.
 
 ## Folder Structure
 
