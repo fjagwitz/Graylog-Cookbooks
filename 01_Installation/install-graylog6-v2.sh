@@ -33,14 +33,28 @@ else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
 
-if [[ $(command -v docker) -ne "" ]]
+if [[ $(command -v docker) -ne "" ]]; 
 then
   echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
 else
   echo "[INFO] - DOCKER CHECK FAILED, WILL BE INSTALLED NOW "
-  wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-docker-v1.sh 
-  chmod +x ./install-docker-v1.sh
-  ./install-docker-v1.sh
+  # Removing preconfigured Docker Installation from Ubuntu (just in case)
+  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg; done
+
+  # Adding Docker Repository
+  sudo apt-get -qq install ca-certificates curl < /dev/null > /dev/null
+  sudo install -m 0755 -d /etc/apt/keyrings > /dev/null
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc > /dev/null
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get -qq update < /dev/null > /dev/null
+
+  # Installing Docker on Ubuntu
+  sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin < /dev/null > /dev/null
 fi
 
 # Checking Docker Installation Success
@@ -90,9 +104,9 @@ sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-#sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
-#sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
-#sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
+sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
+sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
+sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
 # Cloning Git Repo containing prepared content
 sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
@@ -131,16 +145,16 @@ sudo rm -rf ${installpath}
 
 # Start Graylog Stack
 echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
-#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
 
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
-#sleep 15s
+sleep 15s
 
 #while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
-#do
-#  echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
-#  sleep 5s
-#done
+do
+  echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
+  sleep 5s
+done
 
 clear
 
