@@ -18,11 +18,7 @@ Before you start, make a Snapshot of your Ubuntu machine; the Installation Scrip
 
 Get it from here:
 
-    wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6-v1.sh && chmod +x install-graylog6-v1.sh && ./install-graylog6-v1.sh
-
-Don't use this:
-
-    wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6-v2.sh && chmod +x install-graylog6-v2.sh && ./install-graylog6-v2.sh
+    wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6.sh && chmod +x install-graylog6.sh && ./install-graylog6.sh
 
 The system is accessible via
 

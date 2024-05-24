@@ -55,15 +55,16 @@ else
 
   # Installing Docker on Ubuntu
   sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin < /dev/null > /dev/null
+
+  # Checking Docker Installation Success
+  if [[ $(docker -v | awk '{ print $1 $2}') -eq "Dockerversion" ]]
+  then
+    echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
+  else
+    echo "[INFO] - DOCKER INSTALLATION FAILED, WILL EXIT NOW "
+  fi
 fi
 
-# Checking Docker Installation Success
-if [[ $(docker -v | awk '{ print $1 $2}') -eq "Dockerversion" ]]
-then
-  echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
-else
-  echo "[INFO] - DOCKER INSTALLATION FAILED, WILL EXIT NOW "
-fi
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
@@ -132,12 +133,12 @@ echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COM
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
-# Install Samba to make local Data Adapters accessible
+# Install Samba to make local Data Adapters accessible from Windows
 sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
 sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES}
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
 sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
-echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN}
+echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN} > /dev/null
 sudo sed -i -e "s/valid users = GLADMIN/valid users = ${GL_GRAYLOG_ADMIN}/g" /etc/samba/smb.conf 
 sudo service smbd restart
 
