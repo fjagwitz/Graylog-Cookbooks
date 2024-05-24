@@ -127,7 +127,7 @@ sudo wget -qP ${GL_GRAYLOG_LOOKUPTABLES} https://gist.githubusercontent.com/bria
 echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
 echo "[INPUT] - Please add the central Administration Password: "
-read GL_GRAYLOG_PASSWORD
+read -s GL_GRAYLOG_PASSWORD
 
 echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
