@@ -20,6 +20,9 @@ Get it from here:
 
     wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6-v1.sh && chmod +x install-graylog6-v1.sh && ./install-graylog6-v1.sh
 
+Don't use this:
+    wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6-v2.sh && chmod +x install-graylog6-v2.sh && ./install-graylog6-v2.sh
+
 The system is accessible via
 
 - http(s)://ipaddress

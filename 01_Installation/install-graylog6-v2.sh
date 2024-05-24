@@ -90,9 +90,9 @@ sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
-sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
-sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
+#sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
+#sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
+#sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
 # Cloning Git Repo containing prepared content
 sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
@@ -131,16 +131,16 @@ sudo rm -rf ${installpath}
 
 # Start Graylog Stack
 echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
+#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
 
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
-sleep 15s
+#sleep 15s
 
-while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
-do
-  echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
-  sleep 5s
-done
+#while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
+#do
+#  echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
+#  sleep 5s
+#done
 
 clear
 
