@@ -120,6 +120,9 @@ sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 
+# Add external source to resolve Windows Codes
+sudo wget -qP ${GL_GRAYLOG_LOOKUPTABLES} https://gist.githubusercontent.com/brianreitz/d5b9397a2e8b3d52ceb9359897e07c3f/raw/9263602b7cefbc5d13a8745e5fc995820bb9efef/msobjs_message_table.txt
+
 # Add System Credentials
 echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
@@ -161,7 +164,7 @@ done
 
 clear
 
-echo "[INFO] - SYSTEM READY FOR TESTING, PREPARING BASIC CONFIGURATIONS "
+echo "[INFO] - SYSTEM READY FOR TESTING "
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ~/graylog_credentials.txt
 
 exit
