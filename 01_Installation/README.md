@@ -77,8 +77,7 @@ The installation script will create a few folders and populate these with helpfu
 - /lookuptables: this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - /maxmind: this folder contains the GeoIP databases to be used by the Graylog Geo-Location Processor.
 - /nginx: this folder contains the nginx configuration files for the nginx container.
--- /ssl 
-
+- /nginx/ssl: this folder contains the nginx certificates for https connections.
 
 ## Configure Nginx
 
