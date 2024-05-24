@@ -28,7 +28,7 @@ The system is accessible via
 
 ## Get a license
 
-Once set up, the system can be used without a license but limited functionality. For testing Graylog Enterprise & Security Features, you need a test license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days.
+Once set up, the system can be tested without a license but limited functionality. For evaluating Graylog Enterprise & Security Features, you need a trial license. Send the Cluster-ID (displayed when the script finishes) to your local Graylog Solution Engineer and get it within a few days.
 
 ## Folder Structure
 
