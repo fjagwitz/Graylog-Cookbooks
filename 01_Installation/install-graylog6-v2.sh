@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "[INFO] - PREPARING THE SYSTEM "
 # Installing additional Tools on Ubuntu
-sudo apt-get -qq install apt-utils vim git jq pwgen < /dev/null > /dev/null
+sudo apt-get -qq install apt-utils vim git jq pwgen smb acl < /dev/null > /dev/null
 
 
 # Check Minimum Requirements on Linux Server
@@ -109,13 +109,22 @@ echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
 echo "[INPUT] - Please add the central Administration Password: "
 read GL_GRAYLOG_PASSWORD
-echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GL_ROOT_GL_GRAYLOG_ADMIN=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+
+# Install Samba to make local Data Adapters accessible
+sudo adduser ${GL_GRAYLOG_ADMIN} --system
+sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES}
+sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
+echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN}
+sudo sed -i -e "s/valid users = GLADMIN/valid users = ${GL_GRAYLOG_ADMIN}/g" /etc/samba/smb.conf 
+sudo service smbd restart
 
 # Installation Cleanup
 sudo rm -rf ${installpath}
@@ -136,71 +145,6 @@ done
 clear
 
 echo "[INFO] - SYSTEM READY FOR TESTING, PREPARING BASIC CONFIGURATIONS "
+echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ~/graylog_credentials.txt
 
-
-org.graylog2.inputs.syslog.udp.SyslogUDPInput
-
-
-# Adding Inputs to make sure Ports map to Nginx configuration
-# Beats Input for Winlogbeat, Auditbeat, Filebeat
-curl http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H 'X-Requested-By: $(hostname)' \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5044 Beats | Evaluation Input",
-        "type": "org.graylog.plugins.beats.Beats2Input",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5044,
-          "number_worker_threads": 4,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 
-# Syslog UDP Input for Network Devices
-curl http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H 'X-Requested-By: $(hostname)' \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 514 UDP Syslog | Evaluation Input",
-        "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 514,
-          "number_worker_threads": 4,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 
-
-# Syslog TCP Input for Network Devices
-curl http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H 'X-Requested-By: $(hostname)' \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 514 TCP Syslog | Evaluation Input",
-        "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 514,
-          "number_worker_threads": 4,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 
-
-
-
-echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )"
+exit
