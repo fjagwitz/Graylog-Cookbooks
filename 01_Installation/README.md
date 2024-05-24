@@ -40,7 +40,7 @@ The installation script will create a few folders and populate these with helpfu
         |       |--docker-compose.yaml
         |       |--.env
         |       |
-        |       |--/archives
+        |       |--**/archives**
         |       |
         |       |--/contentpacks
         |       |
