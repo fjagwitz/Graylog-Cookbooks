@@ -34,7 +34,7 @@ Once set up, the system can be used without a license but limited functionality.
 
 The installation script will create a few folders and populate these with helpful content to understand the Graylog capabilities:
 
-  /opt
+  /opt \n
     |
     |--/graylog
     |       |
