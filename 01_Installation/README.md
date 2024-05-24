@@ -85,9 +85,7 @@ The installation script will create a few folders and populate these with helpfu
 
 /opt/opensearch (must be owned by the user:group with the id 1000):
 
-- datanode1: this folder contains the Opensearch Data. You can mount any remote storage to that folder.
-- datanode2: this folder contains the Opensearch Data. You can mount any remote storage to that folder.
-- datanode3: this folder contains the Opensearch Data. You can mount any remote storage to that folder.
+- datanode[1-3]: this folder contains the Opensearch Data. You can mount any remote storage to that folder.
 
 ## Configure Nginx
 
