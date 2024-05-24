@@ -118,6 +118,7 @@ sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
+sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
 # Add external source to resolve Windows Codes
 sudo wget -qP ${GL_GRAYLOG_LOOKUPTABLES} https://gist.githubusercontent.com/brianreitz/d5b9397a2e8b3d52ceb9359897e07c3f/raw/9263602b7cefbc5d13a8745e5fc995820bb9efef/msobjs_message_table.txt

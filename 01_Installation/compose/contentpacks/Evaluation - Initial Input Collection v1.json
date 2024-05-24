@@ -1,0 +1,377 @@
+{
+  "v": 1,
+  "id": "ca6c0458-d4bb-405b-98ec-ea8d05cc4c6e",
+  "rev": 1,
+  "name": "Evaluation - Initial Input Collection",
+  "summary": "Evaluation - Initial Input Collection",
+  "description": "Evaluation - Initial Input Collection",
+  "vendor": "Graylog",
+  "url": "https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/contentpacks",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "fc15c20e-1e30-4219-bcdf-33cde036d8bc",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 514 TCP Syslog | Evaluation Input"
+        },
+        "configuration": {
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 262144
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 1514
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 4
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "d1a27d27-ad32-456d-9edc-9c9db96f2e47",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 5044 Beats | Evaluation Input"
+        },
+        "configuration": {
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 262144
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 5044
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 4
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog.plugins.beats.Beats2Input"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "9034933d-901b-45d2-9c10-a891925328d9",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 5555 TCP RAW | Evaluation Input"
+        },
+        "configuration": {
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 262144
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 5555
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 4
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.raw.tcp.RawTCPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "c1d30a3f-eda4-4283-b983-89fa7f79a9d9",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 5555 UDP RAW | Evaluation Input"
+        },
+        "configuration": {
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 262144
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 5555
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 4
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.raw.udp.RawUDPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "9e0f5609-bfa7-4fc0-ae3e-e90a782e0f07",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 514 UDP Syslog | Evaluation Input"
+        },
+        "configuration": {
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 262144
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 1514
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 4
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.syslog.udp.SyslogUDPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "ecdba06a-23a5-4030-b65f-7ced2cbe22d2",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 12201 UDP GELF | Evaluation Input"
+        },
+        "configuration": {
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 262144
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 12201
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 4
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.gelf.udp.GELFUDPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "6cb42659-5fc2-43c2-b87d-f42d82a9268e",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 12201 TCP GELF | Evaluation Input"
+        },
+        "configuration": {
+          "charset_name": {
+            "@type": "string",
+            "@value": "UTF-8"
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 262144
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 12201
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 4
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.gelf.tcp.GELFTCPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    }
+  ]
+}

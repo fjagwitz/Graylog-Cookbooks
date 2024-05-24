@@ -123,9 +123,9 @@ services:
       GRAYLOG_REPORT_RENDER_URI: "http://my.graylog.test/"
       GRAYLOG_REPORT_DISABLE_SANDBOX: "true"
       ## Graylog Content Pack Handling
-      GRAYLOG_CONTENT_PACKS_LOADER_ENABLED: "false"
+      GRAYLOG_CONTENT_PACKS_LOADER_ENABLED: "true"
       GRAYLOG_CONTENT_PACKS_DIR: "/etc/graylog/server/contentpacks"
-      #GRAYLOG_CONTENT_PACKS_AUTO_INSTALL: ""      
+      GRAYLOG_CONTENT_PACKS_AUTO_INSTALL: "Evaluation - Initial Input Collection v1.json"      
       # Email Configurations
       GRAYLOG_TRANSPORT_EMAIL_ENABLED: "true"
       GRAYLOG_TRANSPORT_EMAIL_HOSTNAME: "my.email.system"
