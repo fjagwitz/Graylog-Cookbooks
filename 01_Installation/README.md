@@ -50,7 +50,7 @@ The installation script will create a few folders and populate these with helpfu
         |       |
         |       |--/nginx
         |       |     |
-        |       |     |--http.conf
+        |       |     |--[http.conf](https://github.com/fjagwitz/Graylog-Cookbooks/blob/main/01_Installation/compose/nginx/http.conf)
         |       |     |--nginx.conf
         |       |     |--stream.conf
         |       |     |
