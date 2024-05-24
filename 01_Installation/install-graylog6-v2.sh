@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "[INFO] - PREPARING THE SYSTEM "
 # Installing additional Tools on Ubuntu
-sudo apt-get -qq install apt-utils vim git jq pwgen smb acl < /dev/null > /dev/null
+sudo apt-get -qq install apt-utils vim git jq pwgen samba acl < /dev/null > /dev/null
 
 
 # Check Minimum Requirements on Linux Server
