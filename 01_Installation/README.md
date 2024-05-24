@@ -50,7 +50,7 @@ The installation script will create a few folders and populate these with helpfu
         |       |
         |       |--/nginx
         |       |     |
-        |       |     |--[http.conf](https://github.com/fjagwitz/Graylog-Cookbooks/blob/main/01_Installation/compose/nginx/http.conf)
+        |       |     |--http.conf
         |       |     |--nginx.conf
         |       |     |--stream.conf
         |       |     |
@@ -76,12 +76,12 @@ The installation script will create a few folders and populate these with helpfu
 - **/archives** _(must be owned by the user:group with the id 1100)_: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
 - **/contentpacks**: this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
 - **/journal** _(must be owned by the user:group with the id 1100)_: this folder is used for the Graylog Journal. It must provide at least 5GB of Storage. You can mount any remote storage to that folder.
-- **/lookuptables**: this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
+- [**/lookuptables**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/lookuptables): this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - **/maxmind**: this folder contains the GeoIP databases to be used by the Graylog Geo-Location Processor.
-- **/nginx**: this folder contains the nginx configuration files for the nginx container.
+- [**/nginx**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/nginx): this folder contains the nginx configuration files for the nginx container.
 - **/nginx/ssl**: this folder contains the nginx certificates for https connections.
 - **/notifications** _(must be owned by the user:group with the id 1100)_: this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
-- **/prometheus**: this folder contains configuration data to get metrics from Graylog to Grafana.
+- [**/prometheus**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/prometheus): this folder contains configuration data to get metrics from Graylog to Grafana.
 
 **/opt/opensearch** _(must be owned by the user:group with the id 1000)_:
 
