@@ -1,5 +1,7 @@
 # Graylog Installation
 
+    wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6.sh && chmod +x install-graylog6.sh && sudo ./install-graylog6.sh
+
 ## Prepare Server System
 
 Create a virtual machine:
