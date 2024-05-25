@@ -1,4 +1,4 @@
-# Graylog Installation
+# Graylog Installation on Ubuntu Systems
 
     wget -q https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/main/01_Installation/install-graylog6.sh && chmod +x install-graylog6.sh && sudo ./install-graylog6.sh
 
