@@ -55,7 +55,9 @@ The installation script will create a few folders and populate these with helpfu
         |       |--/nginx
         |       |     |
         |       |     |--http.conf
+        |       |     |--http_lookuptables.conf
         |       |     |--nginx.conf
+        |       |     |--nginx_lookuptables.conf
         |       |     |--stream.conf
         |       |     |
         |       |     |--ssl
