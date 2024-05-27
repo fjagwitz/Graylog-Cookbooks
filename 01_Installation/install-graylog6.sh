@@ -78,12 +78,6 @@ installpath="/tmp/graylog"
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf > /dev/null
 sudo sysctl -p > /dev/null
 
-# Add System Credentials
-echo "[INPUT] - Please add the name of your central Administration User: "
-read GL_GRAYLOG_ADMIN
-echo "[INPUT] - Please add the central Administration Password: "
-read -s GL_GRAYLOG_PASSWORD
-
 echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
