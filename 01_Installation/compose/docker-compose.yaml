@@ -59,11 +59,11 @@ services:
       - "plugins.security.disabled=true"
     ulimits:
       memlock:
-        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        soft: -1 
         hard: -1
       nofile:
-        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
-        hard: 65536
+        soft: 262144 
+        hard: 262144
     volumes:
       - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"
     restart: "on-failure"
@@ -84,11 +84,11 @@ services:
       - "plugins.security.disabled=true"
     ulimits:
       memlock:
-        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        soft: -1 
         hard: -1
       nofile:
-        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
-        hard: 65536
+        soft: 262144 
+        hard: 262144
     volumes:
       - "${GL_OPENSEARCH_DATA}/datanode2:/usr/share/opensearch/data"
     restart: "on-failure"
@@ -109,11 +109,11 @@ services:
       - "plugins.security.disabled=true"
     ulimits:
       memlock:
-        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        soft: -1 
         hard: -1
       nofile:
-        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
-        hard: 65536
+        soft: 262144 
+        hard: 262144
     volumes:
       - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
