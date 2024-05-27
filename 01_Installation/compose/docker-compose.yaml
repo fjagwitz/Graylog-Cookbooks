@@ -1,7 +1,7 @@
 services:
-  nginx: 
+  nginx1: 
     image: "nginx:latest"
-    hostname: nginx
+    hostname: "nginx1"
     ports: 
       # WebUI
       - 443:443
@@ -27,6 +27,15 @@ services:
       - "${GL_GRAYLOG_NGINX}/ssl:/etc/nginx/ssl"
     restart: "always"
 
+  nginx2: 
+    image: "nginx:latest"
+    hostname: "lookuptables"
+    volumes: 
+      - "${GL_GRAYLOG_NGINX}/nginx_lookuptables.conf:/etc/nginx/nginx.conf"
+      - "${GL_GRAYLOG_NGINX}/http_lookuptables.conf:/etc/nginx/conf.d/http.conf"
+      - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
+    restart: "always"
+
   mongodb1:
     image: "mongo:7"
     hostname: "mongodb1"
@@ -46,9 +55,15 @@ services:
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "bootstrap.memory_lock=false"
       - "action.auto_create_index=false"
-
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
     volumes:
       - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"
     restart: "on-failure"
@@ -67,6 +82,13 @@ services:
       - "action.auto_create_index=false"
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
     volumes:
       - "${GL_OPENSEARCH_DATA}/datanode2:/usr/share/opensearch/data"
     restart: "on-failure"
@@ -85,6 +107,13 @@ services:
       - "action.auto_create_index=false"
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
     volumes:
       - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
@@ -100,7 +129,7 @@ services:
     entrypoint: "/docker-entrypoint.sh"
     environment:
       # Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/5-0/setting_up_graylog/server.conf.html)
-      # Work with the .env-example file to configure these values - preconfigured value for ROOT_PASSWORD is "Secr3t2024!"
+      # Work with the .env-example file to configure these values - values configured in Installation Script
       GRAYLOG_PASSWORD_SECRET: "${GL_PASSWORD_SECRET}"
       GRAYLOG_ROOT_USERNAME: "${GL_ROOT_USERNAME}"
       GRAYLOG_ROOT_PASSWORD_SHA2: "${GL_ROOT_PASSWORD_SHA2}"
@@ -124,7 +153,7 @@ services:
       GRAYLOG_REPORT_DISABLE_SANDBOX: "true"
       ## Graylog Content Pack Handling
       GRAYLOG_CONTENT_PACKS_LOADER_ENABLED: "true"
-      GRAYLOG_CONTENT_PACKS_DIR: "/etc/graylog/server/contentpacks"
+      GRAYLOG_CONTENT_PACKS_DIR: "GL_GRAYLOG_CONTENTPACKS"
       GRAYLOG_CONTENT_PACKS_AUTO_INSTALL: "Evaluation - Initial Input Collection v1.json"      
       # Email Configurations
       GRAYLOG_TRANSPORT_EMAIL_ENABLED: "true"
