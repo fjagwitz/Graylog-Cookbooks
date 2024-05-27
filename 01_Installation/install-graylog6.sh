@@ -42,7 +42,7 @@ then
 else
   echo "[INFO] - DOCKER CHECK FAILED, WILL BE INSTALLED NOW "
   # Removing preconfigured Docker Installation from Ubuntu (just in case)
-  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg; done
+  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg 2>/dev/null >/dev/null; done
 
   # Adding Docker Repository
   sudo apt-get -qq install ca-certificates curl < /dev/null > /dev/null
@@ -54,10 +54,10 @@ else
     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  sudo apt-get -qq update < /dev/null > /dev/null
+  sudo apt-get -qq update 2>/dev/null >/dev/null
 
   # Installing Docker on Ubuntu
-  sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin < /dev/null > /dev/null
+  sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
 
   # Checking Docker Installation Success
   if [[ $(docker -v | awk '{ print $1 $2}') -eq "Dockerversion" ]]
@@ -69,7 +69,7 @@ else
 fi
 
 # Installing additional Tools on Ubuntu
-sudo apt-get -qq install vim git jq pwgen samba acl < /dev/null > /dev/null
+sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
@@ -152,7 +152,7 @@ sudo rm -rf ${installpath}
 
 # Start Graylog Stack
 echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull > /dev/null
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
 sleep 15s
