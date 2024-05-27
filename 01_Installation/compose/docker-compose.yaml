@@ -21,18 +21,18 @@ services:
       - 12201:12201
       - 12201:12201/udp 
     volumes:
-      - "${GL_GRAYLOG_NGINX}/nginx.conf:/etc/nginx/nginx.conf"
-      - "${GL_GRAYLOG_NGINX}/http.conf:/etc/nginx/conf.d/http.conf"
-      - "${GL_GRAYLOG_NGINX}/stream.conf:/etc/nginx/conf.d/stream.conf"
-      - "${GL_GRAYLOG_NGINX}/ssl:/etc/nginx/ssl"
+      - "${GL_GRAYLOG_NGINX1}/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "${GL_GRAYLOG_NGINX1}/http.conf:/etc/nginx/conf.d/http.conf:ro"
+      - "${GL_GRAYLOG_NGINX1}/stream.conf:/etc/nginx/conf.d/stream.conf:ro"
+      - "${GL_GRAYLOG_NGINX1}/ssl:/etc/nginx/ssl:ro"
     restart: "always"
 
   nginx2: 
     image: "nginx:latest"
     hostname: "lookuptables"
     volumes: 
-      - "${GL_GRAYLOG_NGINX}/nginx_lookuptables.conf:/etc/nginx/nginx.conf"
-      - "${GL_GRAYLOG_NGINX}/http_lookuptables.conf:/etc/nginx/conf.d/http.conf"
+      - "${GL_GRAYLOG_NGINX2}/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "${GL_GRAYLOG_NGINX2}/http.conf:/etc/nginx/conf.d/http.conf:ro"
       - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
     restart: "always"
 
