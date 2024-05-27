@@ -164,7 +164,7 @@ do
 done
 
 echo "[INFO] - SYSTEM READY FOR TESTING "
-echo "[INFO] - CREDENTIALS STORED IN /opt/graylog/graylog_credentials.txt "
+echo "[INFO] - CREDENTIALS STORED IN /opt/graylog/your_graylog_credentials.txt "
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG}/your_graylog_credentials.txt
 
 exit
