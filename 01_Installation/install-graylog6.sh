@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "[INFO] - PREPARING THE SYSTEM "
 
-# Add System Credentials
+# Request System Credentials
 echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
 echo "[INPUT] - Please add the central Administration Password: "
@@ -136,7 +136,6 @@ echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYL
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-
 
 # Install Samba to make local Data Adapters accessible from Windows
 sudo chmod 666 ${GL_GRAYLOG_LOOKUPTABLES}/*
