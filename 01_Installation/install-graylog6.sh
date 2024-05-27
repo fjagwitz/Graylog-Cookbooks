@@ -1,7 +1,11 @@
 #!/bin/bash
 echo "[INFO] - PREPARING THE SYSTEM "
-# Installing additional Tools on Ubuntu
-sudo apt-get -qq install vim git jq pwgen samba acl < /dev/null > /dev/null
+
+# Add System Credentials
+echo "[INPUT] - Please add the name of your central Administration User: "
+read GL_GRAYLOG_ADMIN
+echo "[INPUT] - Please add the central Administration Password: "
+read -s GL_GRAYLOG_PASSWORD
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
@@ -64,6 +68,8 @@ else
   fi
 fi
 
+# Installing additional Tools on Ubuntu
+sudo apt-get -qq install vim git jq pwgen samba acl < /dev/null > /dev/null
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
