@@ -122,9 +122,6 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
-# Add external source to resolve Windows Codes
-sudo wget -qP ${GL_GRAYLOG_LOOKUPTABLES} https://gist.githubusercontent.com/brianreitz/d5b9397a2e8b3d52ceb9359897e07c3f/raw/9263602b7cefbc5d13a8745e5fc995820bb9efef/msobjs_message_table.txt
-
 # Add System Credentials
 echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
@@ -140,6 +137,7 @@ echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COM
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # Install Samba to make local Data Adapters accessible from Windows
+sudo chmod 666 ${GL_GRAYLOG_LOOKUPTABLES}/*
 sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
 sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES}
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
@@ -167,6 +165,6 @@ done
 clear
 
 echo "[INFO] - SYSTEM READY FOR TESTING "
-echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ~/graylog_credentials.txt
+echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee /opt/graylog/graylog_credentials.txt
 
 exit
