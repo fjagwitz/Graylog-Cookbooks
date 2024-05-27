@@ -52,17 +52,18 @@ The installation script will create a few folders and populate these with helpfu
         |       |
         |       |--/maxmind
         |       |
-        |       |--/nginx
-        |       |     |
+        |       |--/nginx1
         |       |     |--http.conf
-        |       |     |--http_lookuptables.conf
         |       |     |--nginx.conf
-        |       |     |--nginx_lookuptables.conf
         |       |     |--stream.conf
         |       |     |
         |       |     |--ssl
         |       |         |--cert.crt
         |       |         |--cert.key
+        |       |
+        |       |--/nginx2
+        |       |     |--http.conf
+        |       |     |--nginx.conf
         |       |
         |       |--/notifications
         |       |
