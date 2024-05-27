@@ -39,6 +39,7 @@ The installation script will create a few folders and populate these with helpfu
     /opt
         |
         |--/graylog
+        |       |
         |       |--docker-compose.yaml
         |       |--.env
         |       |
@@ -53,6 +54,7 @@ The installation script will create a few folders and populate these with helpfu
         |       |--/maxmind
         |       |
         |       |--/nginx1
+        |       |
         |       |     |--http.conf
         |       |     |--nginx.conf
         |       |     |--stream.conf
@@ -62,6 +64,7 @@ The installation script will create a few folders and populate these with helpfu
         |       |         |--cert.key
         |       |
         |       |--/nginx2
+        |       |
         |       |     |--http.conf
         |       |     |--nginx.conf
         |       |
