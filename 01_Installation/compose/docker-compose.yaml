@@ -156,7 +156,7 @@ services:
       ## Graylog Content Pack Handling
       GRAYLOG_CONTENT_PACKS_LOADER_ENABLED: "true"
       GRAYLOG_CONTENT_PACKS_DIR: "/etc/graylog/server/contentpacks"
-      GRAYLOG_CONTENT_PACKS_AUTO_INSTALL: "Evaluation - Initial Input Collection v1.json"      
+      GRAYLOG_CONTENT_PACKS_AUTO_INSTALL: "Evaluation - Initial Input Collection v1.json, Evaluation - Initial Whitelist Collection v1.json"      
       # Email Configurations
       GRAYLOG_TRANSPORT_EMAIL_ENABLED: "true"
       GRAYLOG_TRANSPORT_EMAIL_HOSTNAME: "my.email.system"
