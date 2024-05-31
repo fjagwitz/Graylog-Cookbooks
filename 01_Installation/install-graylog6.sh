@@ -86,7 +86,6 @@ echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
 
 echo "GL_GRAYLOG_COMPOSE_ENV=${GL_GRAYLOG}/.env" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_URI" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -131,6 +130,9 @@ sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTE
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
+# Additional Graylog config data to guarantee minimum functionality
+echo "GL_GRAYLOG_URI" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
+
 # Add Graylog Secrets to Docker .env-file
 echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
@@ -173,7 +175,7 @@ curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config
   -H 'Content-Type: application/json' \
   -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"MINUTES","refresh_interval":10,"use_s3":false }' 2>/dev/null >/dev/null
 
-echo "[INFO] - SYSTEM READY FOR TESTING "
+echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS REVIEW /opt/graylog/docker-compose.yaml"
 echo "[INFO] - CREDENTIALS STORED IN /opt/graylog/your_graylog_credentials.txt "
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG}/your_graylog_credentials.txt
 
