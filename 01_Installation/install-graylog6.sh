@@ -2,12 +2,9 @@
 echo "[INFO] - PREPARING THE SYSTEM "
 
 # Request System Credentials
-echo "[INPUT] - Please add the name of your central Administration User: "
-read GL_GRAYLOG_ADMIN
-echo "[INPUT] - Please add the central Administration Password: "
-read -s GL_GRAYLOG_PASSWORD
-echo "[INPUT] - Please add the fqdn of your Graylog Instance (e.g. eval.graylog.local): "
-read GL_GRAYLOG_URI 
+read -p "[INPUT] - Please add the name of your central Administration User: " GL_GRAYLOG_ADMIN
+read -p -s "[INPUT] - Please add the central Administration Password: " GL_GRAYLOG_PASSWORD
+read -p "[INPUT] - Please add the fqdn of your Graylog Instance (e.g. eval.graylog.local): " GL_GRAYLOG_URI
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
