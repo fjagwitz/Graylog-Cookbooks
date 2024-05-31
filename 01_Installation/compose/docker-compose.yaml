@@ -133,6 +133,8 @@ services:
       GRAYLOG_PASSWORD_SECRET: "${GL_PASSWORD_SECRET}"
       GRAYLOG_ROOT_USERNAME: "${GL_ROOT_USERNAME}"
       GRAYLOG_ROOT_PASSWORD_SHA2: "${GL_ROOT_PASSWORD_SHA2}"
+      # Set System Timezone; value must be compatible with https://www.joda.org/joda-time/timezones.html
+      GRAYLOG_ROOT_TIMEZONE: "UTC" 
       # Adapt these variables to your environment, refer to "server.conf" documentation (see above)
       GRAYLOG_IS_LEADER: "true"
       GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"

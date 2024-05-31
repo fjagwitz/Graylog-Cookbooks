@@ -163,6 +163,28 @@ do
   sleep 5s
 done
 
+echo "[INFO] - FINALIZING CONFIGURATION "
+
+curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5044 Beats | Evaluation Input",
+        "type": "org.graylog.plugins.beats.Beats2Input",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5044,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+
 echo "[INFO] - SYSTEM READY FOR TESTING "
 echo "[INFO] - CREDENTIALS STORED IN /opt/graylog/your_graylog_credentials.txt "
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG}/your_graylog_credentials.txt

@@ -1,0 +1,3 @@
+"key","value"
+"registry_key","HKLM\Software\Microsoft\CurrentVersion\Run, HKLM\Software\Microsoft\CurrentVersion\RunOnce,  HKCU\Software\Microsoft\CurrentVersion\Run, HKCU\Software\Microsoft\CurrentVersion\RunOnce, HKLM\Software\Wow6432Node\Microsoft\CurrentVersion\Run, HKLM\Software\Wow6432Node\Microsoft\CurrentVersion\RunOnce"
+"command_line","whoami /priv, vssadmin, sdelete, schtasks, net group ""Domain Admins"" /domain, tasklist, ver, ipconfig, net time, systeminfo, netstat, qprocess, query, whoami, net start, nslookup, fsutil, time, set, dir, net view, ping, net use, type, net user, net localgroup, net group, net config, net share, dsquery, csvde, nbtstat, net session, nltest, wevtutil, reg, wmic, netsh advfirewall, sc, wusa, tree, rundll32, arp, chcp, qwinsta"
