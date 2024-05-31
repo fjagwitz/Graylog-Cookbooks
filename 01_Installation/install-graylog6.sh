@@ -175,10 +175,11 @@ curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config
   -H 'Content-Type: application/json' \
   -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
-echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: "
-echo "         **** /opt/graylog/docker-compose.yaml **** "
-echo "[INFO] - CREDENTIALS STORED IN: "
-echo "         **** /opt/graylog/your_graylog_credentials.txt **** "
+echo ""
+echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: /opt/graylog/docker-compose.yaml "
+echo "[INFO] - CREDENTIALS STORED IN: /opt/graylog/your_graylog_credentials.txt "
+echo ""
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG}/your_graylog_credentials.txt
+echo ""
 
 exit
