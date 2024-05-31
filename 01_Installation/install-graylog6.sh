@@ -131,7 +131,7 @@ sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTE
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # Additional Graylog config data to guarantee minimum functionality
-echo "GL_GRAYLOG_URI=${GL_GRAYLOG_URI}" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
+echo "GL_GRAYLOG_URI=\"${GL_GRAYLOG_URI}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
 
 # Add Graylog Secrets to Docker .env-file
 echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
