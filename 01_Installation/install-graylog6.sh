@@ -157,12 +157,12 @@ echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 
 echo "[INFO] - VALIDATING GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
-sleep 15s
+sleep 5s
 
 while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
   echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
-  sleep 5s
+  sleep 10s
 done
 
 echo "[INFO] - FINALIZING CONFIGURATION "
