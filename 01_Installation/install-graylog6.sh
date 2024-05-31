@@ -170,20 +170,7 @@ curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
   -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5044 Beats | Evaluation Input",
-        "type": "org.graylog.plugins.beats.Beats2Input",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5044,
-          "number_worker_threads": 4,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 
-
+  -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"MINUTES","refresh_interval":10,"use_s3":false }' 
 
 echo "[INFO] - SYSTEM READY FOR TESTING "
 echo "[INFO] - CREDENTIALS STORED IN /opt/graylog/your_graylog_credentials.txt "
