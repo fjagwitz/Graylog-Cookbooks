@@ -195,7 +195,7 @@ services:
     image: "grafana/grafana-oss:latest"
     hostname: "grafana1"
     environment:
-     GF_SERVER_ROOT_URL: "https://my.graylog.test/grafana"
+     GF_SERVER_ROOT_URL: "https://${GL_GRAYLOG_URI}/grafana"
      GF_INSTALL_PLUGINS: "grafana-clock-panel"
     volumes:
      - "grafana-data-01:/var/lib/grafana"
