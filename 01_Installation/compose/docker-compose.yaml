@@ -142,7 +142,7 @@ services:
       GRAYLOG_MONGODB_URI: "mongodb://mongodb1:27017/graylog"
       GRAYLOG_ELASTICSEARCH_HOSTS: "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
       GRAYLOG_TELEMETRY_ENABLED: "false"
-      GRAYLOG_HTTP_EXTERNAL_URI: "https://my.graylog.test/"
+      GRAYLOG_HTTP_EXTERNAL_URI: "https://${GL_GRAYLOG_URI}/"
       # Notification Script Path / API URI
       GRAYLOG_INTEGRATIONS_SCRIPTS_DIR: "/etc/graylog/server/notifications"
       GRAYLOG_INTEGRATIONS_WEB_INTERFACE_URI: "https://my.firewall.rest.endpoint:443" 
@@ -151,7 +151,7 @@ services:
       GRAYLOG_HTTP_PROXY_URI: ""
       GRAYLOG_HTTP_NON_PROXY_HOSTS: "graylog*, mongodb*, datanode*, *"
       # Graylog Reporting Configurations
-      GRAYLOG_REPORT_RENDER_URI: "http://my.graylog.test/"
+      GRAYLOG_REPORT_RENDER_URI: "http://${GL_GRAYLOG_URI}/"
       GRAYLOG_REPORT_DISABLE_SANDBOX: "true"
       ## Graylog Content Pack Handling
       GRAYLOG_CONTENT_PACKS_LOADER_ENABLED: "true"
@@ -168,13 +168,13 @@ services:
       GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD: "my-very-secure-P@$$w0rd"
       GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX: ""
       GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL: ""
-      GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL: "https://my.graylog.test"   
+      GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL: "https://${GL_GRAYLOG_URI}"   
       # Grafana Metrics Monitoring
       GRAYLOG_PROMETHEUS_EXPORTER_ENABLED: "true"
       GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS: "0.0.0.0"
       # Indices naming
-      GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX: "gl-non-production-events"
-      GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX: "gl-non-production-system-events"
+      GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX: "gl-evaluation-events"
+      GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX: "gl-evaluation-system-events"
     volumes:
       - "graylog-data-01:/usr/share/graylog/data/data"
       - "${GL_GRAYLOG_JOURNAL}:/usr/share/graylog/data/journal"

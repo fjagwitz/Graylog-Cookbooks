@@ -6,6 +6,8 @@ echo "[INPUT] - Please add the name of your central Administration User: "
 read GL_GRAYLOG_ADMIN
 echo "[INPUT] - Please add the central Administration Password: "
 read -s GL_GRAYLOG_PASSWORD
+echo "[INPUT] - Please add the fqdn of your Graylog Instance (e.g. eval.graylog.local): "
+read GL_GRAYLOG_URI 
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
@@ -87,6 +89,7 @@ echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
 
 echo "GL_GRAYLOG_COMPOSE_ENV=${GL_GRAYLOG}/.env" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_URI" | sudo tee -a "{GL_GRAYLOG_COMPOSE_ENV}"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
