@@ -11,6 +11,8 @@ numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }')
 operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}' | xargs)
 
+echo "[INFO] - CHECKING MINIMUM REQUIREMENTS "
+
 if [[ "$operatingSystem" == Ubuntu ]]
 then
   echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
@@ -41,10 +43,12 @@ then
 else
   echo "[INFO] - DOCKER CHECK FAILED, WILL BE INSTALLED NOW "
   # Removing preconfigured Docker Installation from Ubuntu (just in case)
+  echo "[INFO] - DOCKER CLEANUP "
   for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg 2>/dev/null >/dev/null; done
 
   # Adding Docker Repository
-  sudo apt-get -qq install ca-certificates curl < /dev/null > /dev/null
+  echo "[INFO] - ADDING DOCKER REPOSITORY "
+  sudo apt-get -qq install ca-certificates curl 2>/dev/null >/dev/null
   sudo install -m 0755 -d /etc/apt/keyrings > /dev/null
   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc > /dev/null
   sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -56,6 +60,7 @@ else
   sudo apt-get -qq update 2>/dev/null >/dev/null
 
   # Installing Docker on Ubuntu
+  echo "[INFO] - DOCKER INSTALLATION "
   sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
 
   # Checking Docker Installation Success
@@ -68,12 +73,14 @@ else
 fi
 
 # Installing additional Tools on Ubuntu
+echo "[INFO] - INSTALL ADDITIONAL TOOLS "
 sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
 
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
+echo "[INFO] - SET OPENSEARCH SETTINGS "
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf > /dev/null
 sudo sysctl -p > /dev/null
 
@@ -81,6 +88,7 @@ sudo sysctl -p > /dev/null
 environmentfile="/etc/environment"
 
 echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
+echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
 echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile} > /dev/null 
 source ${environmentfile}
@@ -101,23 +109,28 @@ echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile} >
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
+echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${installpath}
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus}
 
 # Set Folder permissions
+echo "[INFO] - SET FOLDER PERMISSIONS "
 sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
+echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
 sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
 sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
 sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
 # Cloning Git Repo containing prepared content
+echo "[INFO] - CLONE GIT REPO "
 sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files into the proper directories
+echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
 sudo cp ${installpath}/01_Installation/compose/nginx1/*.conf ${GL_GRAYLOG_NGINX1}
 sudo cp ${installpath}/01_Installation/compose/nginx1/ssl ${GL_GRAYLOG_NGINX1} -R
 sudo cp ${installpath}/01_Installation/compose/nginx2/*.conf ${GL_GRAYLOG_NGINX2}
@@ -134,12 +147,14 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 echo "GL_GRAYLOG_URI=\"${GL_GRAYLOG_URI}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
 
 # Add Graylog Secrets to Docker .env-file
+echo "[INFO] - SET SECRETS "
 echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # Install Samba to make local Data Adapters accessible from Windows
+echo "[INFO] - CONFIGURE FILESHARES "
 sudo chmod 666 ${GL_GRAYLOG_LOOKUPTABLES}/*
 sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
 sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES}
