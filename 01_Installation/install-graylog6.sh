@@ -10,9 +10,19 @@ read -p "[INPUT] - Please add the fqdn of your Graylog Instance (e.g. eval.grayl
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }')
 operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}' | xargs)
+connectionTest=$(curl -ILs https://github.com | head -n1 )
+
+echo "[INFO] - VERIFYING INTERNET CONNECTION"
+if [ "${connectionTest%??}" == "HTTP/2 200" ]
+then
+  echo "[INFO] - INTERNET CONNECTION OK "
+else
+  echo "[INFO] - INTERNET CONNECTION NOT ACTIVE: EXITING "
+  exit
+fi
+
 
 echo "[INFO] - CHECKING MINIMUM REQUIREMENTS "
-
 if [[ "$operatingSystem" == Ubuntu ]]
 then
   echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
