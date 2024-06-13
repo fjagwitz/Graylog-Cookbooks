@@ -73,7 +73,7 @@ else
   sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
 
   # Checking Docker Installation Success
-  if [[ $(docker -v | awk '{ print $1 $2}') -eq "Dockerversion" ]]
+  if [[ "$(command -v docker)" == "/usr/bin/docker" ]]
   then
     echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
   else
