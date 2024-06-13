@@ -10,17 +10,16 @@ read -p "[INPUT] - Please add the fqdn of your Graylog Instance (e.g. eval.grayl
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }')
 operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}' | xargs)
-connectionTest=$(curl -ILs https://github.com | head -n1 )
+connectionTest=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 )
 
 echo "[INFO] - VERIFYING INTERNET CONNECTION"
-if [ "${connectionTest%??}" == "HTTP/2 200" ]
+if [ "${connectionTest}" != "" ]
 then
   echo "[INFO] - INTERNET CONNECTION OK "
 else
   echo "[INFO] - INTERNET CONNECTION NOT ACTIVE: EXITING "
   exit
 fi
-
 
 echo "[INFO] - CHECKING MINIMUM REQUIREMENTS "
 if [[ "$operatingSystem" == Ubuntu ]]
@@ -131,9 +130,9 @@ sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLO
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
-sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
-sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
-sudo wget -qP ${GL_GRAYLOG_MAXMIND} https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
