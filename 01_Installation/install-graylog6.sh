@@ -78,6 +78,7 @@ else
     echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
   else
     echo "[INFO] - DOCKER INSTALLATION FAILED, WILL EXIT NOW "
+    exit
   fi
 fi
 
