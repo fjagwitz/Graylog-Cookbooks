@@ -50,15 +50,25 @@ fi
 # Installing additional Tools on Ubuntu
 echo "[INFO] - INSTALL ADDITIONAL TOOLS "
 sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
-installcheck=$(apt list --installed 2>/dev/null | grep samba)
+installcheck1=$(apt list --installed 2>/dev/null | grep samba)
+connectionstate="1"
 
-if [ "$installcheck" == "" ]
+if [ "$installcheck1" == "" ]
 then
   aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
+  connectionstate="0"
   echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
-  echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf
-  echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf
+  echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
+  echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
   sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
+fi
+
+installcheck2=$(apt list --installed 2>/dev/null | grep samba)
+
+if [ "$installcheck2" == "" ]
+then
+  echo "[ERROR] - APT PACKAGE INSTALLATION FAILED, WILL EXIT NOW "
+  exit 
 fi
 
 if [[ "$(command -v docker)" == "/usr/bin/docker" ]]; 
@@ -86,6 +96,16 @@ else
   # Installing Docker on Ubuntu
   echo "[INFO] - DOCKER INSTALLATION "
   sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
+
+  # Configuring Proxy Settings
+  if [ "$connectionstate" == "0" ]
+  then
+    echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
+    sudo service docker stop
+    sudo systemctl stop docker.socket 
+    sudo systemctl start docker.socket 
+    sudo service docker start
+  fi
 
   # Checking Docker Installation Success
   if [[ "$(command -v docker)" == "/usr/bin/docker" ]]
