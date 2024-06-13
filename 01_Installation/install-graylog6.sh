@@ -46,6 +46,19 @@ else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
 
+
+# Installing additional Tools on Ubuntu
+echo "[INFO] - INSTALL ADDITIONAL TOOLS "
+sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
+installcheck=$(apt list --installed | grep samba)
+
+if [[ "$installcheck" == ""]]
+then
+  echo $HTTP_PROXY | sudo tee -a /etc/apt/apt.conf.d/99_proxy.conf
+  echo $HTTPS_PROXY | sudo tee -a /etc/apt/apt.conf.d/99_proxy.conf
+  sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
+fi
+
 if [[ "$(command -v docker)" == "/usr/bin/docker" ]]; 
 then
   echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
@@ -81,10 +94,6 @@ else
     exit
   fi
 fi
-
-# Installing additional Tools on Ubuntu
-echo "[INFO] - INSTALL ADDITIONAL TOOLS "
-sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
