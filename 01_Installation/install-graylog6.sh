@@ -102,8 +102,11 @@ else
   then
     echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
     sudo service docker stop 2>/dev/null >/dev/null
+    sleep 2
     sudo systemctl stop docker.socket 2>/dev/null >/dev/null
+    sleep 3
     sudo systemctl start docker.socket 2>/dev/null >/dev/null
+    sleep 2
     sudo service docker start 2>/dev/null >/dev/null
   fi
 
