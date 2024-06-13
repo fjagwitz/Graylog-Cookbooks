@@ -50,14 +50,14 @@ fi
 # Installing additional Tools on Ubuntu
 echo "[INFO] - INSTALL ADDITIONAL TOOLS "
 sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
-installcheck=$(apt list --installed | grep samba)
+installcheck=$(apt list --installed 2>/dev/null | grep samba)
 
 if [ "$installcheck" == "" ]
 then
   aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
   echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
-  echo "$HTTP_PROXY" | sudo tee -a $aptproxyconf
-  echo "$HTTPS_PROXY" | sudo tee -a $aptproxyconf
+  echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf
+  echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf
   sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
 fi
 
