@@ -101,10 +101,10 @@ else
   if [ "$connectionstate" == "0" ]
   then
     echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
-    sudo service docker stop
-    sudo systemctl stop docker.socket 
-    sudo systemctl start docker.socket 
-    sudo service docker start
+    sudo service docker stop 2>/dev/null >/dev/null
+    sudo systemctl stop docker.socket 2>/dev/null >/dev/null
+    sudo systemctl start docker.socket 2>/dev/null >/dev/null
+    sudo service docker start 2>/dev/null >/dev/null
   fi
 
   # Checking Docker Installation Success
