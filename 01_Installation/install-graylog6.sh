@@ -17,7 +17,7 @@ if [ "${connectionTest}" != "" ]
 then
   echo "[INFO] - INTERNET CONNECTION OK "
 else
-  echo "[INFO] - INTERNET CONNECTION NOT ACTIVE: EXITING "
+  echo "[INFO] - INTERNET CONNECTION NOT ACTIVE, CHECK YOUR PROXY SETTINGS: EXITING "
   exit
 fi
 
