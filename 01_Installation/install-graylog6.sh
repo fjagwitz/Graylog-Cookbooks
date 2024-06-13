@@ -210,19 +210,19 @@ sudo rm -rf ${installpath}
 sudo rm -rf ${aptproxyconf}
 
 # Start Graylog Stack
-echo "[INFO] - GRAYLOG CONTAINERS BEING PULLED - HANG ON, CAN TAKE A WHILE "
+echo "[INFO] - PULL GRAYLOG CONTAINERS - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 
-echo "[INFO] - VALIDATING GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
+echo "[INFO] - VALIDATE GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
 sleep 5s
 
 while [[ $(curl -s $(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
-  echo "[INFO] - WAITING FOR THE SYSTEM TO COME UP "
+  echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
   sleep 10s
 done
 
-echo "[INFO] - FINALIZING CONFIGURATION "
+echo "[INFO] - FINALIZE CONFIGURATION "
 
 # Activating the GeoIP Resolver Plugin
 curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
