@@ -52,7 +52,7 @@ echo "[INFO] - INSTALL ADDITIONAL TOOLS "
 sudo apt-get -qq install vim git jq pwgen samba acl 2>/dev/null >/dev/null
 installcheck=$(apt list --installed | grep samba)
 
-if [[ "$installcheck" == ""]]
+if [ "$installcheck" == "" ]
 then
   aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
   echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
