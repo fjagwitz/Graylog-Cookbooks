@@ -18,4 +18,8 @@
 - Klick on "Edit connections"
   
   ![3](./images/3.png)
+- Choose "Illuminate: Windows Security Event Log Messages"
+
+  ![4](./images/4.png)
+
   
