@@ -184,6 +184,12 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
+# Add HTTP_PROXY to docker-compose.yaml
+if [ "$connectionstate" == "0" ]
+then
+  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" $GL_GRAYLOG/docker-compose.yaml
+fi
+
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
@@ -207,6 +213,7 @@ sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.con
 echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN} > /dev/null
 sudo sed -i -e "s/valid users = GLADMIN/valid users = ${GL_GRAYLOG_ADMIN}/g" /etc/samba/smb.conf 
 sudo service smbd restart
+
 
 # Installation Cleanup
 sudo rm -rf ${installpath}

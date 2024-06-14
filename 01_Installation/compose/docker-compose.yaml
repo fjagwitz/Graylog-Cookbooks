@@ -149,7 +149,7 @@ services:
       GRAYLOG_ALLOWED_AUXILIARY_PATH: "/etc/graylog/server"
       # Graylog Proxy Settings (list of patterns separated by “,” - may start or end with a “*” for wildcards)
       GRAYLOG_HTTP_PROXY_URI: ""
-      GRAYLOG_HTTP_NON_PROXY_HOSTS: "graylog1, mongodb1, datanode*, lookuptables, prometheus1, grafana1, *"
+      GRAYLOG_HTTP_NON_PROXY_HOSTS: "graylog1, mongodb1, datanode*, lookuptables, prometheus1, grafana1"
       # Graylog Reporting Configurations
       GRAYLOG_REPORT_RENDER_URI: "http://${GL_GRAYLOG_URI}/"
       GRAYLOG_REPORT_DISABLE_SANDBOX: "true"
