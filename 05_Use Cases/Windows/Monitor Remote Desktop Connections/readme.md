@@ -12,6 +12,10 @@
 - Go to _"SYSTEM" / "CONTENT PACKS"_, filter for "pro" and klick on "Install":
   
   ![1](./images/1.png)
-- Go to _"SYSTEM" / "PIPELINES"_, filter for "pro" and klick on "Install":
+- Go to _"SYSTEM" / "PIPELINES"_, filter for "pro" and klick on "Edit":
 
   ![2](./images/2.png)
+- Klick on "Edit connections"
+  
+  ![3](./images/3.png)
+  
