@@ -24,3 +24,6 @@
 - Validate your settings and ensure the UI shows "This pipeline is processing messages from the stream "Illuminate:Windows Security Event Log Messages":
   
   ![5](./images/5.png)
+- Go to _"DASHBOARDS"_, filter for "pro" and choose __"Graylog Professionals: Windows - RDP Monitoring"__:
+
+  ![6](./images/6.png)
