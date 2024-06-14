@@ -9,7 +9,7 @@
 ## How to install
 
 - Upload and [Install](https://graylog.org/videos/content-packs/) the Content Pack in Graylog (the video is for Graylog v3.0 but it does still work the same way)
-- Go to _"SYSTEM" / "CONTENT PACKS"_ and filter for "pro":
+- Go to _"SYSTEM" / "CONTENT PACKS"_, filter for "pro" and klick on "Install":
   
   ![1](./images/1.png)
 - test
