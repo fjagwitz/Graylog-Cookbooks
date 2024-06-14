@@ -12,4 +12,6 @@
 - Go to _"SYSTEM" / "CONTENT PACKS"_, filter for "pro" and klick on "Install":
   
   ![1](./images/1.png)
-- test
+- Go to _"SYSTEM" / "PIPELINES"_, filter for "pro" and klick on "Install":
+
+  ![2](./images/2.png)
