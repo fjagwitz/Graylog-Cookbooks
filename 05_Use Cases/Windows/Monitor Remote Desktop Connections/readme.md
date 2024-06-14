@@ -27,3 +27,7 @@
 - Go to _"DASHBOARDS"_, filter for "pro" and choose __"Graylog Professionals: Windows - RDP Monitoring"__:
 
   ![6](./images/6.png)
+- Review your Dashboard for RDP Monitoring:
+  
+  ![7](./images/7.png)
+  
