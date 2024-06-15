@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "f2293921-2945-4fb8-8ea2-d295a23167d1",
-  "rev": 3,
+  "rev": 4,
   "name": "Graylog Professionals: Windows - RDP Monitoring",
   "summary": "Graylog Professionals: Windows - RDP Monitoring",
   "description": "Graylog Professionals: Windows - RDP Monitoring",
@@ -15,7 +15,7 @@
         "name": "dashboard",
         "version": "2"
       },
-      "id": "cc27b466-eeb0-4c69-af15-fac26905fb11",
+      "id": "2e28884e-283a-409e-b428-b6cdc9ef0ff9",
       "data": {
         "summary": {
           "@type": "string",
@@ -529,7 +529,7 @@
         "name": "lookup_adapter",
         "version": "1"
       },
-      "id": "534e8534-601b-455a-a6f7-6e77b78f0848",
+      "id": "3724099f-ac3f-4d99-8e0a-252492b2d235",
       "data": {
         "_scope": {
           "@type": "string",
@@ -537,15 +537,15 @@
         },
         "name": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-active-logins"
+          "@value": "windows-rdp-monitoring-login-timestamps"
         },
         "title": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-active-logins"
+          "@value": "windows-rdp-monitoring-login-timestamps"
         },
         "description": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-active-logins"
+          "@value": "windows-rdp-monitoring-login-timestamps"
         },
         "configuration": {
           "type": {
@@ -571,7 +571,7 @@
         "name": "lookup_adapter",
         "version": "1"
       },
-      "id": "cf7f17b0-1d1b-43da-a9f0-f80f81338fc8",
+      "id": "fdd436e9-b0bd-4cc8-af29-8034d894bfb6",
       "data": {
         "_scope": {
           "@type": "string",
@@ -579,15 +579,15 @@
         },
         "name": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-login-timestamps"
+          "@value": "windows-rdp-monitoring-active-logins"
         },
         "title": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-login-timestamps"
+          "@value": "windows-rdp-monitoring-active-logins"
         },
         "description": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-login-timestamps"
+          "@value": "windows-rdp-monitoring-active-logins"
         },
         "configuration": {
           "type": {
@@ -613,7 +613,7 @@
         "name": "lookup_cache",
         "version": "1"
       },
-      "id": "294bbbd5-e63f-4aa7-bafc-daa4f16ed25d",
+      "id": "d6af2c60-fc69-4aa6-851a-2e865e338419",
       "data": {
         "_scope": {
           "@type": "string",
@@ -621,15 +621,15 @@
         },
         "name": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-active-logins"
+          "@value": "windows-rdp-monitoring-login-timestamps"
         },
         "title": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-active-logins"
+          "@value": "windows-rdp-monitoring-login-timestamps"
         },
         "description": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-active-logins"
+          "@value": "windows-rdp-monitoring-login-timestamps"
         },
         "configuration": {
           "type": {
@@ -651,7 +651,7 @@
         "name": "lookup_cache",
         "version": "1"
       },
-      "id": "76b05fdd-93f1-400e-8ea1-42d988b53548",
+      "id": "74a65515-f3b1-4c8b-ba3a-edfc3024eb5d",
       "data": {
         "_scope": {
           "@type": "string",
@@ -659,15 +659,15 @@
         },
         "name": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-login-timestamps"
+          "@value": "windows-rdp-monitoring-active-logins"
         },
         "title": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-login-timestamps"
+          "@value": "windows-rdp-monitoring-active-logins"
         },
         "description": {
           "@type": "string",
-          "@value": "windows-rdp-monitoring-login-timestamps"
+          "@value": "windows-rdp-monitoring-active-logins"
         },
         "configuration": {
           "type": {
@@ -689,7 +689,7 @@
         "name": "lookup_table",
         "version": "1"
       },
-      "id": "2ffea748-149f-47ac-b0da-9ec66c06596c",
+      "id": "ff6a2c83-cc25-414f-bb3a-fc17af092d1a",
       "data": {
         "default_single_value_type": {
           "@type": "string",
@@ -697,7 +697,7 @@
         },
         "cache_name": {
           "@type": "string",
-          "@value": "294bbbd5-e63f-4aa7-bafc-daa4f16ed25d"
+          "@value": "74a65515-f3b1-4c8b-ba3a-edfc3024eb5d"
         },
         "name": {
           "@type": "string",
@@ -713,7 +713,7 @@
         },
         "data_adapter_name": {
           "@type": "string",
-          "@value": "534e8534-601b-455a-a6f7-6e77b78f0848"
+          "@value": "fdd436e9-b0bd-4cc8-af29-8034d894bfb6"
         },
         "_scope": {
           "@type": "string",
@@ -745,7 +745,7 @@
         "name": "lookup_table",
         "version": "1"
       },
-      "id": "e96e0c5d-15b4-4473-831d-144f2ff5f0da",
+      "id": "b0d864c2-d4e9-4485-8713-52d02df812bc",
       "data": {
         "default_single_value_type": {
           "@type": "string",
@@ -753,7 +753,7 @@
         },
         "cache_name": {
           "@type": "string",
-          "@value": "76b05fdd-93f1-400e-8ea1-42d988b53548"
+          "@value": "d6af2c60-fc69-4aa6-851a-2e865e338419"
         },
         "name": {
           "@type": "string",
@@ -769,7 +769,7 @@
         },
         "data_adapter_name": {
           "@type": "string",
-          "@value": "cf7f17b0-1d1b-43da-a9f0-f80f81338fc8"
+          "@value": "3724099f-ac3f-4d99-8e0a-252492b2d235"
         },
         "_scope": {
           "@type": "string",
@@ -801,7 +801,7 @@
         "name": "pipeline",
         "version": "1"
       },
-      "id": "a65e7514-2ebb-49d0-b656-bd857b71049a",
+      "id": "7ce3c983-a3a6-48ea-b2db-ee2673c9a45e",
       "data": {
         "title": {
           "@type": "string",
@@ -830,35 +830,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "06c3dca8-c163-4a19-9216-d7717283f581",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring - 11"
-        },
-        "description": {
-          "@type": "string",
-          "@value": "Collecting RDP Logins and writing them to MongoDB"
-        },
-        "source": {
-          "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 11\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && array_contains($message.gim_event_type,\"logon\")\n    && to_string($message.event_outcome) == \"success\"\n    && to_string($message.application_name) == \"windows_rdp\"\n    && ( to_string($message.winlogbeat_winlog_event_data_ElevatedToken) == \"%%1843\"\n        || to_string($message.ElevatedToken) == \"%%1843\" )\n    \nthen\n    let rdp_user = lookup_set_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id),\n        value: to_string($message.timestamp)\n    );\n    \n    let rdp_user_collection = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=6.0.2+c751f7c"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "bc12f503-6f98-4f7c-9fcb-d8240a307fd6",
+      "id": "d37a9fea-9a9b-4c2b-b06f-de3f22b60e23",
       "data": {
         "title": {
           "@type": "string",
@@ -886,7 +858,35 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "1d5a9229-3e69-46e3-8237-1bf1a5ad2e56",
+      "id": "9d941f76-bdf3-402e-b7a4-e0b2ad32e6b0",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Professional: Windows - RDP Monitoring - 11"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Collecting RDP Logins and writing them to MongoDB"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Professional: Windows - RDP Monitoring - 11\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && array_contains($message.gim_event_type,\"logon\")\n    && to_string($message.event_outcome) == \"success\"\n    && to_string($message.application_name) == \"windows_rdp\"\n    && ( to_string($message.winlogbeat_winlog_event_data_ElevatedToken) == \"%%1843\"\n        || to_string($message.ElevatedToken) == \"%%1843\" )\n    \nthen\n    let rdp_user = lookup_set_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id),\n        value: to_string($message.timestamp)\n    );\n    \n    let rdp_user_collection = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=6.0.2+c751f7c"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "47139b7f-0dc2-40fe-a6e6-5c3658d6308c",
       "data": {
         "title": {
           "@type": "string",
