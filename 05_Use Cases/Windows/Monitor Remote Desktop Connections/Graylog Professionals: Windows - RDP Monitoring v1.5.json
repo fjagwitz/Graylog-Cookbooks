@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "f2293921-2945-4fb8-8ea2-d295a23167d1",
-  "rev": 4,
+  "rev": 5,
   "name": "Graylog Professionals: Windows - RDP Monitoring",
   "summary": "Graylog Professionals: Windows - RDP Monitoring",
   "description": "Graylog Professionals: Windows - RDP Monitoring",
@@ -15,7 +15,7 @@
         "name": "dashboard",
         "version": "2"
       },
-      "id": "2e28884e-283a-409e-b428-b6cdc9ef0ff9",
+      "id": "aefccfbf-221c-4634-a5f6-3f114d93a3b5",
       "data": {
         "summary": {
           "@type": "string",
@@ -529,7 +529,7 @@
         "name": "lookup_adapter",
         "version": "1"
       },
-      "id": "3724099f-ac3f-4d99-8e0a-252492b2d235",
+      "id": "afcfa962-54b0-453d-8e7f-4186efee4c07",
       "data": {
         "_scope": {
           "@type": "string",
@@ -571,7 +571,7 @@
         "name": "lookup_adapter",
         "version": "1"
       },
-      "id": "fdd436e9-b0bd-4cc8-af29-8034d894bfb6",
+      "id": "a680010c-9a81-4bea-ab90-1f5cb398f662",
       "data": {
         "_scope": {
           "@type": "string",
@@ -613,7 +613,7 @@
         "name": "lookup_cache",
         "version": "1"
       },
-      "id": "d6af2c60-fc69-4aa6-851a-2e865e338419",
+      "id": "cb3e873e-6b01-4016-9dfd-f89db4becb5a",
       "data": {
         "_scope": {
           "@type": "string",
@@ -651,7 +651,7 @@
         "name": "lookup_cache",
         "version": "1"
       },
-      "id": "74a65515-f3b1-4c8b-ba3a-edfc3024eb5d",
+      "id": "2e9dca7e-bf72-456a-aaaa-3a9c1de89da8",
       "data": {
         "_scope": {
           "@type": "string",
@@ -689,7 +689,7 @@
         "name": "lookup_table",
         "version": "1"
       },
-      "id": "ff6a2c83-cc25-414f-bb3a-fc17af092d1a",
+      "id": "96b55181-255a-4162-bbe4-7fe2dbc1c490",
       "data": {
         "default_single_value_type": {
           "@type": "string",
@@ -697,7 +697,7 @@
         },
         "cache_name": {
           "@type": "string",
-          "@value": "74a65515-f3b1-4c8b-ba3a-edfc3024eb5d"
+          "@value": "2e9dca7e-bf72-456a-aaaa-3a9c1de89da8"
         },
         "name": {
           "@type": "string",
@@ -713,7 +713,7 @@
         },
         "data_adapter_name": {
           "@type": "string",
-          "@value": "fdd436e9-b0bd-4cc8-af29-8034d894bfb6"
+          "@value": "a680010c-9a81-4bea-ab90-1f5cb398f662"
         },
         "_scope": {
           "@type": "string",
@@ -745,7 +745,7 @@
         "name": "lookup_table",
         "version": "1"
       },
-      "id": "b0d864c2-d4e9-4485-8713-52d02df812bc",
+      "id": "cf7d57ca-d4e8-4bce-8c61-e319fb481ffc",
       "data": {
         "default_single_value_type": {
           "@type": "string",
@@ -753,7 +753,7 @@
         },
         "cache_name": {
           "@type": "string",
-          "@value": "d6af2c60-fc69-4aa6-851a-2e865e338419"
+          "@value": "cb3e873e-6b01-4016-9dfd-f89db4becb5a"
         },
         "name": {
           "@type": "string",
@@ -769,7 +769,7 @@
         },
         "data_adapter_name": {
           "@type": "string",
-          "@value": "3724099f-ac3f-4d99-8e0a-252492b2d235"
+          "@value": "afcfa962-54b0-453d-8e7f-4186efee4c07"
         },
         "_scope": {
           "@type": "string",
@@ -801,7 +801,7 @@
         "name": "pipeline",
         "version": "1"
       },
-      "id": "7ce3c983-a3a6-48ea-b2db-ee2673c9a45e",
+      "id": "399c77b3-d8d3-441e-ba78-f770a1b5b1af",
       "data": {
         "title": {
           "@type": "string",
@@ -830,7 +830,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "d37a9fea-9a9b-4c2b-b06f-de3f22b60e23",
+      "id": "1ebfde8a-ac88-4381-bc77-5ed886cad267",
       "data": {
         "title": {
           "@type": "string",
@@ -842,7 +842,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 12\"\n\nwhen\n\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logoff\")\n    && to_string($message.event_outcome) == \"success\" \n    && lookup_has_value(\n        lookup_table: \"windows-security-rdp-sessions\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let session_login_time = list_get(lookup_string_list(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ),0);\n    \n    let login_time = to_long(parse_date(\n        value: to_string(session_login_time),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n        \n    let current_time = to_long(parse_date(\n        value: to_string(now(timezone:\"Europe/Berlin\")),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n    \n    let session_duration = current_time - login_time;\n    \n    set_field(\"session_duration_milliseconds\", session_duration);\n    set_field(\"session_duration_seconds\", session_duration/1000);\n    set_field(\"session_duration_minutes\", session_duration/1000/60);\n    set_field(\"session_duration_hours\", session_duration/1000/60/60); \n    \nend"
+          "@value": "rule \"Professional: Windows - RDP Monitoring - 12\"\n\nwhen\n\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logoff\")\n    && to_string($message.event_outcome) == \"success\" \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let session_login_time = list_get(lookup_string_list(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ),0);\n    \n    let login_time = to_long(parse_date(\n        value: to_string(session_login_time),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n        \n    let current_time = to_long(parse_date(\n        value: to_string(now(timezone:\"Europe/Berlin\")),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n    \n    let session_duration = current_time - login_time;\n    \n    set_field(\"session_duration_milliseconds\", session_duration);\n    set_field(\"session_duration_seconds\", session_duration/1000);\n    set_field(\"session_duration_minutes\", session_duration/1000/60);\n    set_field(\"session_duration_hours\", session_duration/1000/60/60); \n    \nend"
         }
       },
       "constraints": [
@@ -858,7 +858,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "9d941f76-bdf3-402e-b7a4-e0b2ad32e6b0",
+      "id": "4684f9d7-b249-4a09-85a2-03e3bbc41154",
       "data": {
         "title": {
           "@type": "string",
@@ -886,7 +886,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "47139b7f-0dc2-40fe-a6e6-5c3658d6308c",
+      "id": "20e1a972-ee66-4103-8227-54697e0e7c19",
       "data": {
         "title": {
           "@type": "string",
@@ -898,7 +898,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 13\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && array_contains($message.gim_event_type,\"logoff\") \n    && to_string($message.event_outcome) == \"success\"  \n    && lookup_has_value(\n        lookup_table: \"windows-security-rdp-sessions\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_user = lookup_clear_key(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    );\n\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \nend"
+          "@value": "rule \"Professional: Windows - RDP Monitoring - 13\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && array_contains($message.gim_event_type,\"logoff\") \n    && to_string($message.event_outcome) == \"success\"  \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_user = lookup_clear_key(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    );\n\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \nend"
         }
       },
       "constraints": [
