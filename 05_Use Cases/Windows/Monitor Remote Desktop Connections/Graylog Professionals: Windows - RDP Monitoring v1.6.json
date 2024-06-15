@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "f2293921-2945-4fb8-8ea2-d295a23167d1",
-  "rev": 5,
+  "rev": 6,
   "name": "Graylog Professionals: Windows - RDP Monitoring",
   "summary": "Graylog Professionals: Windows - RDP Monitoring",
   "description": "Graylog Professionals: Windows - RDP Monitoring",
@@ -15,7 +15,7 @@
         "name": "dashboard",
         "version": "2"
       },
-      "id": "aefccfbf-221c-4634-a5f6-3f114d93a3b5",
+      "id": "df3837e2-7693-4a4a-8b62-328b1c82b9f9",
       "data": {
         "summary": {
           "@type": "string",
@@ -529,7 +529,7 @@
         "name": "lookup_adapter",
         "version": "1"
       },
-      "id": "afcfa962-54b0-453d-8e7f-4186efee4c07",
+      "id": "b99d28df-90c7-49b3-a75d-ba6209b82b46",
       "data": {
         "_scope": {
           "@type": "string",
@@ -571,7 +571,7 @@
         "name": "lookup_adapter",
         "version": "1"
       },
-      "id": "a680010c-9a81-4bea-ab90-1f5cb398f662",
+      "id": "376d83cd-3a34-4270-976f-50ecb949685a",
       "data": {
         "_scope": {
           "@type": "string",
@@ -613,7 +613,7 @@
         "name": "lookup_cache",
         "version": "1"
       },
-      "id": "cb3e873e-6b01-4016-9dfd-f89db4becb5a",
+      "id": "5a8b3ef2-93e0-4df2-8f49-92855a5d2d2a",
       "data": {
         "_scope": {
           "@type": "string",
@@ -651,7 +651,7 @@
         "name": "lookup_cache",
         "version": "1"
       },
-      "id": "2e9dca7e-bf72-456a-aaaa-3a9c1de89da8",
+      "id": "27a501a6-0d45-4c74-b859-33c1724aa94f",
       "data": {
         "_scope": {
           "@type": "string",
@@ -689,7 +689,7 @@
         "name": "lookup_table",
         "version": "1"
       },
-      "id": "96b55181-255a-4162-bbe4-7fe2dbc1c490",
+      "id": "9b1c7be1-14ac-47d7-af8b-0bab936dcef2",
       "data": {
         "default_single_value_type": {
           "@type": "string",
@@ -697,7 +697,7 @@
         },
         "cache_name": {
           "@type": "string",
-          "@value": "2e9dca7e-bf72-456a-aaaa-3a9c1de89da8"
+          "@value": "27a501a6-0d45-4c74-b859-33c1724aa94f"
         },
         "name": {
           "@type": "string",
@@ -713,7 +713,7 @@
         },
         "data_adapter_name": {
           "@type": "string",
-          "@value": "a680010c-9a81-4bea-ab90-1f5cb398f662"
+          "@value": "376d83cd-3a34-4270-976f-50ecb949685a"
         },
         "_scope": {
           "@type": "string",
@@ -745,7 +745,7 @@
         "name": "lookup_table",
         "version": "1"
       },
-      "id": "cf7d57ca-d4e8-4bce-8c61-e319fb481ffc",
+      "id": "805601ff-8cc0-4f82-a2b3-d2a493914a9d",
       "data": {
         "default_single_value_type": {
           "@type": "string",
@@ -753,7 +753,7 @@
         },
         "cache_name": {
           "@type": "string",
-          "@value": "cb3e873e-6b01-4016-9dfd-f89db4becb5a"
+          "@value": "5a8b3ef2-93e0-4df2-8f49-92855a5d2d2a"
         },
         "name": {
           "@type": "string",
@@ -769,7 +769,7 @@
         },
         "data_adapter_name": {
           "@type": "string",
-          "@value": "afcfa962-54b0-453d-8e7f-4186efee4c07"
+          "@value": "b99d28df-90c7-49b3-a75d-ba6209b82b46"
         },
         "_scope": {
           "@type": "string",
@@ -801,7 +801,7 @@
         "name": "pipeline",
         "version": "1"
       },
-      "id": "399c77b3-d8d3-441e-ba78-f770a1b5b1af",
+      "id": "31ec2acc-fdde-4c69-81b0-976a122e25ce",
       "data": {
         "title": {
           "@type": "string",
@@ -830,7 +830,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "1ebfde8a-ac88-4381-bc77-5ed886cad267",
+      "id": "9a7c9a14-b49e-481e-9619-7f81da2f88b0",
       "data": {
         "title": {
           "@type": "string",
@@ -842,7 +842,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 12\"\n\nwhen\n\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logoff\")\n    && to_string($message.event_outcome) == \"success\" \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let session_login_time = list_get(lookup_string_list(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ),0);\n    \n    let login_time = to_long(parse_date(\n        value: to_string(session_login_time),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n        \n    let current_time = to_long(parse_date(\n        value: to_string(now(timezone:\"Europe/Berlin\")),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n    \n    let session_duration = current_time - login_time;\n    \n    set_field(\"session_duration_milliseconds\", session_duration);\n    set_field(\"session_duration_seconds\", session_duration/1000);\n    set_field(\"session_duration_minutes\", session_duration/1000/60);\n    set_field(\"session_duration_hours\", session_duration/1000/60/60); \n    \nend"
+          "@value": "rule \"Professional: Windows - RDP Monitoring - 12\"\n\nwhen\n\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logoff\")\n    && to_string($message.event_outcome) == \"success\" \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let session_login_time = list_get(lookup_string_list(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ),0);\n    \n    let login_time = to_long(parse_date(\n        value: to_string(session_login_time),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n        \n    let current_time = to_long(parse_date(\n        value: to_string(now(timezone:\"Europe/Berlin\")),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n    \n    let session_duration = current_time - login_time;\n    \n    set_field(\"session_duration_milliseconds\", session_duration);\n    set_field(\"session_duration_seconds\", session_duration/1000);\n    set_field(\"session_duration_minutes\", session_duration/1000/60);\n    set_field(\"session_duration_hours\", session_duration/1000/60/60); \n    \nend"
         }
       },
       "constraints": [
@@ -858,7 +858,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "4684f9d7-b249-4a09-85a2-03e3bbc41154",
+      "id": "2040480a-aed6-4dd3-bee9-ffc428e37924",
       "data": {
         "title": {
           "@type": "string",
@@ -886,7 +886,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "20e1a972-ee66-4103-8227-54697e0e7c19",
+      "id": "86cf7744-256c-4f17-9eeb-0d45c55c5c46",
       "data": {
         "title": {
           "@type": "string",
