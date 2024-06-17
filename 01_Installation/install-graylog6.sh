@@ -17,7 +17,7 @@ if [ "${connectionTest}" != "" ]
 then
   echo "[INFO] - INTERNET CONNECTION OK "
 else
-  echo "[INFO] - INTERNET CONNECTION NOT ACTIVE, CHECK YOUR PROXY SETTINGS: EXITING "
+  echo "[ERROR] - INTERNET CONNECTION NOT ACTIVE, CHECK YOUR PROXY SETTINGS - EXITING "
   exit
 fi
 
@@ -26,13 +26,13 @@ if [[ "$operatingSystem" == Ubuntu ]]
 then
   echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
 else
-  echo "[INFO] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
+  echo "[ERROR] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
   exit
 fi
 
 if [[ $numberCores -lt 8 ]]
 then
-  echo "[INFO] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXIT "
+  echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXITING "
   exit
 else
   echo "[INFO] - CPU CHECK SUCCESSFUL: $numberCores CORES "
@@ -40,7 +40,7 @@ fi
 
 if [[ $randomAccessMemory -lt 32000 ]]
 then
-  echo "[INFO] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXIT "
+  echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "
   exit
 else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
@@ -67,7 +67,7 @@ installcheck2=$(apt list --installed 2>/dev/null | grep samba)
 
 if [ "$installcheck2" == "" ]
 then
-  echo "[ERROR] - APT PACKAGE INSTALLATION FAILED, WILL EXIT NOW "
+  echo "[ERROR] - APT PACKAGE INSTALLATION FAILED - EXITING "
   exit 
 fi
 
@@ -115,7 +115,7 @@ else
   then
     echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
   else
-    echo "[INFO] - DOCKER INSTALLATION FAILED, WILL EXIT NOW "
+    echo "[ERROR] - DOCKER INSTALLATION FAILED, EXITING"
     exit
   fi
 fi
