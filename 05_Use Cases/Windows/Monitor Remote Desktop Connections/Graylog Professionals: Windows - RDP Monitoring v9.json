@@ -1427,15 +1427,15 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring"
+          "@value": "Graylog Professionals: Windows - RDP Monitoring"
         },
         "description": {
           "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring"
+          "@value": "Graylog Professionals: Windows - RDP Monitoring"
         },
         "source": {
           "@type": "string",
-          "@value": "pipeline \"Professional: Windows - RDP Monitoring\"\nstage 0 match either\nstage 11 match pass\nrule \"Professional: Windows - RDP Monitoring - 11\"\nstage 12 match pass\nrule \"Professional: Windows - RDP Monitoring - 12\"\nstage 21 match either\nrule \"Professional: Windows - RDP Monitoring - 21\"\nstage 22 match either\nrule \"Professional: Windows - RDP Monitoring - 22\"\nstage 13 match pass\nrule \"Professional: Windows - RDP Monitoring - 13\"\nend"
+          "@value": "pipeline \"Graylog Professionals: Windows - RDP Monitoring\"\nstage 0 match either\nstage 11 match pass\nrule \"Graylog Professionals: Windows - RDP Monitoring - 11\"\nstage 12 match pass\nrule \"Graylog Professionals: Windows - RDP Monitoring - 12\"\nstage 21 match either\nrule \"Graylog Professionals: Windows - RDP Monitoring - 21\"\nstage 22 match either\nrule \"Graylog Professionals: Windows - RDP Monitoring - 22\"\nstage 13 match pass\nrule \"Graylog Professionals: Windows - RDP Monitoring - 13\"\nend"
         },
         "connected_streams": []
       },
@@ -1456,7 +1456,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring - 21"
+          "@value": "Graylog Professionals: Windows - RDP Monitoring - 21"
         },
         "description": {
           "@type": "string",
@@ -1464,7 +1464,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 21\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logoff\")\n    && to_string($message.event_outcome) == \"success\" \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let session_login_time = list_get(lookup_string_list(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ),0);\n    \n    let login_time = to_long(parse_date(\n        value: to_string(session_login_time),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n        \n    let current_time = to_long(parse_date(\n        value: to_string(now(timezone:\"Europe/Berlin\")),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n    \n    let session_duration = current_time - login_time;\n    \n    set_field(\"session_duration_milliseconds\", session_duration);\n    set_field(\"session_duration_seconds\", session_duration/1000);\n    set_field(\"session_duration_minutes\", session_duration/1000/60);\n    set_field(\"session_duration_hours\", session_duration/1000/60/60); \n    \nend"
+          "@value": "rule \"Graylog Professionals: Windows - RDP Monitoring - 21\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logoff\")\n    && to_string($message.event_outcome) == \"success\" \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let session_login_time = list_get(lookup_string_list(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ),0);\n    \n    let login_time = to_long(parse_date(\n        value: to_string(session_login_time),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n        \n    let current_time = to_long(parse_date(\n        value: to_string(now(timezone:\"Europe/Berlin\")),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n    \n    let session_duration = current_time - login_time;\n    \n    set_field(\"session_duration_milliseconds\", session_duration);\n    set_field(\"session_duration_seconds\", session_duration/1000);\n    set_field(\"session_duration_minutes\", session_duration/1000/60);\n    set_field(\"session_duration_hours\", session_duration/1000/60/60); \n    \nend"
         }
       },
       "constraints": [
@@ -1484,7 +1484,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring - 11"
+          "@value": "Graylog Professionals: Windows - RDP Monitoring - 11"
         },
         "description": {
           "@type": "string",
@@ -1492,7 +1492,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 11\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logon\")\n    && to_string($message.event_outcome) == \"success\"\n    && to_string($message.application_name) == \"windows_rdp\"\n    && ( to_string($message.winlogbeat_winlog_event_data_ElevatedToken) == \"%%1843\"\n        || to_string($message.ElevatedToken) == \"%%1843\" )\n    \nthen\n    let rdp_user = lookup_set_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id),\n        value: to_string($message.timestamp)\n    );\n    \n    let rdp_user_collection = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
+          "@value": "rule \"Graylog Professionals: Windows - RDP Monitoring - 11\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"logon\")\n    && to_string($message.event_outcome) == \"success\"\n    && to_string($message.application_name) == \"windows_rdp\"\n    && ( to_string($message.winlogbeat_winlog_event_data_ElevatedToken) == \"%%1843\"\n        || to_string($message.ElevatedToken) == \"%%1843\" )\n    \nthen\n    let rdp_user = lookup_set_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id),\n        value: to_string($message.timestamp)\n    );\n    \n    let rdp_user_collection = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
         }
       },
       "constraints": [
@@ -1512,7 +1512,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring - 12"
+          "@value": "Graylog Professionals: Windows - RDP Monitoring - 12"
         },
         "description": {
           "@type": "string",
@@ -1520,7 +1520,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 12\"\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"session disconnect\")\n    && to_string($message.event_outcome) == \"success\"\n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_session_status = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"inactive_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
+          "@value": "rule \"Graylog Professionals: Windows - RDP Monitoring - 12\"\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"session disconnect\")\n    && to_string($message.event_outcome) == \"success\"\n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_session_status = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"inactive_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
         }
       },
       "constraints": [
@@ -1540,7 +1540,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring - 22"
+          "@value": "Graylog Professionals: Windows - RDP Monitoring - 22"
         },
         "description": {
           "@type": "string",
@@ -1548,7 +1548,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 22\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && array_contains($message.gim_event_type,\"logoff\") \n    && to_string($message.event_outcome) == \"success\"  \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_user = lookup_clear_key(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    );\n\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"inactive_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \nend"
+          "@value": "rule \"Graylog Professionals: Windows - RDP Monitoring - 22\"\n\nwhen\n    has_field(\"gim_event_type\")\n    && array_contains($message.gim_event_type,\"logoff\") \n    && to_string($message.event_outcome) == \"success\"  \n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_user = lookup_clear_key(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    );\n\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"inactive_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \nend"
         }
       },
       "constraints": [
@@ -1568,7 +1568,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Professional: Windows - RDP Monitoring - 13"
+          "@value": "Graylog Professionals: Windows - RDP Monitoring - 13"
         },
         "description": {
           "@type": "string",
@@ -1576,7 +1576,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Professional: Windows - RDP Monitoring - 13\"\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"session reconnect\")\n    && to_string($message.event_outcome) == \"success\"\n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_session_status = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"inactive_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
+          "@value": "rule \"Graylog Professionals: Windows - RDP Monitoring - 13\"\nwhen\n    has_field(\"gim_event_type\")\n    && has_field(\"user_session_id\")\n    && array_contains($message.gim_event_type,\"session reconnect\")\n    && to_string($message.event_outcome) == \"success\"\n    && lookup_has_value(\n        lookup_table: \"windows-rdp-monitoring-login-timestamps\",\n        key: to_string($message.user_session_id)\n    ) == true\n    \nthen\n    let rdp_session_status = lookup_add_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"windows-rdp-monitoring-active-logins\",\n        key: \"inactive_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n\nend"
         }
       },
       "constraints": [
