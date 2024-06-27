@@ -2,13 +2,18 @@
 echo "[INFO] - PREPARING THE SYSTEM "
 
 # Request System Credentials
-read -p "[INPUT] - Please add the name of your central Administration User: " GL_GRAYLOG_ADMIN
-read -p "[INPUT] - Please add the central Administration Password: "$'\n' -s GL_GRAYLOG_PASSWORD
-read -p "[INPUT] - Please add the fqdn of your Graylog Instance (e.g. eval.graylog.local): " GL_GRAYLOG_URI
+read -p "[INPUT] - Please add the name of your central Administration User [admin]: " GL_GRAYLOG_ADMIN
+GL_GRAYLOG_ADMIN=${GL_GRAYLOG_ADMIN:-admin}
+read -p "[INPUT] - Please add the central Administration Password [MyP@ssw0rd]: "$'\n' -s GL_GRAYLOG_PASSWORD
+GL_GRAYLOG_PASSWORD=${GL_GRAYLOG_PASSWORD:-MyP@ssw0rd}
+read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " GL_GRAYLOG_ADDRESS
+GL_GRAYLOG_ADDRESS=${GL_GRAYLOG_ADDRESS:-eval.graylog.local}
+read -p "[INPUT] - Where do you want Graylog to be installed [/opt]: " GL_GRAYLOG_FOLDER
+GL_GRAYLOG_FOLDER=${GL_GRAYLOG_FOLDER:-/opt}
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
-randomAccessMemory=$(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }')
+randomAccessMemory=$(printf '%.*f\n' 0 $(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }'))
 operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}' | xargs)
 connectionTest=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 )
 
@@ -38,7 +43,7 @@ else
   echo "[INFO] - CPU CHECK SUCCESSFUL: $numberCores CORES "
 fi
 
-if [[ $randomAccessMemory -lt 32000 ]]
+if [[ $randomAccessMemory -lt 24576 ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "
   exit
@@ -134,33 +139,30 @@ environmentfile="/etc/environment"
 echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
-echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile} > /dev/null 
-source ${environmentfile}
+GL_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/.env"
+GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/graylog1.env"
 
-echo "GL_GRAYLOG_COMPOSE_ENV=${GL_GRAYLOG}/.env" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG_FOLDER}/graylog/archives\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG_FOLDER}/graylog/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG_FOLDER}/graylog/journal\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG_FOLDER}/graylog/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG_FOLDER}/graylog/maxmind\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG_FOLDER}/graylog/nginx1\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG_FOLDER}/graylog/nginx2\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG_FOLDER}/graylog/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG_FOLDER}/graylog/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
 
-echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG}/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG}/maxmind\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG}/nginx1\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG}/nginx2\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
-
-echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${installpath}
-sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus}
+sudo mkdir -p ${GL_GRAYLOG_FOLDER}/opensearch/{datanode1,datanode2,datanode3}
+sudo mkdir -p ${GL_GRAYLOG_FOLDER}/graylog/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus}
 
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "
-sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
+sudo chown -R 1000:1000 ${GL_GRAYLOG_FOLDER}/opensearch
 sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
@@ -178,8 +180,9 @@ echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
 sudo cp ${installpath}/01_Installation/compose/nginx1/*.conf ${GL_GRAYLOG_NGINX1}
 sudo cp ${installpath}/01_Installation/compose/nginx1/ssl ${GL_GRAYLOG_NGINX1} -R
 sudo cp ${installpath}/01_Installation/compose/nginx2/*.conf ${GL_GRAYLOG_NGINX2}
-sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
-sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
+sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG_FOLDER}/graylog
+sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG_FOLDER}/graylog/.env
+sudo cp ${installpath}/01_Installation/compose/graylog.example ${GL_GRAYLOG_FOLDER}/graylog/graylog1.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
@@ -187,14 +190,12 @@ sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTE
 # Add HTTP_PROXY to docker-compose.yaml
 if [ "$connectionstate" == "0" ]
 then
-  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" $GL_GRAYLOG/docker-compose.yaml
+  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_FOLDER}/graylog/docker-compose.yaml
 fi
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
-echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
-# Additional Graylog config data to guarantee minimum functionality
-echo "GL_GRAYLOG_URI=\"${GL_GRAYLOG_URI}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
 
 # Add Graylog Secrets to Docker .env-file
 echo "[INFO] - SET SECRETS "
@@ -202,6 +203,12 @@ echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYL
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+
+# Additional Graylog config data to guarantee minimum functionality
+sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\"\GRAYLOG_ROOT_USERNAME = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_ROOT_PASSWORD = \"\"\"\GRAYLOG_ROOT_PASSWORD = \"${GL_GRAYLOG_PASSWORD}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 
 # Install Samba to make local Data Adapters accessible from Windows
 echo "[INFO] - CONFIGURE FILESHARES "
@@ -221,7 +228,7 @@ sudo rm -rf ${aptproxyconf}
 
 # Start Graylog Stack
 echo "[INFO] - PULL GRAYLOG CONTAINERS - HANG ON, CAN TAKE A WHILE "
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
+sudo docker compose -f ${GL_GRAYLOG_FOLDER}/graylog/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 
 echo "[INFO] - VALIDATE GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
 sleep 5s
@@ -243,10 +250,10 @@ curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config
   -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
 echo ""
-echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: /opt/graylog/docker-compose.yaml "
-echo "[INFO] - CREDENTIALS STORED IN: /opt/graylog/your_graylog_credentials.txt "
+echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG_FOLDER}/graylog/docker-compose.yaml "
+echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG_FOLDER}/graylog/your_graylog_credentials.txt "
 echo ""
-echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG}/your_graylog_credentials.txt
+echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG_FOLDER}/graylog/your_graylog_credentials.txt
 echo ""
 
 exit

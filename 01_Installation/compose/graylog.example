@@ -1,0 +1,68 @@
+environment:
+      ## Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/server.conf.html)
+      ## Work with the .env-example file to configure these values - values configured in Installation Script
+      #
+      GRAYLOG_IS_LEADER = "true"
+      GRAYLOG_PASSWORD_SECRET = ""
+      GRAYLOG_ROOT_USERNAME = ""
+      GRAYLOG_ROOT_PASSWORD_SHA2 = ""
+      GRAYLOG_ROOT_EMAIL = ""
+      
+      ## Set System Timezone; value must be compatible with https://www.joda.org/joda-time/timezones.html
+      #
+      GRAYLOG_ROOT_TIMEZONE = "UTC" 
+      
+      ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
+      #
+      GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:9000"
+      GRAYLOG_HTTP_PUBLISH_URI = "http://graylog1:9000"
+      GRAYLOG_MONGODB_URI = "mongodb://mongodb1:27017/graylog"
+      GRAYLOG_ELASTICSEARCH_HOSTS = "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
+      GRAYLOG_TELEMETRY_ENABLED = "false"
+      GRAYLOG_HTTP_EXTERNAL_URI = ""
+      
+      ## Notification Script Path / API URI
+      #
+      GRAYLOG_INTEGRATIONS_SCRIPTS_DIR = "/etc/graylog/server/notifications"
+      GRAYLOG_INTEGRATIONS_WEB_INTERFACE_URI = "https://my.device.rest.endpoint:443" 
+      GRAYLOG_ALLOWED_AUXILIARY_PATH = "/etc/graylog/server"
+      
+      ## Graylog Proxy Settings (list of patterns separated by “,” - may start or end with a “*” for wildcards)
+      #
+      GRAYLOG_HTTP_PROXY_URI = ""
+      GRAYLOG_HTTP_NON_PROXY_HOSTS = "graylog1, mongodb1, datanode*, lookuptables, prometheus1, grafana1"
+      
+      ## Graylog Reporting Configurations
+      #
+      GRAYLOG_REPORT_RENDER_URI = "http://${GL_GRAYLOG_ADDRESS}"
+      GRAYLOG_REPORT_DISABLE_SANDBOX = "true"
+      
+      ## Graylog Content Pack Handling
+      #
+      GRAYLOG_CONTENT_PACKS_LOADER_ENABLED = "true"
+      GRAYLOG_CONTENT_PACKS_DIR = "/etc/graylog/server/contentpacks"
+      GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Evaluation - Initial Input Collection v1.json, Evaluation - Initial Whitelist Collection v1.json"
+      
+      ## Email Configurations
+      #
+      GRAYLOG_TRANSPORT_EMAIL_ENABLED = "true"
+      GRAYLOG_TRANSPORT_EMAIL_HOSTNAME = "my.email.system"
+      GRAYLOG_TRANSPORT_EMAIL_PORT = "587"
+      GRAYLOG_TRANSPORT_EMAIL_USE_AUTH = "true"
+      GRAYLOG_TRANSPORT_EMAIL_USE_TLS = "true"
+      GRAYLOG_TRANSPORT_EMAIL_USE_SSL = "false"
+      GRAYLOG_TRANSPORT_EMAIL_AUTH_USERNAME = "my-graylog-mail-account"
+      GRAYLOG_TRANSPORT_EMAIL_AUTH_PASSWORD = "my-very-secure-P@$$w0rd"
+      GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX = ""
+      GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL = ""
+      GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = "https://${GL_GRAYLOG_ADDRESS}"
+
+      ## Grafana Metrics Monitoring
+      #
+      GRAYLOG_PROMETHEUS_EXPORTER_ENABLED = "true"
+      GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
+      
+      # Indices naming
+      #
+      GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-evaluation-events"
+      GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-evaluation-system-events"
