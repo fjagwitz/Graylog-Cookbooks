@@ -136,17 +136,20 @@ sudo sysctl -p > /dev/null
 echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
-GL_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/.env"
-GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/graylog1.env"
-GL_GRAYLOG_ARCHIVES="${GL_GRAYLOG_FOLDER}/graylog/archives" 
-GL_GRAYLOG_CONTENTPACKS="${GL_GRAYLOG_FOLDER}/graylog/contentpacks"
-GL_GRAYLOG_JOURNAL="${GL_GRAYLOG_FOLDER}/graylog/journal"
-GL_GRAYLOG_LOOKUPTABLES="${GL_GRAYLOG_FOLDER}/graylog/lookuptables"
-GL_GRAYLOG_MAXMIND="${GL_GRAYLOG_FOLDER}/graylog/maxmind"
-GL_GRAYLOG_NGINX1="${GL_GRAYLOG_FOLDER}/graylog/nginx1"
-GL_GRAYLOG_NGINX2="${GL_GRAYLOG_FOLDER}/graylog/nginx2"
-GL_GRAYLOG_NOTIFICATIONS="${GL_GRAYLOG_FOLDER}/graylog/notifications" 
-GL_GRAYLOG_PROMETHEUS="${GL_GRAYLOG_FOLDER}/graylog/prometheus"
+GL_GRAYLOG_DATA="${GL_GRAYLOG_FOLDER}/graylog"
+GL_OPENSEARCH_DATA="${GL_GRAYLOG_FOLDER}/opensearch"
+
+GL_COMPOSE_ENV="${GL_GRAYLOG_DATA}/.env"
+GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG_DATA}/graylog1.env"
+GL_GRAYLOG_ARCHIVES="${GL_GRAYLOG_DATA}/archives" 
+GL_GRAYLOG_CONTENTPACKS="${GL_GRAYLOG_DATA}/contentpacks"
+GL_GRAYLOG_JOURNAL="${GL_GRAYLOG_DATA}/journal"
+GL_GRAYLOG_LOOKUPTABLES="${GL_GRAYLOG_DATA}/lookuptables"
+GL_GRAYLOG_MAXMIND="${GL_GRAYLOG_DATA}/maxmind"
+GL_GRAYLOG_NGINX1="${GL_GRAYLOG_DATA}/nginx1"
+GL_GRAYLOG_NGINX2="${GL_GRAYLOG_DATA}/nginx2"
+GL_GRAYLOG_NOTIFICATIONS="${GL_GRAYLOG_DATA}/notifications" 
+GL_GRAYLOG_PROMETHEUS="${GL_GRAYLOG_DATA}/prometheus"
 
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
@@ -182,15 +185,16 @@ sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKU
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
 # Setting additional Variables for the Environmentfile
-echo ${GL_GRAYLOG_ARCHIVES} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_CONTENTPACKS} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_JOURNAL} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_LOOKUPTABLES} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_MAXMIND} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_NGINX1} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_NGINX2} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_NOTIFICATIONS} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo ${GL_GRAYLOG_PROMETHEUS} | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG_FOLDER}/graylog/archives\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG_FOLDER}/graylog/contentpacks\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG_FOLDER}/graylog/journal\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG_FOLDER}/graylog/lookuptables\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG_FOLDER}/graylog/maxmind\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG_FOLDER}/graylog/nginx1\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG_FOLDER}/graylog/nginx2\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG_FOLDER}/graylog/notifications\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG_FOLDER}/graylog/prometheus\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_OPENSEARCH_DATA=\"${GL_GRAYLOG_FOLDER}/opensearch\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
