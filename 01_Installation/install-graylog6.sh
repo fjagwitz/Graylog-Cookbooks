@@ -19,36 +19,36 @@ connectionTest=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 )
 
 echo "[INFO] - VERIFYING INTERNET CONNECTION"
 if [ "${connectionTest}" != "" ]
-then
-  echo "[INFO] - INTERNET CONNECTION OK "
-else
-  echo "[ERROR] - INTERNET CONNECTION NOT ACTIVE, CHECK YOUR PROXY SETTINGS - EXITING "
-  exit
+  then
+    echo "[INFO] - INTERNET CONNECTION OK "
+  else
+    echo "[ERROR] - INTERNET CONNECTION NOT ACTIVE, CHECK YOUR PROXY SETTINGS - EXITING "
+    exit
 fi
 
 echo "[INFO] - CHECKING MINIMUM REQUIREMENTS "
 if [[ "$operatingSystem" == Ubuntu ]]
-then
-  echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
-else
-  echo "[ERROR] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
-  exit
+  then
+    echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
+  else
+    echo "[ERROR] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
+    exit
 fi
 
 if [[ $numberCores -lt 8 ]]
-then
-  echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXITING "
-  exit
-else
-  echo "[INFO] - CPU CHECK SUCCESSFUL: $numberCores CORES "
+  then
+    echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXITING "
+    exit
+  else
+    echo "[INFO] - CPU CHECK SUCCESSFUL: $numberCores CORES "
 fi
 
 if [[ $randomAccessMemory -lt 24576 ]]
-then
-  echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "
-  exit
-else
-  echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
+  then
+    echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "
+    exit
+  else
+    echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
 
 
@@ -59,70 +59,70 @@ installcheck1=$(apt list --installed 2>/dev/null | grep samba)
 connectionstate="1"
 
 if [ "$installcheck1" == "" ]
-then
-  aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
-  connectionstate="0"
-  echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
-  echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
-  echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
-  sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
-fi
+  then
+    aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
+    connectionstate="0"
+    echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
+    echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
+    echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
+    sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
+  fi
 
 installcheck2=$(apt list --installed 2>/dev/null | grep samba)
 
 if [ "$installcheck2" == "" ]
-then
-  echo "[ERROR] - APT PACKAGE INSTALLATION FAILED - EXITING "
-  exit 
+  then
+    echo "[ERROR] - APT PACKAGE INSTALLATION FAILED - EXITING "
+    exit 
 fi
 
 if [[ "$(command -v docker)" == "/usr/bin/docker" ]]; 
-then
-  echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
-else
-  echo "[INFO] - DOCKER CHECK FAILED, WILL BE INSTALLED NOW "
-  # Removing preconfigured Docker Installation from Ubuntu (just in case)
-  echo "[INFO] - DOCKER CLEANUP "
-  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg 2>/dev/null >/dev/null; done
-
-  # Adding Docker Repository
-  echo "[INFO] - ADDING DOCKER REPOSITORY "
-  sudo apt-get -qq install ca-certificates curl 2>/dev/null >/dev/null
-  sudo install -m 0755 -d /etc/apt/keyrings > /dev/null
-  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc > /dev/null
-  sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  sudo apt-get -qq update 2>/dev/null >/dev/null
-
-  # Installing Docker on Ubuntu
-  echo "[INFO] - DOCKER INSTALLATION "
-  sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
-
-  # Configuring Proxy Settings
-  if [ "$connectionstate" == "0" ]
   then
-    echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
-    sudo service docker stop 2>/dev/null >/dev/null
-    sleep 2
-    sudo systemctl stop docker.socket 2>/dev/null >/dev/null
-    sleep 3
-    sudo systemctl start docker.socket 2>/dev/null >/dev/null
-    sleep 2
-    sudo service docker start 2>/dev/null >/dev/null
-  fi
-
-  # Checking Docker Installation Success
-  if [[ "$(command -v docker)" == "/usr/bin/docker" ]]
-  then
-    echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
+    echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
   else
-    echo "[ERROR] - DOCKER INSTALLATION FAILED, EXITING"
-    exit
-  fi
+    echo "[INFO] - DOCKER CHECK FAILED, WILL BE INSTALLED NOW "
+    # Removing preconfigured Docker Installation from Ubuntu (just in case)
+    echo "[INFO] - DOCKER CLEANUP "
+    for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg 2>/dev/null >/dev/null; done
+
+    # Adding Docker Repository
+    echo "[INFO] - ADDING DOCKER REPOSITORY "
+    sudo apt-get -qq install ca-certificates curl 2>/dev/null >/dev/null
+    sudo install -m 0755 -d /etc/apt/keyrings > /dev/null
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc > /dev/null
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get -qq update 2>/dev/null >/dev/null
+
+    # Installing Docker on Ubuntu
+    echo "[INFO] - DOCKER INSTALLATION "
+    sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
+
+    # Configuring Proxy Settings
+    if [ "$connectionstate" == "0" ]
+      then
+        echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
+        sudo service docker stop 2>/dev/null >/dev/null
+        sleep 2
+        sudo systemctl stop docker.socket 2>/dev/null >/dev/null
+        sleep 3
+        sudo systemctl start docker.socket 2>/dev/null >/dev/null
+        sleep 2
+        sudo service docker start 2>/dev/null >/dev/null
+    fi
+
+    # Checking Docker Installation Success
+    if [[ "$(command -v docker)" == "/usr/bin/docker" ]]
+      then
+        echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
+      else
+        echo "[ERROR] - DOCKER INSTALLATION FAILED, EXITING"
+        exit
+    fi
 fi
 
 # Configure temporary installpath
@@ -138,16 +138,6 @@ echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
 GL_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/graylog1.env"
-
-echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG_FOLDER}/graylog/archives\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG_FOLDER}/graylog/contentpacks\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG_FOLDER}/graylog/journal\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG_FOLDER}/graylog/lookuptables\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG_FOLDER}/graylog/maxmind\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG_FOLDER}/graylog/nginx1\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG_FOLDER}/graylog/nginx2\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG_FOLDER}/graylog/notifications\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
-echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG_FOLDER}/graylog/prometheus\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
@@ -182,27 +172,37 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
-# Add HTTP_PROXY to docker-compose.yaml
-if [ "$connectionstate" == "0" ]
-then
-  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_FOLDER}/graylog/docker-compose.yaml
-fi
+# Setting additional Variables for the Environmentfile
+echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG_FOLDER}/graylog/archives\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG_FOLDER}/graylog/contentpacks\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG_FOLDER}/graylog/journal\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG_FOLDER}/graylog/lookuptables\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG_FOLDER}/graylog/maxmind\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG_FOLDER}/graylog/nginx1\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG_FOLDER}/graylog/nginx2\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG_FOLDER}/graylog/notifications\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG_FOLDER}/graylog/prometheus\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
+# Add HTTP_PROXY to docker-compose.yaml
+if [ "$connectionstate" == "0" ]
+  then
+    sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_FOLDER}/graylog/docker-compose.yaml
+fi
 
 # Add Graylog Secrets to Docker .env-file
 echo "[INFO] - SET SECRETS "
-echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
-echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+#echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+#GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
+#echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # Additional Graylog config data to guarantee minimum functionality
 sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\"\GRAYLOG_ROOT_USERNAME = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-sudo sed -i "s\GRAYLOG_ROOT_PASSWORD = \"\"\"\GRAYLOG_ROOT_PASSWORD = \"${GL_GRAYLOG_PASSWORD}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${GL_GRAYLOG_PASSWORD}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_ROOT_PASSWORD = \"\"\"\GRAYLOG_ROOT_PASSWORD = \"${GL_PASSWORD_SECRET}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 
 # Install Samba to make local Data Adapters accessible from Windows
