@@ -133,26 +133,21 @@ echo "[INFO] - SET OPENSEARCH SETTINGS "
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf > /dev/null
 sudo sysctl -p > /dev/null
 
-# Create Environment Variables
-environmentfile="/etc/environment"
-
 echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
 GL_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG_FOLDER}/graylog/graylog1.env"
 
-echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG_FOLDER}/graylog/archives\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG_FOLDER}/graylog/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG_FOLDER}/graylog/journal\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG_FOLDER}/graylog/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG_FOLDER}/graylog/maxmind\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG_FOLDER}/graylog/nginx1\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG_FOLDER}/graylog/nginx2\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG_FOLDER}/graylog/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG_FOLDER}/graylog/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
-
-source ${environmentfile}
+echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG_FOLDER}/graylog/archives\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG_FOLDER}/graylog/contentpacks\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG_FOLDER}/graylog/journal\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG_FOLDER}/graylog/lookuptables\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG_FOLDER}/graylog/maxmind\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG_FOLDER}/graylog/nginx1\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG_FOLDER}/graylog/nginx2\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG_FOLDER}/graylog/notifications\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG_FOLDER}/graylog/prometheus\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
