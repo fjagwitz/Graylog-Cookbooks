@@ -206,7 +206,7 @@ sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPOR
 # Add HTTP_PROXY to graylog.env
 if [ "$connectionstate" == "0" ]
 then
-  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 fi
 
 # Install Samba to make local Data Adapters accessible from Windows
