@@ -2,6 +2,8 @@ services:
   nginx1: 
     image: "nginx:latest"
     hostname: "nginx1"
+    depends_on:
+      - "graylog1"
     ports: 
       # WebUI
       - 443:443
