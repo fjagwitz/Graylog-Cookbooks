@@ -184,7 +184,7 @@ sudo cp ${installpath}/01_Installation/compose/nginx1/ssl ${GL_GRAYLOG_NGINX1} -
 sudo cp ${installpath}/01_Installation/compose/nginx2/*.conf ${GL_GRAYLOG_NGINX2}
 sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
-sudo cp ${installpath}/01_Installation/compose/graylog.example ${GL_GRAYLOG}/graylog.env
+sudo cp ${installpath}/01_Installation/compose/graylog.example ${GL_GRAYLOG}/graylog1.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
@@ -196,7 +196,7 @@ then
 fi
 
 # This can be kept as-is, because Opensearch will not be available except inside the Docker Network
-echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Additional Graylog config data to guarantee minimum functionality
 #echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
