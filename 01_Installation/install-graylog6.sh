@@ -202,11 +202,8 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 #echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
 
 # Add Graylog Secrets to Docker .env-file
-echo "[INFO] - SET SECRETS "
-#echo "GL_ROOT_USERNAME=\"$(echo ${GL_GRAYLOG_ADMIN})\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-#GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
-#echo "GL_ROOT_PASSWORD_SHA2=\"${GL_ROOT_PASSWORD_SHA2}\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
-echo "GL_PASSWORD_SECRET=\"$(pwgen -N 1 -s 96)\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
+echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
+GL_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
 sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\GRAYLOG_ROOT_USERNAME = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${GL_GRAYLOG_PASSWORD}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_ROOT_PASSWORD = \"\"\GRAYLOG_ROOT_PASSWORD = \"${GL_PASSWORD_SECRET}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
