@@ -199,9 +199,9 @@ echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a ${GL_COMPOSE_E
 # The Graylog Version, in case one wants to use Graylog Open
 if [[ ${GL_GRAYLOG_VERSION} != [Oo]pensource ]]
 then
-  GL_GRAYLOG_VERSION="enterprise"
+  GL_GRAYLOG_VERSION="graylog-enterprise"
 else
-  GL_GRAYLOG_VERSION="server"
+  GL_GRAYLOG_VERSION="graylog"
 fi
 echo "GL_GRAYLOG_VERSION=\"${GL_GRAYLOG_VERSION}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
