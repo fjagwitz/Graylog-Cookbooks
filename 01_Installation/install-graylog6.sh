@@ -191,6 +191,9 @@ sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTE
 # This can be kept as-is, because Opensearch will not be available from outside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
+# The Graylog URI for additional Services like Grafana
+echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+
 # Adapt Variables in the graylog.env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
 GL_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
@@ -251,8 +254,8 @@ echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: /opt/graylog/graylog.env "
 echo "[INFO] - CREDENTIALS STORED IN: /opt/graylog/your_graylog_credentials.txt "
 echo ""
-echo "[INFO] - URL: \"http(s): ${GL_GRAYLOG_ADDRESS}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG}/your_graylog_credentials.txt
-echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" 
+echo "[INFO] - URL: \"http(s): ${GL_GRAYLOG_ADDRESS}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" | tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
+echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" "
 echo ""
 
 exit
