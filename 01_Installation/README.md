@@ -31,7 +31,7 @@ The system is accessible via
 ## Get a license
 
 - Graylog Open: This system can be tested without a license but limited functionality (Graylog Open Features). 
-- Graylog Small Business License (2GB/day, 1 year): For evaluating Graylog Enterprise, feel free to download a [Small Business License](https://graylog.org/products/small-business); enjoy the additional Enterprise Features but be aware that you won't get access to our Illuminate packages that deal with your logs without the requirement to do parsing on them and provide you corresponding analytics (Dashboards, Alerts,...)
+- Graylog Small Business License (2GB/day, 1 year): For evaluating Graylog Enterprise, feel free to download a [Small Business License](https://graylog.org/products/small-business); enjoy the additional Enterprise Features
 - Graylog Enterprise and Graylog Security: You need a trial license (xGB/day, up to 14 days). Please get in touch with your local [Graylog Partner](https://cybercompare.com/de/providers/graylog-germany-gmbh/#provider-contact) to align on the Evaluation Process and keep your Cluster-ID (displayed after Installation has finished) at hand.  
 
 ## Folder Structure
