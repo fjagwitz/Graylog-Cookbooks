@@ -1,5 +1,4 @@
 ## Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/server.conf.html)
-## Work with the .env-example file to configure these values - values configured in Installation Script
 #
 GRAYLOG_IS_LEADER = "true"
 GRAYLOG_PASSWORD_SECRET = ""

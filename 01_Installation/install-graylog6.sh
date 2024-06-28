@@ -255,6 +255,7 @@ echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE D
 echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG}/your_graylog_credentials.txt "
 echo ""
 echo "[INFO] - URL: \"http(s)://${GL_GRAYLOG_ADDRESS}\" || CLUSTER-ID: $(curl -s $(hostname)/api | jq '.cluster_id' | tr a-z A-Z )" 
+echo ""
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" " | tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
 echo ""
 
