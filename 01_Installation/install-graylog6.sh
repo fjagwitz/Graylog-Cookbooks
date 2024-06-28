@@ -138,11 +138,10 @@ environmentfile="/etc/environment"
 echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
-echo "GL_GRAYLOG=\"${GL_GRAYLOG_FOLDER}/graylog\"" | sudo tee -a ${environmentfile} > /dev/null 
-source ${environmentfile}
+GL_GRAYLOG="${GL_GRAYLOG_FOLDER}/graylog"
+GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
+GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog1.env"
 
-echo "GL_COMPOSE_ENV"=${GL_GRAYLOG}/.env | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_COMPOSE_ENV=\"${GL_GRAYLOG}/graylog1.env\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -192,7 +191,7 @@ sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTE
 # This can be kept as-is, because Opensearch will not be available from outside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
-# Add Graylog Secrets and additional Variables to graylog.env-file
+# Add additional Variables to graylog.env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
 GL_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
