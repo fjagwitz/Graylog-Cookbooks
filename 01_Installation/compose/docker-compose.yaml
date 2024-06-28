@@ -16,6 +16,7 @@ services:
       - 514:514/udp
       # Beats Input 5044
       - 5044:5044
+      - 5044:5044/udp
       # RAW UDP Input 
       - 5555:5555
       - 5555:5555/udp

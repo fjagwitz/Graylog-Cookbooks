@@ -170,11 +170,11 @@ sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLO
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
-sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://git.io/GeoLite2-ASN.mmdb
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-ASN.mmdb
 # OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
-sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://git.io/GeoLite2-City.mmdb
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-City.mmdb
 # OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
-sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://git.io/GeoLite2-Country.mmdb
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Country.mmdb
 # OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
 # Cloning Git Repo containing prepared content
