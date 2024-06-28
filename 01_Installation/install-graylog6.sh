@@ -189,22 +189,12 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
-# Add HTTP_PROXY to docker-compose.yaml
-if [ "$connectionstate" == "0" ]
-then
-  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" $GL_GRAYLOG/docker-compose.yaml
-fi
-
-# This can be kept as-is, because Opensearch will not be available except inside the Docker Network
+# This can be kept as-is, because Opensearch will not be available from outside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
-# Additional Graylog config data to guarantee minimum functionality
-#echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
-
-# Add Graylog Secrets to Docker .env-file
+# Add Graylog Secrets and additional Variables to graylog.env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
 GL_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
-echo $GL_PASSWORD_SECRET
 GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 
 sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\GRAYLOG_ROOT_USERNAME = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
@@ -213,6 +203,12 @@ sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${GL_P
 sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GL_GRAYLOG_ADDRESS}/\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+
+# Add HTTP_PROXY to graylog.env
+if [ "$connectionstate" == "0" ]
+then
+  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI: \"\"\GRAYLOG_HTTP_PROXY_URI: \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+fi
 
 # Install Samba to make local Data Adapters accessible from Windows
 echo "[INFO] - CONFIGURE FILESHARES "
