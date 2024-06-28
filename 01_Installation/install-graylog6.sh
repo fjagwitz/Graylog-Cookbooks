@@ -2,9 +2,14 @@
 echo "[INFO] - PREPARING THE SYSTEM "
 
 # Request System Credentials
-read -p "[INPUT] - Please add the name of your central Administration User: " GL_GRAYLOG_ADMIN
-read -p "[INPUT] - Please add the central Administration Password: "$'\n' -s GL_GRAYLOG_PASSWORD
-read -p "[INPUT] - Please add the fqdn of your Graylog Instance (e.g. eval.graylog.local): " GL_GRAYLOG_ADDRESS
+read -p "[INPUT] - Please add the name of your central Administration User [admin]: " GL_GRAYLOG_ADMIN
+GL_GRAYLOG_ADMIN=${GL_GRAYLOG_ADMIN:-admin}
+read -p "[INPUT] - Please add the central Administration Password [MyP@ssw0rd]: "$'\n' -s GL_GRAYLOG_PASSWORD
+GL_GRAYLOG_PASSWORD=${GL_GRAYLOG_PASSWORD:-MyP@ssw0rd}
+read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " GL_GRAYLOG_ADDRESS
+GL_GRAYLOG_ADDRESS=${GL_GRAYLOG_ADDRESS:-eval.graylog.local}
+read -p "[INPUT] - Where do you want Graylog to be installed [/opt]: " GL_GRAYLOG_FOLDER
+GL_GRAYLOG_FOLDER=${GL_GRAYLOG_FOLDER:-/opt}
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
@@ -45,7 +50,6 @@ then
 else
   echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
 fi
-
 
 # Installing additional Tools on Ubuntu
 echo "[INFO] - INSTALL ADDITIONAL TOOLS "
@@ -120,13 +124,13 @@ else
   fi
 fi
 
-# Configure temporary installpath
-installpath="/tmp/graylog"
-
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
 echo "[INFO] - SET OPENSEARCH SETTINGS "
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf > /dev/null
 sudo sysctl -p > /dev/null
+
+# Configure temporary installpath
+installpath="/tmp/graylog"
 
 # Create Environment Variables
 environmentfile="/etc/environment"
@@ -134,10 +138,11 @@ environmentfile="/etc/environment"
 echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
-echo "GL_GRAYLOG=\"/opt/graylog\"" | sudo tee -a ${environmentfile} > /dev/null 
+echo "GL_GRAYLOG=\"${GL_GRAYLOG_FOLDER}/graylog\"" | sudo tee -a ${environmentfile} > /dev/null 
 source ${environmentfile}
 
-echo "GL_GRAYLOG_COMPOSE_ENV=${GL_GRAYLOG}/.env" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_COMPOSE_ENV"=${GL_GRAYLOG}/.env | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_COMPOSE_ENV=\"${GL_GRAYLOG}/graylog1.env\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -148,7 +153,7 @@ echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG}/nginx2\"" | sudo tee -a ${environmentfil
 echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
 
-echo "GL_OPENSEARCH_DATA=\"/opt/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_OPENSEARCH_DATA=\"${GL_GRAYLOG_FOLDER}/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
 
 # Create required Folders in the Filesystem
@@ -194,7 +199,7 @@ fi
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV} > /dev/null
 
 # Additional Graylog config data to guarantee minimum functionality
-echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
+#echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a "${GL_GRAYLOG_COMPOSE_ENV}" > /dev/null
 
 # Add Graylog Secrets to Docker .env-file
 echo "[INFO] - SET SECRETS "
