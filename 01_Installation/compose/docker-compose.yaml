@@ -149,6 +149,8 @@ services:
   grafana1:
     image: "grafana/grafana-oss:latest"
     hostname: "grafana1"
+    depends_on:
+      - "prometheus1"
     environment:
      GF_SERVER_ROOT_URL: "https://${GL_GRAYLOG_ADDRESS}/grafana"
      GF_INSTALL_PLUGINS: "grafana-clock-panel"
@@ -160,6 +162,8 @@ services:
   prometheus1:
     image: "prom/prometheus:latest"
     hostname: "prometheus1"
+    depends_on:
+      - "graylog1"
     environment: 
       LISTEN_ADDRESS: "0.0.0.0"
       LISTEN_PORT: '9090'
