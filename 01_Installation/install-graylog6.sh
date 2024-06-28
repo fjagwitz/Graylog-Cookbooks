@@ -169,9 +169,9 @@ sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLO
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
-sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
-sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
-sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
+#sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
+#sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
+#sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -Os https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
@@ -204,8 +204,10 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 # Add Graylog Secrets to Docker .env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
 GL_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
+GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
+
 sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\GRAYLOG_ROOT_USERNAME = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${GL_GRAYLOG_PASSWORD}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${GL_ROOT_PASSWORD_SHA2}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_ROOT_PASSWORD = \"\"\GRAYLOG_ROOT_PASSWORD = \"${GL_PASSWORD_SECRET}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 
