@@ -8,8 +8,17 @@ read -p "[INPUT] - Please add the central Administration Password [MyP@ssw0rd]: 
 GL_GRAYLOG_PASSWORD=${GL_GRAYLOG_PASSWORD:-MyP@ssw0rd}
 read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " GL_GRAYLOG_ADDRESS
 GL_GRAYLOG_ADDRESS=${GL_GRAYLOG_ADDRESS:-eval.graylog.local}
-read -p "[INPUT] - Where do you want Graylog to be installed [/opt]: " GL_GRAYLOG_FOLDER
+read -p "[INPUT] - Please add the folder where you want Graylog to be installed [/opt]: " GL_GRAYLOG_FOLDER
 GL_GRAYLOG_FOLDER=${GL_GRAYLOG_FOLDER:-/opt}
+read -p "[INPUT] - Please add the Graylog Version you want to install (Opensource / Enterprise) [Enterprise]: " GL_GRAYLOG_VERSION
+GL_GRAYLOG_VERSION=${GL_GRAYLOG_VERSION:-enterprise}
+
+if [[ ${GL_GRAYLOG_VERSION} != [Oo]pensource ]]
+then
+  GL_GRAYLOG_VERSION="enterprise"
+else
+  GL_GRAYLOG_VERSION="server"
+fi
 
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
@@ -193,6 +202,7 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" |
 
 # The Graylog URI for additional Services like Grafana
 echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_VERSION=\"${GL_GRAYLOG_VERSION}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Adapt Variables in the graylog.env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
@@ -205,6 +215,9 @@ sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${GL_P
 sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GL_GRAYLOG_ADDRESS}/\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+
+
+GL_GRAYLOG_VERSION
 
 # Add HTTP_PROXY to graylog.env if that's required
 if [ "$connectionstate" == "0" ]
