@@ -2,7 +2,7 @@
 echo "[INFO] - PREPARING THE SYSTEM "
 
 # Request System Credentials
-read -p "[INPUT] - Please add the name of your central Administration User [admin]: " GL_GRAYLOG_ADMIN
+read -p "[INPUT] - Please add the name of your central Administration User (must not exist in /etc/passwd) [admin]: " GL_GRAYLOG_ADMIN
 GL_GRAYLOG_ADMIN=${GL_GRAYLOG_ADMIN:-admin}
 read -p "[INPUT] - Please add the central Administration Password [MyP@ssw0rd]: "$'\n' -s GL_GRAYLOG_PASSWORD
 GL_GRAYLOG_PASSWORD=${GL_GRAYLOG_PASSWORD:-MyP@ssw0rd}
@@ -28,7 +28,7 @@ else
   exit
 fi
 
-echo "[INFO] - CHECKING MINIMUM REQUIREMENTS "
+echo "[INFO] - CHECKING OPERATING SYSTEM "
 if [[ "$operatingSystem" == Ubuntu ]]
 then
   echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
@@ -37,6 +37,7 @@ else
   exit
 fi
 
+echo "[INFO] - CHECKING CPU CORES "
 if [[ $numberCores -lt 8 ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXITING "
@@ -45,6 +46,7 @@ else
   echo "[INFO] - CPU CHECK SUCCESSFUL: $numberCores CORES "
 fi
 
+echo "[INFO] - CHECKING MEMORY "
 if [[ $randomAccessMemory -lt 32000 ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "

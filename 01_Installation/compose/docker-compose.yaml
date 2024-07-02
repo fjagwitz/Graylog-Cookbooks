@@ -20,7 +20,7 @@ services:
       # RAW UDP Input 
       - 5555:5555
       - 5555:5555/udp
-      # Gelf Inputs
+      # Gelf Input
       - 12201:12201
       - 12201:12201/udp 
     volumes:
