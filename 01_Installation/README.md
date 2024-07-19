@@ -12,7 +12,7 @@ Create a virtual machine:
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 
-Heads-up: If you are using the Proxmox Hypervisor, make sure you configure you CPU type as "host", otherwise you will observer Opensearch Containers to be caught in a restart loop. 
+_Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure you CPU type as "host", otherwise you will observer Opensearch Containers to be caught in a restart loop. 
 
 Depending on your setup, you might want to add hypervisor-specific guest tools and additional software required by organizational policy.
 
