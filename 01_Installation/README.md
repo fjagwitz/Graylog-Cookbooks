@@ -79,11 +79,11 @@ The installation script will create a few folders and populate these with helpfu
         |
         |--/opensearch
                 |
-                |--datanode1
+                |--/datanode1
                 |
-                |--datanode2
+                |--/datanode2
                 |
-                |--datanode3
+                |--/datanode3
 
 **/opt/graylog**:
 
