@@ -47,7 +47,7 @@ else
 fi
 
 echo "[INFO] - CHECKING CPU FLAGS "
-if [ $(lscpu | grep Flags | grep avx) == "" ]
+if [[ $(lscpu | grep Flags | grep avx) == "" ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS A CPU WITH AVX FLAGS - EXITING "
   exit
