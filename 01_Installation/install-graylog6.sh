@@ -275,6 +275,18 @@ curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config
   -H 'Content-Type: application/json' \
   -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
+# Stopping all Inputs to allow a controlled Log Source Onboarding
+echo "[INFO] - STOPPING INPUTS" 
+for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X GET | jq -r '.[].[].id'); do
+  curl http://$(hostname)/api/cluster/inputstates/$input \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X DELETE \
+  -H "X-Requested-By: $(hostname)" \
+  -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+done
+
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
 echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG}/your_graylog_credentials.txt "
