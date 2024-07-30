@@ -36,27 +36,6 @@ The system is accessible via
 - Graylog Small Business License (2GB/day, 1 year): For evaluating some of the Graylog Enterprise features, feel free to download a [Small Business License](https://graylog.org/products/small-business); enjoy the additional features
 - Graylog Enterprise and Graylog Security: You need a trial license (xGB/day, up to 14 days). Please get in touch with your local [Graylog Partner](https://cybercompare.com/de/providers/graylog-germany-gmbh/#provider-contact) to align on the Evaluation Process and keep your Cluster-ID (displayed after Installation has finished) at hand.  
 
-## Get started
-#### Adding your license
-- Watch the Graylog [Video](https://graylog.org/videos/enterprise-license-install/); a Security License will be installed on top of an Enterprise license
-
-#### Configuring Illuminate
-- Go through the Graylog [Documentation](https://go2docs.graylog.org/illuminate-current/installing_illuminate/installing_graylog_illuminate.htm) and see how it is to be done
-- Choose the Illuminate Packs based on the products you want to monitor
-
-#### Configuring Sidecar
-- Installation on [Linux](https://go2docs.graylog.org/current/getting_in_log_data/install_sidecar_on_linux.htm)
-- Installation on [Windows](https://go2docs.graylog.org/current/getting_in_log_data/install_sidecar_on_windows.htm)
-- Configuring Sidecar [Collectors](https://go2docs.graylog.org/current/getting_in_log_data/set_up_sidecar_collectors.htm)
-
-#### Starting Inputs
-- Scroll through the Graylog [Documentation](https://go2docs.graylog.org/current/getting_in_log_data/inputs.htm) to get a grasp of the "Inputs" concept
-- To make things easier, we added a few Inputs to this Evaluation System - just Start them
-
-![START INPUT](images/start_input.png)
-
-
-
 ## Folder Structure
 
 The installation script will create a few folders and populate these with helpful content to understand the Graylog capabilities:
