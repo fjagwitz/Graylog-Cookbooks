@@ -276,7 +276,7 @@ curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config
   -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
 # Stopping all Inputs to allow a controlled Log Source Onboarding
-echo "[INFO] - STOPPING INPUTS" 
+echo "[INFO] - STOPPING ALL INPUTS" 
 for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X GET | jq -r '.[].[].id'); do
