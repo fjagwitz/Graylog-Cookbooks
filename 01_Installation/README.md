@@ -52,7 +52,10 @@ The system is accessible via
 #### Starting Inputs
 - Scroll through the Graylog [Documentation](https://go2docs.graylog.org/current/getting_in_log_data/inputs.htm) to get a grasp of the "Inputs" concept
 - To make things easier, we added a few Inputs to this Evaluation System - just Start them
+
 ![START INPUT](images/start_input.png)
+
+
 
 ## Folder Structure
 
