@@ -36,6 +36,16 @@ The system is accessible via
 - Graylog Small Business License (2GB/day, 1 year): For evaluating Graylog Enterprise, feel free to download a [Small Business License](https://graylog.org/products/small-business); enjoy the additional Enterprise Features
 - Graylog Enterprise and Graylog Security: You need a trial license (xGB/day, up to 14 days). Please get in touch with your local [Graylog Partner](https://cybercompare.com/de/providers/graylog-germany-gmbh/#provider-contact) to align on the Evaluation Process and keep your Cluster-ID (displayed after Installation has finished) at hand.  
 
+## Get started
+### Adding a license
+
+### Configuring Illuminate
+
+### Configuring Sidecar
+
+### Starting Inputs
+
+
 ## Folder Structure
 
 The installation script will create a few folders and populate these with helpful content to understand the Graylog capabilities:
