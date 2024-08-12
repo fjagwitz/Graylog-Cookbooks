@@ -154,7 +154,7 @@ services:
       - "prometheus1"
     environment:
      GF_SERVER_ROOT_URL: "https://${GL_GRAYLOG_ADDRESS}/grafana"
-     GF_INSTALL_PLUGINS: "grafana-clock-panel"
+     GF_INSTALL_PLUGINS: ""
     volumes:
      - "grafana-data-01:/var/lib/grafana"
     restart: "unless-stopped"
