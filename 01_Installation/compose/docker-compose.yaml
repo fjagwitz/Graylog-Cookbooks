@@ -122,7 +122,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/${GL_GRAYLOG_VERSION}:6.0.3"
+    image: "graylog/${GL_GRAYLOG_VERSION}:6.0"
     hostname: "graylog1"
     depends_on:
       - "mongodb1"
