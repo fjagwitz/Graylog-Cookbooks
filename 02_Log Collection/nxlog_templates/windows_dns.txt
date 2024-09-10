@@ -1,5 +1,8 @@
-# Configure the directory you installed NXLog to; default is C:\Program Files\nxlog
-define ROOT C:\Program Files\Graylog\nxlog
+# In case you installed NXLog in the Sidecar Directory
+define ROOT %PROGRAMFILES%\Graylog\nxlog
+
+# Default Setting
+# define ROOT %PROGRAMFILES%\nxlog
 
 
 Moduledir %ROOT%\modules
@@ -46,12 +49,12 @@ LogLevel INFO
 	  # These fields are needed for Graylog
 	  $gl2_source_collector = '${sidecar.nodeId}';
 	  $collector_node_id = '${sidecar.nodeName}';
-      # This field is added to identify logs sent from NXLog
-	  $agent_type = 'nxlog';
+	  # This field is added to identify logs sent from NXLog
+      agent_type = 'nxlog';
 	</Exec>
 </Output>
 
 
-<Route route-1>
+<Route route-2>
   Path etw => gelf
 </Route>
