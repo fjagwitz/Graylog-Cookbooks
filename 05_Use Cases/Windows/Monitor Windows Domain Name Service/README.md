@@ -1,5 +1,5 @@
-## WINDOWS MONITORING
-### DNS Log Collection
+# WINDOWS MONITORING
+## DNS Log Collection
 
 ### Preparation
 - Read this Microsoft [Blog](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/secrets-from-the-deep-the-dns-analytical-log-part-1/ba-p/1875094)
