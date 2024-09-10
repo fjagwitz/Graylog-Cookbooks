@@ -50,7 +50,7 @@ LogLevel INFO
 	  $gl2_source_collector = '${sidecar.nodeId}';
 	  $collector_node_id = '${sidecar.nodeName}';
 	  # This field is added to identify logs sent from NXLog
-      agent_type = 'nxlog';
+    agent_type = 'nxlog';
 	</Exec>
 </Output>
 
