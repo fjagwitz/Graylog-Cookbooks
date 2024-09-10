@@ -34,9 +34,9 @@ LogLevel INFO
 
 
 <Input etw>
-    Module      im_etw
-    Provider    Microsoft-Windows-DNSServer
-    Exec        to_json();
+  Module      im_etw
+  Provider    Microsoft-Windows-DNSServer
+  Exec        to_json();
 </Input>
 
 
@@ -45,13 +45,13 @@ LogLevel INFO
 	Host ${user.graylog_host}
 	Port 12201
 	OutputType  GELF_TCP
-	<Exec>
-	  # These fields are needed for Graylog
-	  $gl2_source_collector = '${sidecar.nodeId}';
-	  $collector_node_id = '${sidecar.nodeName}';
-	  # This field is added to identify logs sent from NXLog
+  <Exec>
+    # These fields are needed for Graylog
+    $gl2_source_collector = '${sidecar.nodeId}';
+    $collector_node_id = '${sidecar.nodeName}';
+    # This field is added to identify logs sent from NXLog
     agent_type = 'nxlog';
-	</Exec>
+  </Exec>
 </Output>
 
 
