@@ -1,0 +1,57 @@
+# Configure the directory you installed NXLog to; default is C:\Program Files\nxlog
+define ROOT C:\Program Files\Graylog\nxlog
+
+
+Moduledir %ROOT%\modules
+CacheDir %ROOT%\data
+Pidfile %ROOT%\data\nxlog.pid
+SpoolDir %ROOT%\data
+LogFile %ROOT%\data\nxlog.log
+LogLevel INFO
+
+
+<Extension logrotate>
+  Module  xm_fileop
+    <Schedule>
+      When    @daily
+      Exec    file_cycle('%ROOT%\data\nxlog.log', 7);
+     </Schedule>
+</Extension>
+
+
+<Extension gelfExt>
+  Module xm_gelf
+  ShortMessageLength 65536
+</Extension>
+
+
+<Extension json>
+  Module  xm_json
+</Extension>
+
+
+<Input etw>
+    Module      im_etw
+    Provider    Microsoft-Windows-DNSServer
+    Exec        to_json();
+</Input>
+
+
+<Output gelf>
+	Module om_tcp
+	Host ${user.graylog_host}
+	Port 12201
+	OutputType  GELF_TCP
+	<Exec>
+	  # These fields are needed for Graylog
+	  $gl2_source_collector = '${sidecar.nodeId}';
+	  $collector_node_id = '${sidecar.nodeName}';
+      # This field is added to identify logs sent from NXLog
+	  $agent_type = 'nxlog';
+	</Exec>
+</Output>
+
+
+<Route route-1>
+  Path etw => gelf
+</Route>
