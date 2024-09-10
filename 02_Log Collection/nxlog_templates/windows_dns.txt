@@ -1,8 +1,8 @@
 # In case you installed NXLog in the Sidecar Directory
-# define ROOT %PROGRAMFILES%\Graylog\nxlog
+# define ROOT C:\Program Files\Graylog\nxlog
 
 # Default Setting
-define ROOT %PROGRAMFILES%\nxlog
+define ROOT C:\Program Files\nxlog
 
 
 Moduledir %ROOT%\modules
