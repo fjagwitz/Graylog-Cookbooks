@@ -15,7 +15,11 @@ tags:
 - windows
 
 filebeat.inputs:
-# This functionality is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features. Graylog Sidecar does not support this functionality; using it works with filebeat 8.14 and higher. You can download the filebeat.exe from the zip Download and replace the existing filebeat.exe within the Graylog sidecar folder. 
+# This functionality is in beta and is subject to change. The design and code is less mature than official GA features and 
+# is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features. 
+# Graylog Sidecar does not support this functionality; using it works with filebeat 8.14 and higher: 
+# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-etw.html
+# You can download the current filebeat binary from the zip Download and replace the existing filebeat.exe within the Graylog sidecar folder. 
 - type: etw
   id: etw-dnsserver
   enabled: true
