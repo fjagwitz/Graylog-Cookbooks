@@ -55,6 +55,6 @@ LogLevel INFO
 </Output>
 
 
-<Route route-2>
+<Route route-1>
   Path etw => gelf
 </Route>
