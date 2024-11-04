@@ -237,6 +237,8 @@ sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"ht
 sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 
+sudo echo "GL_GRAYLOG_LOGDIR = \"$GL_GRAYLOG/logs\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
+
 # Add HTTP_PROXY to graylog.env if that's required
 if [ "$connectionstate" == "0" ]
 then
