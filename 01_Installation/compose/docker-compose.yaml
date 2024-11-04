@@ -176,7 +176,6 @@ services:
     env_file: "graylog1.env"
     volumes:
       - "${GL_GRAYLOG_JOURNAL}:/usr/share/graylog/data/journal"
-      - "${GL_GRAYLOG_LOGDIR}:/var/log/graylog/server/server.log"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
