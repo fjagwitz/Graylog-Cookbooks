@@ -17,12 +17,19 @@ services:
       # Beats Input 5044
       - 5044:5044
       - 5044:5044/udp
-      # RAW UDP Input 
+      # RAW Input 
       - 5555:5555
       - 5555:5555/udp
+      # Fortinet Input 
+      - 5556:5556
+      - 5556:5556/udp
+      # Graylog Gelf Input (Self-Monitoring)
+      - 12200:12200
+      - 12200:12200/udp 
       # Gelf Input
       - 12201:12201
       - 12201:12201/udp 
+
     volumes:
       - "${GL_GRAYLOG_NGINX1}/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "${GL_GRAYLOG_NGINX1}/http.conf:/etc/nginx/conf.d/http.conf:ro"

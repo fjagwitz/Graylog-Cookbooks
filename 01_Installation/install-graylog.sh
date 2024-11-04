@@ -115,7 +115,9 @@ else
   sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
 
   # Configuring Logging Settings
-  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"tcp://$(hostname):12200\"}}"
+  echo "[INFO] - CONFIGURING DOCKER LOGGING "
+  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"tcp://$(hostname):12200\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
+  sudo service docker restart
 
   # Configuring Proxy Settings
   if [ "$connectionstate" == "0" ]
