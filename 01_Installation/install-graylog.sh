@@ -268,7 +268,7 @@ sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/d
 echo "[INFO] - VALIDATE GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
 sleep 5s
 
-while [[ $(curl -s http://$(hostname)/api/system/lbstatus) != "ALIVE" ]]
+while [[ $(curl http://$(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
   echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
   sleep 10s
@@ -295,7 +295,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
 
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
 curl -s http://$(hostname)/api/system/inputs \
@@ -315,7 +315,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
 
 # Syslog UDP Input for Network Devices
 curl -s http://$(hostname)/api/system/inputs \
@@ -335,7 +335,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
 
 # Syslog TCP Input for Network Devices
 curl -s http://$(hostname)/api/system/inputs \
@@ -355,7 +355,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
 
 # GELF TCP Input for NXLog
 curl -s http://$(hostname)/api/system/inputs \
@@ -375,7 +375,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
 
 # GELF UDP Input for NXLog
 curl -s http://$(hostname)/api/system/inputs \
@@ -395,7 +395,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
       
 # RAW TCP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -415,7 +415,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
     
 # RAW UDP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -435,7 +435,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
 
 # Fortinet Syslog TCP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -455,7 +455,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
     
 # Fortinet Syslog UDP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -475,7 +475,7 @@ curl -s http://$(hostname)/api/system/inputs \
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }' 
+      }'  > /dev/null
 
 # Stopping all Inputs to allow a controlled Log Source Onboarding
 echo "[INFO] - STOPPING ALL INPUTS" 
@@ -524,13 +524,14 @@ curl -s http://admin:admin@$(hostname)/grafana/api/users/1 \
   -d "{
         \"name\" : \"Evaluation Admin\",
         \"login\" : \"$GL_GRAYLOG_ADMIN\"
-      }"
+      }" > /dev/null 
+
 curl -s http://$GL_GRAYLOG_ADMIN:admin@$(hostname)/grafana/api/admin/users/1/password \
   -H 'Content-Type: application/json' \
   -X PUT \
   -d "{
         \"password\" : \"$GL_GRAYLOG_PASSWORD\"
-    }"
+    }" /dev/null
 
 ## Configure Prometheus Connector 
 curl -s http://$GL_GRAYLOG_ADMIN:$GL_GRAYLOG_PASSWORD@$(hostname)/grafana/api/datasources \
@@ -544,7 +545,7 @@ curl -s http://$GL_GRAYLOG_ADMIN:$GL_GRAYLOG_PASSWORD@$(hostname)/grafana/api/da
         "readOnly" : false,
         "isDefault" : true,
         "basicAuth" : false
-      }'
+      }' > /dev/null
 
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
