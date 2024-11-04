@@ -225,6 +225,9 @@ else
 fi
 echo "GL_GRAYLOG_VERSION=\"${GL_GRAYLOG_VERSION}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
+# Configure Docker Logging
+sudo echo "GL_GRAYLOG_LOGDIR = \"$GL_GRAYLOG/logs\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+
 # Adapt Variables in the graylog.env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
 GL_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
@@ -236,8 +239,6 @@ sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${GL_P
 sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GL_GRAYLOG_ADDRESS}/\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-
-sudo echo "GL_GRAYLOG_LOGDIR = \"$GL_GRAYLOG/logs\"" | sudo tee -a ${GL_GRAYLOG_COMPOSE_ENV}
 
 # Add HTTP_PROXY to graylog.env if that's required
 if [ "$connectionstate" == "0" ]
@@ -277,7 +278,7 @@ echo "[INFO] - FINALIZE CONFIGURATION "
 
 # Adding Inputs to make sure Ports map to Nginx configuration
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -297,7 +298,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
 
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -317,7 +318,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
 
 # Syslog UDP Input for Network Devices
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -337,7 +338,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
 
 # Syslog TCP Input for Network Devices
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -357,7 +358,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
 
 # GELF TCP Input for NXLog
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -377,7 +378,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
 
 # GELF UDP Input for NXLog
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -397,7 +398,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
       
 # RAW TCP Input
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -417,7 +418,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
     
 # RAW UDP Input
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -437,7 +438,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
 
 # Fortinet Syslog TCP Input
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -457,7 +458,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
     
 # Fortinet Syslog UDP Input
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -481,7 +482,7 @@ echo "[INFO] - STOPPING ALL INPUTS"
 for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X GET | jq -r '.[].[].id'); do
-  curl http://$(hostname)/api/cluster/inputstates/$input \
+  curl -s http://$(hostname)/api/cluster/inputstates/$input \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X DELETE \
   -H "X-Requested-By: $(hostname)" \
@@ -489,7 +490,7 @@ for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
 done
 
 # GELF TCP Input for Graylog Self
-curl http://$(hostname)/api/system/inputs \
+curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
   -H "X-Requested-By: \$\(hostname\)" \
@@ -509,7 +510,7 @@ curl http://$(hostname)/api/system/inputs \
       }' 
 
 # Activating the GeoIP Resolver Plugin
-curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
+curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X PUT \
   -H "X-Requested-By: $(hostname)" \
