@@ -114,6 +114,9 @@ else
   echo "[INFO] - DOCKER INSTALLATION "
   sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
 
+  # Configuring Logging Settings
+  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"tcp://$(hostname):12200\"}}"
+
   # Configuring Proxy Settings
   if [ "$connectionstate" == "0" ]
   then
@@ -157,6 +160,7 @@ GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog1.env"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_WAREHOUSE=\"${GL_GRAYLOG}/warehouse\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG}/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -177,7 +181,7 @@ sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "
 sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
-sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
+sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_WAREHOUSE} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
@@ -348,26 +352,6 @@ curl http://$(hostname)/api/system/inputs \
         }
       }' 
 
-# GELF TCP Input for Graylog Self
-curl http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 12200 TCP GELF | Evaluation Input",
-        "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 12200,
-          "number_worker_threads": 4,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 
-
 # GELF TCP Input for NXLog
 curl http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
@@ -468,7 +452,7 @@ curl http://$(hostname)/api/system/inputs \
         }
       }' 
     
-# RAW UDP Input
+# Fortinet Syslog UDP Input
 curl http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
@@ -488,14 +472,6 @@ curl http://$(hostname)/api/system/inputs \
         }
       }' 
 
-# Activating the GeoIP Resolver Plugin
-curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X PUT \
-  -H "X-Requested-By: $(hostname)" \
-  -H 'Content-Type: application/json' \
-  -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
-
 # Stopping all Inputs to allow a controlled Log Source Onboarding
 echo "[INFO] - STOPPING ALL INPUTS" 
 for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
@@ -508,8 +484,62 @@ for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
   -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
 
-# Starting Graylog GELF Input for server.log
-# do here
+# GELF TCP Input for Graylog Self
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 12200 TCP GELF | Evaluation Input",
+        "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 12200,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# Activating the GeoIP Resolver Plugin
+curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X PUT \
+  -H "X-Requested-By: $(hostname)" \
+  -H 'Content-Type: application/json' \
+  -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
+
+## Reconfigure Grafana Credentials
+curl -s http://admin:admin@$(hostname)/grafana/api/users/1 \
+  -H 'Content-Type:application/json' \
+  -X PUT \
+  -d "{
+        \"name\" : \"Evaluation Admin\",
+        \"login\" : \"$GL_GRAYLOG_ADMIN\"
+      }"
+curl -s http://$GL_GRAYLOG_ADMIN:admin@$(hostname)/grafana/api/admin/users/1/password \
+  -H 'Content-Type: application/json' \
+  -X PUT \
+  -d "{
+        \"password\" : \"$GL_GRAYLOG_PASSWORD\"
+    }"
+
+## Configure Prometheus Connector 
+curl -s http://$GL_GRAYLOG_ADMIN:$GL_GRAYLOG_PASSWORD@$(hostname)/grafana/api/datasources \
+  -H 'Content-Type: application/json' \
+  -X POST \
+  -d '{
+        "name" : "prometheus",
+        "type" : "prometheus",
+        "url": "http://prometheus1:9090/prometheus",
+        "access": "proxy",
+        "readOnly" : false,
+        "isDefault" : true,
+        "basicAuth" : false
+      }'
 
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
