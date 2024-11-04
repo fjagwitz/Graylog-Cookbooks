@@ -267,6 +267,227 @@ done
 
 echo "[INFO] - FINALIZE CONFIGURATION "
 
+# Adding Inputs to make sure Ports map to Nginx configuration
+# Beats Input for Winlogbeat, Auditbeat, Filebeat
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5044 Beats | Evaluation Input",
+        "type": "org.graylog.plugins.beats.Beats2Input",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5044,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# Beats Input for Winlogbeat, Auditbeat, Filebeat
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5045 Beats | Evaluation Input",
+        "type": "org.graylog.plugins.beats.Beats2Input",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5045,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# Syslog UDP Input for Network Devices
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 514 UDP Syslog | Evaluation Input",
+        "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 1514,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# Syslog TCP Input for Network Devices
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 514 TCP Syslog | Evaluation Input",
+        "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 1514,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# GELF TCP Input for Graylog Self
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 12200 TCP GELF | Evaluation Input",
+        "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 12200,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# GELF TCP Input for NXLog
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 12201 TCP GELF | Evaluation Input",
+        "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 12201,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# GELF UDP Input for NXLog
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 12201 UDP GELF | Evaluation Input",
+        "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 12201,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+      
+# RAW TCP Input
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5555 TCP RAW | Evaluation Input",
+        "type": "org.graylog2.inputs.raw.tcp.RawTCPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5555,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+    
+# RAW UDP Input
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5555 UDP RAW | Evaluation Input",
+        "type": "org.graylog2.inputs.raw.udp.RawUDPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5555,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
+# Fortinet Syslog TCP Input
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5556 TCP Fortinet | Evaluation Input",
+        "type": "org.graylog2.inputs.raw.tcp.RawTCPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5556,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+    
+# RAW UDP Input
+curl http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 5556 UDP Fortinet | Evaluation Input",
+        "type": "org.graylog2.inputs.raw.udp.RawUDPInput",
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 5556,
+          "number_worker_threads": 4,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 
+
 # Activating the GeoIP Resolver Plugin
 curl http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
