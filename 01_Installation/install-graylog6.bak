@@ -137,13 +137,14 @@ else
   fi
 fi
 
-# Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.13/install-and-configure/install-opensearch/index/#important-settings)
+# Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.15/install-and-configure/install-opensearch/index/#important-settings)
 echo "[INFO] - SET OPENSEARCH SETTINGS "
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf > /dev/null
 sudo sysctl -p > /dev/null
 
 # Configure temporary installpath
 installpath="/tmp/graylog"
+sudo mkdir -p ${installpath}
 
 # Create Environment Variables
 environmentfile="/etc/environment"
@@ -170,8 +171,7 @@ source ${environmentfile}
 
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
-sudo mkdir -p ${installpath}
-sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3}
+sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,searchable_snapshots}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus}
 
 # Set Folder permissions
@@ -286,6 +286,9 @@ for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
   -H "X-Requested-By: $(hostname)" \
   -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
+
+# Starting Graylog GELF Input for server.log
+# do here
 
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "

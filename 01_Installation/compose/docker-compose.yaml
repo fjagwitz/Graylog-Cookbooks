@@ -47,12 +47,13 @@ services:
     restart: "always"
 
   datanode1:
-    image: "opensearchproject/opensearch:2.13.0"
+    image: "opensearchproject/opensearch:2.15.0"
     hostname: "datanode1"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode1"
+      - "node.roles=cluster_manager,data"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"      
       - "discovery.seed_hosts=datanode2,datanode3"
@@ -72,12 +73,13 @@ services:
     restart: "on-failure"
 
   datanode2:
-    image: "opensearchproject/opensearch:2.13.0"
+    image: "opensearchproject/opensearch:2.15.0"
     hostname: "datanode2"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode2"
+      - "node.roles=cluster_manager,data"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode3"
@@ -97,12 +99,13 @@ services:
     restart: "on-failure"
 
   datanode3:
-    image: "opensearchproject/opensearch:2.13.0"
+    image: "opensearchproject/opensearch:2.15.0"
     hostname: "datanode3"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode3"
+      - "node.roles=cluster_manager,data"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode2"
@@ -121,8 +124,35 @@ services:
       - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
 
+datanode9:
+    image: "opensearchproject/opensearch:2.15.0"
+    hostname: "datanode9"
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
+      - "node.name=datanode9"
+      - "node.roles=search"
+      - "node.search.cache.size=50gb"
+      - "path.repo=/usr/share/opensearch/searchable_snapshots"
+      - "cluster.name=evaluation-cluster-opensearch"
+      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
+      - "discovery.seed_hosts=datanode1,datanode2,datanode3"
+      - "bootstrap.memory_lock=false"
+      - "action.auto_create_index=false"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.disabled=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
+
   graylog1:
-    image: "graylog/${GL_GRAYLOG_VERSION}:6.0"
+    image: "graylog/${GL_GRAYLOG_VERSION}:6.1"
     hostname: "graylog1"
     depends_on:
       - "mongodb1"
