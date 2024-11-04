@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "[INFO] - PREPARING THE SYSTEM "
+echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG 6.1"
 
 # Request System Credentials
 read -p "[INPUT] - Please add the name of your central Administration User (must not exist in /etc/passwd) [admin]: " GL_GRAYLOG_ADMIN
