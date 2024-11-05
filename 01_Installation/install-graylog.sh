@@ -116,7 +116,7 @@ else
 
   # Configuring Logging Settings
   echo "[INFO] - CONFIGURING DOCKER LOGGING "
-  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"tcp://$(hostname):12200\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
+  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):12200\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
   sudo service docker restart
 
   # Configuring Proxy Settings
@@ -291,11 +291,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 5044,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
 
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
 curl -s http://$(hostname)/api/system/inputs \
@@ -311,11 +311,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 5045,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
 
 # Syslog UDP Input for Network Devices
 curl -s http://$(hostname)/api/system/inputs \
@@ -331,11 +331,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 1514,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
 
 # Syslog TCP Input for Network Devices
 curl -s http://$(hostname)/api/system/inputs \
@@ -351,11 +351,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 1514,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
 
 # GELF TCP Input for NXLog
 curl -s http://$(hostname)/api/system/inputs \
@@ -371,11 +371,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 12201,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
 
 # GELF UDP Input for NXLog
 curl -s http://$(hostname)/api/system/inputs \
@@ -391,11 +391,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 12201,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
       
 # RAW TCP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -411,11 +411,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 5555,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
     
 # RAW UDP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -431,11 +431,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 5555,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
 
 # Fortinet Syslog TCP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -451,11 +451,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 5556,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
     
 # Fortinet Syslog UDP Input
 curl -s http://$(hostname)/api/system/inputs \
@@ -471,11 +471,11 @@ curl -s http://$(hostname)/api/system/inputs \
         {
           "recv_buffer_size": 262144,
           "port": 5556,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
         }
-      }'  > /dev/null
+      }' 2>/dev/null >/dev/null
 
 # Stopping all Inputs to allow a controlled Log Source Onboarding
 echo "[INFO] - STOPPING ALL INPUTS" 
@@ -489,7 +489,7 @@ for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
   -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
 
-# GELF TCP Input for Graylog Self
+# GELF UDP Input for Graylog Self
 curl -s http://$(hostname)/api/system/inputs \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
   -X POST \
@@ -497,15 +497,19 @@ curl -s http://$(hostname)/api/system/inputs \
   -H 'Content-Type: application/json' \
   -d '{ 
         "global": true,
-        "title": "Port 12200 TCP GELF | Evaluation Input",
-        "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+        "title": "Port 12200 UDP GELF | Evaluation Input",
+        "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
         "configuration":
         {
           "recv_buffer_size": 262144,
           "port": 12200,
-          "number_worker_threads": 4,
+          "number_worker_threads": 2,
           "charset_name": "UTF-8",
           "bind_address": "0.0.0.0"
+        },
+        "static_fields": 
+        {
+          "Monitoring": "SELF"
         }
       }' 
 
