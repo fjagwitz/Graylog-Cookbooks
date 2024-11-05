@@ -489,6 +489,31 @@ for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
   -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
 
+# GELF UDP Input for SELF-Monitoring
+curl -s http://$(hostname)/api/system/inputs \
+  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
+  -X POST \
+  -H "X-Requested-By: \$\(hostname\)" \
+  -H 'Content-Type: application/json' \
+  -d '{ 
+        "global": true,
+        "title": "Port 12200 UDP GELF | Evaluation Input",
+        "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
+        "static_fields": 
+        {
+          "monitor": "SELF"
+        },
+        "configuration":
+        {
+          "recv_buffer_size": 262144,
+          "port": 12200,
+          "number_worker_threads": 2,
+          "charset_name": "UTF-8",
+          "bind_address": "0.0.0.0"
+        }
+      }' 2>/dev/null >/dev/null
+
+
 # Activating the GeoIP Resolver Plugin
 curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
   -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
