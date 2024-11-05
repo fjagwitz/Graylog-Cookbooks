@@ -24,8 +24,8 @@ services:
       - 5556:5556
       - 5556:5556/udp
       # Graylog Gelf Input (Self-Monitoring)
-      - 12200:12200
-      - 12200:12200/udp 
+      - 9900:9900
+      - 9900:9900/udp 
       # Gelf Input
       - 12201:12201
       - 12201:12201/udp 
