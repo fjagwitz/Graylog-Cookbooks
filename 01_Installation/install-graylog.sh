@@ -116,7 +116,7 @@ else
 
   # Configuring Logging Settings
   echo "[INFO] - CONFIGURING DOCKER LOGGING "
-  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):12200\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
+  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):9900\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
   sudo service docker restart
 
   # Configuring Proxy Settings
