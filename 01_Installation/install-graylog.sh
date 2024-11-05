@@ -104,10 +104,7 @@ else
   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc > /dev/null
   sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  echo   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   sudo apt-get -qq update 2>/dev/null >/dev/null
 
   # Installing Docker on Ubuntu
@@ -278,254 +275,55 @@ echo "[INFO] - FINALIZE CONFIGURATION "
 
 # Adding Inputs to make sure Ports map to Nginx configuration
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5044 Beats | Evaluation Input",
-        "type": "org.graylog.plugins.beats.Beats2Input",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5044,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 262144, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5045 Beats | Evaluation Input",
-        "type": "org.graylog.plugins.beats.Beats2Input",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5045,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 262144, "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
 # Syslog UDP Input for Network Devices
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 514 UDP Syslog | Evaluation Input",
-        "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 1514,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 1514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
 # Syslog TCP Input for Network Devices
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 514 TCP Syslog | Evaluation Input",
-        "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 1514,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 262144, "port": 1514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
 # GELF TCP Input for NXLog
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 12201 TCP GELF | Evaluation Input",
-        "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 12201,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
 # GELF UDP Input for NXLog
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 12201 UDP GELF | Evaluation Input",
-        "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 12201,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
       
 # RAW TCP Input
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5555 TCP RAW | Evaluation Input",
-        "type": "org.graylog2.inputs.raw.tcp.RawTCPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5555,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
     
 # RAW UDP Input
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5555 UDP RAW | Evaluation Input",
-        "type": "org.graylog2.inputs.raw.udp.RawUDPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5555,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
 # Fortinet Syslog TCP Input
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5556 TCP Fortinet | Evaluation Input",
-        "type": "org.graylog2.inputs.raw.tcp.RawTCPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5556,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5556 TCP Fortinet | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 262144, "port": 5556, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
     
 # Fortinet Syslog UDP Input
-curl -s http://$(hostname)/api/system/inputs \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X POST \
-  -H "X-Requested-By: \$\(hostname\)" \
-  -H 'Content-Type: application/json' \
-  -d '{ 
-        "global": true,
-        "title": "Port 5556 UDP Fortinet | Evaluation Input",
-        "type": "org.graylog2.inputs.raw.udp.RawUDPInput",
-        "configuration":
-        {
-          "recv_buffer_size": 262144,
-          "port": 5556,
-          "number_worker_threads": 2,
-          "charset_name": "UTF-8",
-          "bind_address": "0.0.0.0"
-        }
-      }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5556 UDP Fortinet | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5556, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
 # Stopping all Inputs to allow a controlled Log Source Onboarding
 echo "[INFO] - STOPPING ALL INPUTS" 
-for input in $(curl -s http://$(hostname)/api/cluster/inputstates \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X GET | jq -r '.[].[].id'); do
-  curl -s http://$(hostname)/api/cluster/inputstates/$input \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X DELETE \
-  -H "X-Requested-By: $(hostname)" \
-  -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+for input in $(curl -s http://$(hostname)/api/cluster/inputstates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET | jq -r '.[].[].id'); do
+  curl -s http://$(hostname)/api/cluster/inputstates/$input -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
 
+# Creating FieldType Profile for Docker Logs from Graylog Evaluation Stack
+GL_FIELD_TYPE_PROFILE=$(curl -s http://$(hostname)/api/system/indices/index_sets/profiles -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Docker", "description": "Field Mappings for Docker Logs (GELF)" }' | jq '.id')
+
+
+
 # Activating the GeoIP Resolver Plugin
-curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig \
-  -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" \
-  -X PUT \
-  -H "X-Requested-By: $(hostname)" \
-  -H 'Content-Type: application/json' \
-  -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
+curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
 ## Reconfigure Grafana Credentials
-curl -s http://admin:admin@$(hostname)/grafana/api/users/1 \
-  -H 'Content-Type:application/json' \
-  -X PUT \
-  -d "{
-        \"name\" : \"Evaluation Admin\",
-        \"login\" : \"$GL_GRAYLOG_ADMIN\"
-      }" 2>/dev/null > /dev/null 
-
-curl -s http://$GL_GRAYLOG_ADMIN:admin@$(hostname)/grafana/api/admin/users/1/password \
-  -H 'Content-Type: application/json' \
-  -X PUT \
-  -d "{
-        \"password\" : \"$GL_GRAYLOG_PASSWORD\"
-    }" 2>/dev/null > /dev/null 
+curl -s http://admin:admin@$(hostname)/grafana/api/users/1 -H 'Content-Type:application/json' -X PUT -d "{ \"name\" : \"Evaluation Admin\", \"login\" : \"$GL_GRAYLOG_ADMIN\" }" 2>/dev/null > /dev/null 
+curl -s http://$GL_GRAYLOG_ADMIN:admin@$(hostname)/grafana/api/admin/users/1/password -H 'Content-Type: application/json' -X PUT -d "{ \"password\" : \"$GL_GRAYLOG_PASSWORD\" }" 2>/dev/null > /dev/null 
 
 ## Configure Prometheus Connector 
-curl -s http://$GL_GRAYLOG_ADMIN:$GL_GRAYLOG_PASSWORD@$(hostname)/grafana/api/datasources \
-  -H 'Content-Type: application/json' \
-  -X POST \
-  -d '{
-        "name" : "prometheus",
-        "type" : "prometheus",
-        "url": "http://prometheus1:9090/prometheus",
-        "access": "proxy",
-        "readOnly" : false,
-        "isDefault" : true,
-        "basicAuth" : false
-      }' 2>/dev/null > /dev/null 
+curl -s http://$GL_GRAYLOG_ADMIN:$GL_GRAYLOG_PASSWORD@$(hostname)/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null > /dev/null 
 
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
