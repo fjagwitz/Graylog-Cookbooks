@@ -111,24 +111,6 @@ else
   echo "[INFO] - DOCKER INSTALLATION "
   sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
 
-  # Configuring Logging Settings
-  echo "[INFO] - CONFIGURING DOCKER LOGGING "
-  echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):9900\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
-  sudo service docker restart
-
-  # Configuring Proxy Settings
-  if [ "$connectionstate" == "0" ]
-  then
-    echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
-    sudo service docker stop 2>/dev/null >/dev/null
-    sleep 2
-    sudo systemctl stop docker.socket 2>/dev/null >/dev/null
-    sleep 3
-    sudo systemctl start docker.socket 2>/dev/null >/dev/null
-    sleep 2
-    sudo service docker start 2>/dev/null >/dev/null
-  fi
-
   # Checking Docker Installation Success
   if [[ "$(command -v docker)" == "/usr/bin/docker" ]]
   then
@@ -138,6 +120,24 @@ else
     exit
   fi
 fi
+
+# Configuring Docker Proxy Settings
+if [ "$connectionstate" == "0" ]
+then
+  echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
+  sudo service docker stop 2>/dev/null >/dev/null
+  sleep 2
+  sudo systemctl stop docker.socket 2>/dev/null >/dev/null
+  sleep 3
+  sudo systemctl start docker.socket 2>/dev/null >/dev/null
+  sleep 2
+  sudo service docker start 2>/dev/null >/dev/null
+fi
+
+# Configuring Docker Logging Settings
+echo "[INFO] - CONFIGURING DOCKER LOGGING "
+echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):9900\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
+sudo service docker restart
 
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.15/install-and-configure/install-opensearch/index/#important-settings)
 echo "[INFO] - SET OPENSEARCH SETTINGS "
