@@ -311,7 +311,7 @@ for input in $(curl -s http://$(hostname)/api/cluster/inputstates -u "${GL_GRAYL
 done
 
 # GELF UDP Input for NXLog
-GL_MONITORING_INPUT=$(curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id')
+GL_MONITORING_INPUT=$(curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: \$\(hostname\)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
 
 # Creating FieldType Profile for Docker Logs from Graylog Evaluation Stack
 GL_MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://$(hostname)/api/system/indices/index_sets/profiles -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
@@ -323,28 +323,28 @@ GL_MONITORING_INDEX=$(curl -s http://$(hostname)/api/system/indices/index_sets -
 GL_MONITORING_STREAM=$(curl -s http://$(hostname)/api/streams -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d "{ \"matching_type\": \"AND\", \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"index_set_id\": ${GL_MONITORING_INDEX} }" | jq -r '.stream_id')
 
 # Creating Stream Rule for Docker Logs from Graylog Evaluation Stack
-curl -s http://$(hostname)/api/streams/${GL_MONITORING_STREAM}/rules -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${GL_MONITORING_INPUT} }"
+curl -s http://$(hostname)/api/streams/${GL_MONITORING_STREAM}/rules -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${GL_MONITORING_INPUT} }" 2>/dev/null >/dev/null
 
 # Start Stream for Docker Logs from Graylog Evaluation Stack
-curl -s http://$(hostname)/api/streams/${GL_MONITORING_STREAM}/resume -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)"
+curl -s http://$(hostname)/api/streams/${GL_MONITORING_STREAM}/resume -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" 2>/dev/null >/dev/null
 
 # Activating OTX Lists
-curl -s http://$(hostname)/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }'
+curl -s http://$(hostname)/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }' 2>/dev/null >/dev/null
 
 # Activating Tor Exit Nodes Lists
-curl -s http://$(hostname)/api/system/content_packs/9350a70a-8453-f516-7041-517b4df0b832/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }'
+curl -s http://$(hostname)/api/system/content_packs/9350a70a-8453-f516-7041-517b4df0b832/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }' 2>/dev/null >/dev/null
 
 # Activating Spamhaus Drop Lists
-curl -s http://$(hostname)/api/system/content_packs/90be5e03-cb16-c802-6462-a244b4a342f3/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }'
+curl -s http://$(hostname)/api/system/content_packs/90be5e03-cb16-c802-6462-a244b4a342f3/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }' 2>/dev/null >/dev/null
 
 # Activating WHOIS Adapter
-curl -s http://$(hostname)/api/system/content_packs/1794d39d-077f-7360-b92b-95411b05fbce/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }'
+curl -s http://$(hostname)/api/system/content_packs/1794d39d-077f-7360-b92b-95411b05fbce/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "comment": "Activated for Evaluation" }' 2>/dev/null >/dev/null
 
 # Activating the GeoIP Resolver Plugin
 curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
 # Activating the ThreatIntel Plugin
-curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}' 
+curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}'  2>/dev/null >/dev/null
 
 ## Reconfigure Grafana Credentials
 curl -s http://admin:admin@$(hostname)/grafana/api/users/1 -H 'Content-Type:application/json' -X PUT -d "{ \"name\" : \"Evaluation Admin\", \"login\" : \"$GL_GRAYLOG_ADMIN\" }" 2>/dev/null > /dev/null 
