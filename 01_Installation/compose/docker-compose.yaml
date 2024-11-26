@@ -49,9 +49,10 @@ services:
   mongodb1:
     image: "mongo:7"
     hostname: "mongodb1"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     volumes:
       - "mongodb-data-01:/data/db"
     restart: "always"
@@ -59,9 +60,10 @@ services:
   datanode1:
     image: "opensearchproject/opensearch:2.15.0"
     hostname: "datanode1"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
@@ -90,9 +92,10 @@ services:
   datanode2:
     image: "opensearchproject/opensearch:2.15.0"
     hostname: "datanode2"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
@@ -121,9 +124,10 @@ services:
   datanode3:
     image: "opensearchproject/opensearch:2.15.0"
     hostname: "datanode3"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
@@ -152,9 +156,10 @@ services:
   datanode9:
     image: "opensearchproject/opensearch:2.15.0"
     hostname: "datanode9"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
@@ -183,9 +188,10 @@ services:
   graylog1:
     image: "graylog/${GL_GRAYLOG_VERSION}:6.1"
     hostname: "graylog1"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     depends_on:
       - "mongodb1"
       - "datanode1"
