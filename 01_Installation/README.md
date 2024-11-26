@@ -1,6 +1,6 @@
 # Graylog Installation on Ubuntu Systems
 
-    curl -sO https://github.com/fjagwitz/Graylog-Cookbooks/blob/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
+curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
 
 ## Prepare Server System
 
@@ -22,7 +22,7 @@ Before you start, make a Snapshot of your Ubuntu machine; the Installation Scrip
 
 Get it from here:
 
-    curl -sO https://github.com/fjagwitz/Graylog-Cookbooks/blob/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
+curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
 
 The system is accessible via
 
