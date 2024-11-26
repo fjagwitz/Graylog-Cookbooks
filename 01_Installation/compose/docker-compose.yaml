@@ -51,9 +51,10 @@ services:
     hostname: "mongodb1"
     volumes:
       - "mongodb-data-01:/data/db"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "always"
 
   datanode1:
@@ -81,10 +82,11 @@ services:
         hard: 262144
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
-      - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+      - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"    
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   datanode2:
@@ -113,9 +115,10 @@ services:
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
       - "${GL_OPENSEARCH_DATA}/datanode2:/usr/share/opensearch/data"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   datanode3:
@@ -144,9 +147,10 @@ services:
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
       - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   datanode9:
@@ -175,9 +179,10 @@ services:
         hard: 262144
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   graylog1:
@@ -204,9 +209,10 @@ services:
       - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
       # only required if you want to work with Lookup Tables for Enrichment
       - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
-    log_driver: "gelf"
-    log_opt:
-      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
