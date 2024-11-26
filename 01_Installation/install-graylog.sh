@@ -258,6 +258,9 @@ sudo rm -rf ${aptproxyconf}
 
 # Start Graylog Stack
 echo "[INFO] - PULL GRAYLOG CONTAINERS - HANG ON, CAN TAKE A WHILE "
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
+
+echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 
 echo "[INFO] - VALIDATE GRAYLOG INSTALLATION - HANG ON, CAN TAKE A WHILE "
