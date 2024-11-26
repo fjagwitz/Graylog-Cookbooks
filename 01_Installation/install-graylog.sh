@@ -218,7 +218,7 @@ fi
 echo "GL_GRAYLOG_VERSION=\"${GL_GRAYLOG_VERSION}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Configure Docker Logging
-sudo echo "GL_GRAYLOG_LOG_TARGET = "udp://graylog1:9900" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_GRAYLOG_LOG_TARGET = \"udp://graylog1:9900\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Adapt Variables in the graylog.env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
@@ -342,11 +342,11 @@ curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.con
 curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}'  2>/dev/null >/dev/null
 
 ## Reconfigure Grafana Credentials
-curl -s http://admin:admin@$(hostname)/grafana/api/users/1 -H 'Content-Type:application/json' -X PUT -d "{ \"name\" : \"Evaluation Admin\", \"login\" : \"$GL_GRAYLOG_ADMIN\" }" 2>/dev/null > /dev/null 
-curl -s http://$GL_GRAYLOG_ADMIN:admin@$(hostname)/grafana/api/admin/users/1/password -H 'Content-Type: application/json' -X PUT -d "{ \"password\" : \"$GL_GRAYLOG_PASSWORD\" }" 2>/dev/null > /dev/null 
+curl -s http://admin:admin@$(hostname)/grafana/api/users/1 -H 'Content-Type:application/json' -X PUT -d "{ \"name\" : \"Evaluation Admin\", \"login\" : \"${GL_GRAYLOG_ADMIN}\" }" 2>/dev/null > /dev/null 
+curl -s http://${GL_GRAYLOG_ADMIN}:admin@$(hostname)/grafana/api/admin/users/1/password -H 'Content-Type: application/json' -X PUT -d "{ \"password\" : \"$GL_GRAYLOG_PASSWORD\" }" 2>/dev/null > /dev/null 
 
 ## Configure Prometheus Connector 
-curl -s http://$GL_GRAYLOG_ADMIN:$GL_GRAYLOG_PASSWORD@$(hostname)/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null > /dev/null 
+curl -s http://${GL_GRAYLOG_ADMIN}:$GL_GRAYLOG_PASSWORD@$(hostname)/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null > /dev/null 
 
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
