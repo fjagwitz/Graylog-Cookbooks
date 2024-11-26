@@ -135,9 +135,9 @@ then
 fi
 
 # Configuring Docker Logging Settings
-echo "[INFO] - CONFIGURING DOCKER LOGGING "
-echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):9900\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
-sudo service docker restart
+# echo "[INFO] - CONFIGURING DOCKER LOGGING "
+# echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):9900\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
+# sudo service docker restart
 
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.15/install-and-configure/install-opensearch/index/#important-settings)
 echo "[INFO] - SET OPENSEARCH SETTINGS "
@@ -223,7 +223,7 @@ fi
 echo "GL_GRAYLOG_VERSION=\"${GL_GRAYLOG_VERSION}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Configure Docker Logging
-sudo echo "GL_GRAYLOG_LOGDIR = \"$GL_GRAYLOG/logs\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+sudo echo "GL_GRAYLOG_LOG_TARGET = "udp://graylog1:9900" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Adapt Variables in the graylog.env-file
 echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
