@@ -51,6 +51,9 @@ services:
     hostname: "mongodb1"
     volumes:
       - "mongodb-data-01:/data/db"
+    log_driver: "gelf"
+    log_opt:
+      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "always"
 
   datanode1:
@@ -79,6 +82,9 @@ services:
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
       - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"
+    log_driver: "gelf"
+    log_opt:
+      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   datanode2:
@@ -107,6 +113,9 @@ services:
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
       - "${GL_OPENSEARCH_DATA}/datanode2:/usr/share/opensearch/data"
+    log_driver: "gelf"
+    log_opt:
+      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   datanode3:
@@ -135,6 +144,9 @@ services:
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
       - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
+    log_driver: "gelf"
+    log_opt:
+      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   datanode9:
@@ -163,6 +175,10 @@ services:
         hard: 262144
     volumes:
       - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
+    log_driver: "gelf"
+    log_opt:
+      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    restart: "on-failure"
 
   graylog1:
     image: "graylog/${GL_GRAYLOG_VERSION}:6.1"
@@ -179,7 +195,7 @@ services:
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_WAREHOUSE}:/etc/graylog/server/warehouse"
+      - "${GL_GRAYLOG_WAREHOUSE}:/usr/share/graylog/data/warehouse"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
       # only required if you want to use predefined content packs
@@ -188,6 +204,9 @@ services:
       - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
       # only required if you want to work with Lookup Tables for Enrichment
       - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
+    log_driver: "gelf"
+    log_opt:
+      gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
