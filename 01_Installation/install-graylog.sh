@@ -121,6 +121,9 @@ else
   fi
 fi
 
+# Adding current User to Docker Admin Group
+sudo usermod -aG docker $USER
+
 # Configuring Docker Proxy Settings
 if [ "$connectionstate" == "0" ]
 then
