@@ -352,6 +352,9 @@ curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.map.con
 # Activating the ThreatIntel Plugin
 curl -s http://$(hostname)/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}'  2>/dev/null >/dev/null
 
+# Deactivating AI Reports
+curl -s http://$(hostname)/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: $(hostname)"
+
 ## Reconfigure Grafana Credentials
 curl -s http://admin:admin@$(hostname)/grafana/api/users/1 -H 'Content-Type:application/json' -X PUT -d "{ \"name\" : \"Evaluation Admin\", \"login\" : \"${GL_GRAYLOG_ADMIN}\" }" 2>/dev/null > /dev/null 
 curl -s http://${GL_GRAYLOG_ADMIN}:admin@$(hostname)/grafana/api/admin/users/1/password -H 'Content-Type: application/json' -X PUT -d "{ \"password\" : \"$GL_GRAYLOG_PASSWORD\" }" 2>/dev/null > /dev/null 
