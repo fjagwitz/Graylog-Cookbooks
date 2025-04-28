@@ -196,7 +196,8 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Countr
 
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
-sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
+#sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
+sudo git clone --single-branch --branch Graylog-6.2 https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files from Git Repo into the proper directories
 echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
