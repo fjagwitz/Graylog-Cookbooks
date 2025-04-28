@@ -186,7 +186,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/${GL_GRAYLOG_VERSION}:6.1"
+    image: "graylog/${GL_GRAYLOG_VERSION}:6.2"
     hostname: "graylog1"
     logging: 
       driver: "gelf"
