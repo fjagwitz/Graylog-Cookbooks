@@ -1,14 +1,10 @@
-# Graylog Installation on Ubuntu Systems
-
-    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
-
 ## Prepare Server System
 
 Create a virtual machine:
 
 - CPU Cores: at least 8
 - Memory: at least 32 GB
-- Storage: at least 480 GB
+- Storage: at least 480 GB (depending on the amount of data you plan to Ingest over a defined timeframe)
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 
@@ -22,7 +18,7 @@ Before you start, make a Snapshot of your Ubuntu machine; the Installation Scrip
 
 Get it from here:
 
-    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
+    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/Graylog-6.2/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
 
 The system is accessible via
 
