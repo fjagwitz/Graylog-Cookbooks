@@ -255,7 +255,7 @@ fi
 echo "[INFO] - CONFIGURE FILESHARES "
 sudo chmod 666 ${GL_GRAYLOG_LOOKUPTABLES}/* ${GL_GRAYLOG_SOURCES}/*
 sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
-sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx,d:u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_SOURCES}
+sudo setfacl -Rm u:${GL_GRAYLOG_ADMIN}:rwx,d:u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_SOURCES}
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
 sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
 echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN} > /dev/null
