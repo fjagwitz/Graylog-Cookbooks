@@ -16,7 +16,7 @@ GL_GRAYLOG_VERSION=${GL_GRAYLOG_VERSION:-enterprise}
 # Check Minimum Requirements on Linux Server
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(printf '%.*f\n' 0 $(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }'))
-operatingSystem=$(lsb_release -a | grep Distributor | awk -F":" '{print $2}' | xargs)
+operatingSystem=$(lsb_release -d | awk -F":" '{print $2}' | awk -F" " '{print $1}' | xargs)
 connectionTest=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 )
 
 echo "[INFO] - VERIFYING INTERNET CONNECTION"
@@ -197,7 +197,7 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Countr
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
 #sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
-sudo git clone --single-branch --branch Graylog-6.2 https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
+sudo git clone -q --single-branch --branch Graylog-6.2 https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files from Git Repo into the proper directories
 echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
