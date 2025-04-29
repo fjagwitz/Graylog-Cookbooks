@@ -162,7 +162,7 @@ GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog1.env"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_WAREHOUSE=\"${GL_GRAYLOG}/warehouse\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG}/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -178,12 +178,12 @@ source ${environmentfile}
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,searchable_snapshots}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus,warehouse}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus,datalake}
 
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "
 sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
-sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_WAREHOUSE} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
+sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_DATALAKE} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
