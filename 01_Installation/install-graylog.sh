@@ -31,9 +31,9 @@ fi
 echo "[INFO] - CHECKING OPERATING SYSTEM "
 if [[ "$operatingSystem" == Ubuntu ]]
 then
-  echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
+  echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -d | awk -F":" '{print $2}' | awk -F" " '{print $1}' | xargs) "
 else
-  echo "[ERROR] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -a | grep Description | awk -F":" '{print $2}' | xargs) "
+  echo "[ERROR] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -d | awk -F":" '{print $2}' | awk -F" " '{print $1}' | xargs) "
   exit
 fi
 
