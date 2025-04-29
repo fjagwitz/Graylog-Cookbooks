@@ -313,7 +313,7 @@ curl -s http://$(hostname)/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAY
 
 # Stopping all Inputs to allow a controlled Log Source Onboarding
 echo "[INFO] - STOPPING ALL INPUTS" 
-for input in $(curl -s http://$(hostname)/api/cluster/inputstates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET | jq -r '.[].[].id'); do
+for input in $(curl -s http://$(hostname)/api/cluster/inputstates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET | jq -r '.[] | map(.) | .[].id'); do
   curl -s http://$(hostname)/api/cluster/inputstates/$input -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: $(hostname)" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
 
