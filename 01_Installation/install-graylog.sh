@@ -171,6 +171,7 @@ echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG}/nginx1\"" | sudo tee -a ${environmentfil
 echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG}/nginx2\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_SOURCES=\"${GL_GRAYLOG}/sources\"" | sudo tee -a ${environmentfile} > /dev/null
 
 echo "GL_OPENSEARCH_DATA=\"${GL_GRAYLOG_FOLDER}/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
@@ -178,7 +179,7 @@ source ${environmentfile}
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,searchable_snapshots}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus,datalake}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus,datalake,sources}
 
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "
@@ -249,9 +250,9 @@ fi
 
 # Install Samba to make local Data Adapters accessible from Windows
 echo "[INFO] - CONFIGURE FILESHARES "
-sudo chmod 666 ${GL_GRAYLOG_LOOKUPTABLES}/*
+sudo chmod 666 ${GL_GRAYLOG_LOOKUPTABLES}/* ${GL_GRAYLOG_SOURCES}/*
 sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
-sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES}
+sudo setfacl -m u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_LOOKUPTABLES}
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
 sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
 echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN} > /dev/null
