@@ -212,8 +212,11 @@ sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETH
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
+# Pull Graylog Containers
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
+
 # This can be kept as-is, because Opensearch will not be available from outside the Docker Network
-echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"TbY1EjV5sfs!u9;I0@3%9m7i520g3s\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # The Graylog URI for additional Services like Grafana 
 echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
@@ -264,9 +267,6 @@ sudo rm -rf ${installpath}
 sudo rm -rf ${aptproxyconf}
 
 # Start Graylog Stack
-echo "[INFO] - PULL GRAYLOG CONTAINERS - HANG ON, CAN TAKE A WHILE "
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
-
 echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 
