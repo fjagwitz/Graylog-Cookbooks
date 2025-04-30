@@ -14,7 +14,7 @@ Depending on your setup, you might want to add hypervisor-specific guest tools a
 
 ## Install Graylog
 
-Before you start, make a Snapshot of your Ubuntu machine; the Installation Script contains practically no error handling; in case it breaks at some point you can revert the machine to the initial state and restart the Installation Script.
+**Before** you start, make a **Snapshot** of your Ubuntu machine; the Installation Script contains practically **no error handling**; in case it breaks at some point you can **revert** the machine to the initial state and restart the Installation Script.
 
 Get it from here:
 
