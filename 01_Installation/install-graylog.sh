@@ -253,7 +253,7 @@ fi
 
 # Install Samba to make local Data Adapters accessible from Windows
 echo "[INFO] - CONFIGURE FILESHARES "
-sudo chmod 666 ${GL_GRAYLOG_LOOKUPTABLES}/* ${GL_GRAYLOG_SOURCES}/*
+sudo chmod 755 ${GL_GRAYLOG_LOOKUPTABLES}/* ${GL_GRAYLOG_SOURCES}/*
 sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
 sudo setfacl -Rm u:${GL_GRAYLOG_ADMIN}:rwx,d:u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_SOURCES}
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
