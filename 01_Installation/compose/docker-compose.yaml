@@ -164,7 +164,7 @@ services:
       - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode9"
-      - "node.roles=search"
+      - "node.roles=Search"
       - "node.search.cache.size=50gb"
       - "path.repo=/usr/share/opensearch/searchable_snapshots"
       - "cluster.name=evaluation-cluster-opensearch"
@@ -204,7 +204,7 @@ services:
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/warehouse"
+      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/datalake"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
       # only required if you want to use predefined content packs

@@ -195,6 +195,10 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-City.m
 sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Country.mmdb
 # OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
+# Download Filebeat for Windows Binary
+
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Country.mmdb
+
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
 #sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
