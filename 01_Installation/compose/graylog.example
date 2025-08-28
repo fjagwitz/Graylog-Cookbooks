@@ -1,6 +1,5 @@
 ## Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/server.conf.html)
 #
-GRAYLOG_IS_LEADER = "true"
 GRAYLOG_PASSWORD_SECRET = ""
 GRAYLOG_ROOT_USERNAME = ""
 GRAYLOG_ROOT_PASSWORD_SHA2 = ""
