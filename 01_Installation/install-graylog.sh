@@ -1,5 +1,6 @@
 #!/bin/bash
-export GRAYLOG_VERSION_NUMBER="6.3"
+GRAYLOG_VERSION_NUMBER="6.3"
+
 echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG ${GRAYLOG_VERSION_NUMBER}"
 
 # Request System Credentials
@@ -139,7 +140,7 @@ sudo usermod -aG docker $USER
 # sudo service docker restart
 
 # Configuring Docker Proxy Settings
-if [ "$connectionstate" == "0" ]
+if [ $(sudo docker pull hello-world:latest) ]
 then
   if [ echo $HTTP_PROXY != "" ]
   then    
