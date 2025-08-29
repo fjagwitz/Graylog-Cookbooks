@@ -198,10 +198,10 @@ services:
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
-    env_file: "graylog1.env"
+    env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=true"
-      - "GRAYLOG_SERVER_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
     volumes:
       - "${GL_GRAYLOG_JOURNAL}:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
@@ -218,9 +218,9 @@ services:
       - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
     restart: "on-failure"
 
-    graylog2:
+  graylog2:
     image: "graylog/${GL_GRAYLOG_VERSION}:6.3"
-    hostname: "graylog1"
+    hostname: "graylog2"
     logging: 
       driver: "gelf"
       options: 
@@ -231,10 +231,10 @@ services:
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
-    env_file: "graylog1.env"
+    env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=false"
-      - "GRAYLOG_SERVER_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
     volumes:
       - "${GL_GRAYLOG_JOURNAL}:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead

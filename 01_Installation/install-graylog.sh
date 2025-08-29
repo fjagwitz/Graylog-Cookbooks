@@ -159,7 +159,7 @@ echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
 GL_GRAYLOG="${GL_GRAYLOG_FOLDER}/graylog"
 GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
-GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog1.env"
+GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -211,7 +211,7 @@ sudo cp ${installpath}/01_Installation/compose/nginx1/ssl ${GL_GRAYLOG_NGINX1} -
 sudo cp ${installpath}/01_Installation/compose/nginx2/*.conf ${GL_GRAYLOG_NGINX2}
 sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
 sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
-sudo cp ${installpath}/01_Installation/compose/graylog.example ${GL_GRAYLOG}/graylog1.env
+sudo cp ${installpath}/01_Installation/compose/graylog.example ${GL_GRAYLOG}/graylog.env
 sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
 sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
