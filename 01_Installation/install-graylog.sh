@@ -1,5 +1,6 @@
 #!/bin/bash
-echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG 6.3"
+export GRAYLOG_VERSION_NUMBER="6.3"
+echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG $GRAYLOG_VERSION_NUMBER"
 
 # Request System Credentials
 read -p "[INPUT] - Please add the name of your central Administration User (must not exist in /etc/passwd) [admin]: " GL_GRAYLOG_ADMIN
@@ -213,7 +214,7 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Countr
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
 #sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
-sudo git clone -q --single-branch --branch Graylog-6.2 https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
+sudo git clone -q --single-branch --branch Graylog-$GRAYLOG_VERSION_NUMBER https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files from Git Repo into the proper directories
 echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
