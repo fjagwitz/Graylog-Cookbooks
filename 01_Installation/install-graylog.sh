@@ -76,8 +76,8 @@ if [ "$installcheck1" == "" ]
 then
   aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
   connectionstate="0"
-  echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
   proxy_env=$(echo $HTTP_PROXY)
+  echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
   if [ $proxy_env != "" ]
   then
     echo "[INFO - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED ]"
