@@ -140,7 +140,9 @@ sudo usermod -aG docker $USER
 # sudo service docker restart
 
 # Configuring Docker Proxy Settings
-if [ $(sudo docker pull hello-world:latest) ]
+docker_connectivity_check=$(sudo docker pull hello-world:latest; echo $?)
+
+if [ docker_connectivity_check == 1 ]
 then
   if [ echo $HTTP_PROXY != "" ]
   then    
