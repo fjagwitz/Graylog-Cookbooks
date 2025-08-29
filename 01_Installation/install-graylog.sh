@@ -77,7 +77,8 @@ then
   aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
   connectionstate="0"
   echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
-  if [ echo $HTTP_PROXY != "" ]
+  proxy_env=$(echo $HTTP_PROXY)
+  if [ $proxy_env != "" ]
   then
     echo "[INFO - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED ]"
     echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
@@ -145,7 +146,7 @@ docker_connectivity_check=$(sudo docker pull hello-world:latest 2>/dev/null >/de
 if [ $docker_connectivity_check == 1 ]
 echo "[INFO] - DOCKER PROXY CONFIGURATION "
 then
-  if [ echo $HTTP_PROXY != "" ]
+  if [ $proxy_env != "" ]
   then    
     echo "[INFO - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED ]"
     echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
@@ -272,7 +273,7 @@ sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPOR
 # Add HTTP_PROXY to graylog.env if that's required
 if [ "$connectionstate" == "0" ]
 then
-  if [ echo $HTTP_PROXY != "" ]
+  if [ $proxy_env != "" ]
   then
     echo "[INFO - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED ]"
     sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
