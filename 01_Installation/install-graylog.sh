@@ -75,8 +75,14 @@ then
   aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
   connectionstate="0"
   echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
-  echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
-  echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
+  if [ echo $HTTP_PROXY != "" ]
+  then
+    echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
+    echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
+  else
+    echo "Acquire::http::Proxy \"$http_proxy\";" | sudo tee -a $aptproxyconf >/dev/null
+    echo "Acquire::https::Proxy \"$https_proxy\";" | sudo tee -a $aptproxyconf >/dev/null
+  fi
   sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
 fi
 
@@ -132,7 +138,12 @@ sudo usermod -aG docker $USER
 # Configuring Docker Proxy Settings
 if [ "$connectionstate" == "0" ]
 then
-  echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
+  if [ echo $HTTP_PROXY != "" ]
+  then
+    echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
+  else
+    echo "{ \"proxies\": { \"http-proxy\": \"$http_proxy\", \"https-proxy\": \"$https_proxy\",\"no-proxy\": \"$no_proxy\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
+  fi
   sudo service docker stop 2>/dev/null >/dev/null
   sleep 2
   sudo systemctl stop docker.socket 2>/dev/null >/dev/null
@@ -252,7 +263,12 @@ sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPOR
 # Add HTTP_PROXY to graylog.env if that's required
 if [ "$connectionstate" == "0" ]
 then
-  sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+  if [ echo $HTTP_PROXY != "" ]
+  then
+    sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+  else
+    sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$http_proxy\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+  fi
 fi
 
 # Install Samba to make local Data Adapters accessible from Windows
