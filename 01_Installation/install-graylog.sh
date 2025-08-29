@@ -78,9 +78,11 @@ then
   echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
   if [ echo $HTTP_PROXY != "" ]
   then
+    echo "[INFO - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED ]"
     echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
     echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
   else
+    echo "[INFO - HTTP_PROXY VARIABLE WAS NOT POPULATED, http_proxy IS BEING USED INSTEAD ]"
     echo "Acquire::http::Proxy \"$http_proxy\";" | sudo tee -a $aptproxyconf >/dev/null
     echo "Acquire::https::Proxy \"$https_proxy\";" | sudo tee -a $aptproxyconf >/dev/null
   fi
@@ -140,9 +142,11 @@ sudo usermod -aG docker $USER
 if [ "$connectionstate" == "0" ]
 then
   if [ echo $HTTP_PROXY != "" ]
-  then
+  then    
+    echo "[INFO - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED ]"
     echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
   else
+    echo "[INFO - HTTP_PROXY VARIABLE WAS NOT POPULATED, http_proxy IS BEING USED INSTEAD ]"
     echo "{ \"proxies\": { \"http-proxy\": \"$http_proxy\", \"https-proxy\": \"$https_proxy\",\"no-proxy\": \"$no_proxy\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
   fi
   sudo service docker stop 2>/dev/null >/dev/null
@@ -266,8 +270,10 @@ if [ "$connectionstate" == "0" ]
 then
   if [ echo $HTTP_PROXY != "" ]
   then
+    echo "[INFO - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED ]"
     sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-  else
+  else    
+    echo "[INFO - HTTP_PROXY VARIABLE WAS NOT POPULATED, http_proxy IS BEING USED INSTEAD ]"
     sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$http_proxy\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
   fi
 fi
