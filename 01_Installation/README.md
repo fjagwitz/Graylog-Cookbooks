@@ -85,7 +85,7 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/datanode3
                 |
-                |--/searchable_snapshots
+                |--/warm_tier
 
 **/opt/graylog**:
 
@@ -103,4 +103,4 @@ The installation script will create a few folders and populate these with helpfu
 **/opt/opensearch** _(must be owned by the user:group with the id 1000)_:
 
 - **datanode[1-3]**: these folders contain the Opensearch Data. You can mount any remote storage to that folder.
-- **searchable_snapshots**: these folders contain Opensearch searchable snapshots (Data Tiering / Warm Tier).
+- **warm_tier**: these folders contain Opensearch searchable snapshots (Data Tiering / Warm Tier).
