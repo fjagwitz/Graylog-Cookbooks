@@ -188,8 +188,8 @@ sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKU
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
 # Copy Post-Install Script to Base Directory
-sudo cp ${installpath}/01_Installation/post-install.sh ${$GL_GRAYLOG}
-chmod +x ${GL_GRAYLOG\post-install.sh}
+sudo cp ${installpath}/01_Installation/post-install.sh ${GL_GRAYLOG}
+sudo chmod +x ${GL_GRAYLOG}/post-install.sh
 
 # Pull Graylog Containers
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
