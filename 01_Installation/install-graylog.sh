@@ -70,14 +70,9 @@ fi
 # Installing additional Tools on Ubuntu
 echo "[INFO] - INSTALL ADDITIONAL TOOLS "
 sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
-installcheck1=$(apt list --installed 2>/dev/null | grep samba)
-connectionstate="1"
+installcheck=$(apt list --installed 2>/dev/null | grep samba)
 
-sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
-
-installcheck2=$(apt list --installed 2>/dev/null | grep samba)
-
-if [ "$installcheck2" == "" ]
+if [ "$installcheck" == "" ]
 then
   echo "[ERROR] - APT PACKAGE INSTALLATION FAILED - EXITING "
   exit 
