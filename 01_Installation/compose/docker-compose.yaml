@@ -165,7 +165,7 @@ services:
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode9"
       - "node.roles=search"
-      - "node.search.cache.size=120gb"
+      - "node.search.cache.size=10gb"
       - "path.repo=/usr/share/opensearch/warm_tier"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
