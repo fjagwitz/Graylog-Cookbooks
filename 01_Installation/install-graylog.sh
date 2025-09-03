@@ -1,7 +1,7 @@
 #!/bin/bash
-GRAYLOG_VERSION_NUMBER="6.3"
+GL_GRAYLOG_VERSION_NUMBER="6.3"
 
-echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG ${GRAYLOG_VERSION_NUMBER}"
+echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG ${GL_GRAYLOG_VERSION_NUMBER}"
 
 # Request System Credentials
 read -p "[INPUT] - Please add the name of your central Administration User (must not exist in /etc/passwd) [admin]: " GL_GRAYLOG_ADMIN
@@ -19,6 +19,7 @@ GL_GRAYLOG_VERSION=${GL_GRAYLOG_VERSION:-enterprise}
 numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
 randomAccessMemory=$(printf '%.*f\n' 0 $(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }'))
 operatingSystem=$(lsb_release -d | awk -F":" '{print $2}' | awk -F" " '{print $1}' | xargs)
+
 connectionTest=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 )
 
 echo "[INFO] - VERIFYING INTERNET CONNECTION"
@@ -31,7 +32,7 @@ else
 fi
 
 echo "[INFO] - CHECKING OPERATING SYSTEM "
-if [[ "$operatingSystem" == Ubuntu ]]
+if [[ "$operatingSystem" == "Ubuntu" ]]
 then
   echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -d | awk -F":" '{print $2}' | xargs) "
 else
@@ -72,24 +73,7 @@ sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/nu
 installcheck1=$(apt list --installed 2>/dev/null | grep samba)
 connectionstate="1"
 
-if [ "$installcheck1" == "" ]
-then
-  aptproxyconf="/etc/apt/apt.conf.d/99_proxy.conf"
-  connectionstate="0"
-  proxy_env=$(echo $HTTP_PROXY)
-  echo "[INFO] - ADDING APT PROXY CONFIG FROM ENVIRONMENT "
-  if [ $proxy_env != "" ]
-  then
-    echo "[INFO] - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED "
-    echo "Acquire::http::Proxy \"$HTTP_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
-    echo "Acquire::https::Proxy \"$HTTPS_PROXY\";" | sudo tee -a $aptproxyconf >/dev/null
-  else
-    echo "[INFO] - HTTP_PROXY VARIABLE WAS NOT POPULATED, http_proxy IS BEING USED INSTEAD "
-    echo "Acquire::http::Proxy \"$http_proxy\";" | sudo tee -a $aptproxyconf >/dev/null
-    echo "Acquire::https::Proxy \"$https_proxy\";" | sudo tee -a $aptproxyconf >/dev/null
-  fi
-  sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
-fi
+sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
 
 installcheck2=$(apt list --installed 2>/dev/null | grep samba)
 
@@ -134,34 +118,6 @@ fi
 
 # Adding current User to Docker Admin Group
 sudo usermod -aG docker $USER
-
-# Configuring Docker Logging Settings
-# echo "[INFO] - CONFIGURING DOCKER LOGGING "
-# echo "{\"log-driver\": \"gelf\",\"log-opts\": {\"gelf-address\": \"udp://$(hostname):9900\"}}" | sudo tee -a /etc/docker/daemon.json >/dev/null 
-# sudo service docker restart
-
-# Configuring Docker Proxy Settings
-docker_connectivity_check=$(sudo docker pull hello-world:latest 2>/dev/null >/dev/null; echo $?)
-
-if [ $docker_connectivity_check == 1 ]
-echo "[INFO] - DOCKER PROXY CONFIGURATION "
-then
-  if [ $proxy_env != "" ]
-  then    
-    echo "[INFO] - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED "
-    echo "{ \"proxies\": { \"http-proxy\": \"$HTTP_PROXY\", \"https-proxy\": \"$HTTPS_PROXY\",\"no-proxy\": \"$NO_PROXY\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
-  else
-    echo "[INFO] - HTTP_PROXY VARIABLE WAS NOT POPULATED, http_proxy IS BEING USED INSTEAD "
-    echo "{ \"proxies\": { \"http-proxy\": \"$http_proxy\", \"https-proxy\": \"$https_proxy\",\"no-proxy\": \"$no_proxy\" } }" | sudo tee -a /etc/docker/daemon.json >/dev/null    
-  fi
-  sudo service docker stop 2>/dev/null >/dev/null
-  sleep 2
-  sudo systemctl stop docker.socket 2>/dev/null >/dev/null
-  sleep 3
-  sudo systemctl start docker.socket 2>/dev/null >/dev/null
-  sleep 2
-  sudo service docker start 2>/dev/null >/dev/null
-fi
 
 # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.15/install-and-configure/install-opensearch/index/#important-settings)
 echo "[INFO] - SET OPENSEARCH SETTINGS "
@@ -223,7 +179,7 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Countr
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
 #sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
-sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION_NUMBER} https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
+sudo git clone -q --single-branch --branch Graylog-${GL_GRAYLOG_VERSION_NUMBER} https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files from Git Repo into the proper directories
 echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
@@ -269,19 +225,6 @@ sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${GL_P
 sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GL_GRAYLOG_ADDRESS}/\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
 sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-
-# Add HTTP_PROXY to graylog.env if that's required
-if [ "$connectionstate" == "0" ]
-then
-  if [ $proxy_env != "" ]
-  then
-    echo "[INFO] - HTTP_PROXY VARIABLE WAS POPULATED AND IS BEING USED "
-    sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$HTTP_PROXY\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-  else    
-    echo "[INFO] - HTTP_PROXY VARIABLE WAS NOT POPULATED, http_proxy IS BEING USED INSTEAD "
-    sudo sed -i "s\GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"$http_proxy\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
-  fi
-fi
 
 # Install Samba to make local Data Adapters accessible from Windows
 echo "[INFO] - CONFIGURE FILESHARES "
