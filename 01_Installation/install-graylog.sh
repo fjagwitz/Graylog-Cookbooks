@@ -136,7 +136,6 @@ GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_JOURNAL=\"${GL_GRAYLOG}/journal\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG}/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG}/maxmind\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG}/nginx1\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -151,12 +150,12 @@ source ${environmentfile}
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,warm_tier}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,journal,maxmind,nginx1,nginx2,notifications,prometheus,datalake,sources/{scripts,binaries,other}}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,datalake,sources/{scripts,binaries,other}}
 
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "
 sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
-sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_DATALAKE} ${GL_GRAYLOG_JOURNAL} ${GL_GRAYLOG_NOTIFICATIONS}
+sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_DATALAKE} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
@@ -239,9 +238,6 @@ sudo rm -rf ${aptproxyconf}
 # Start Graylog Stack
 echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
-
-echo "[INFO] - PULLING CONTAINERS FOR GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
-sleep 5s
 
 while [[ $(curl -s http://$(hostname)/api/system/lbstatus) != "ALIVE" ]]
 do
