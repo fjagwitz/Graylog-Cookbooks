@@ -8,7 +8,7 @@ Create a virtual machine:
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 
-_Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure the CPU type as "host", otherwise you will observe Opensearch Containers to be caught in a restart loop (see https://github.com/ansible/awx/issues/11879). 
+_Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure the CPU type as "host", otherwise you will observe Opensearch Containers being caught in a restart loop (see https://github.com/ansible/awx/issues/11879). 
 
 _Heads-up_: Make sure to work with **Memory Reservation** for your VM as you MUST avoid the hypervisor to use Graylog's Memory for other services. 
 
