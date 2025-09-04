@@ -9,6 +9,7 @@ active_license=$(curl -s http://localhost/api/plugins/org.graylog.plugins.licens
 
 # Adding Header Badge
 if [ $active_license -gt 0 ]
+then
   echo "[INFO] - ENABLE HEADER BADGE "
   enabled_header_badge=$(curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.customization.HeaderBadge -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .badge_enable)
 fi
@@ -20,11 +21,12 @@ fi
 
 # Adding Warning Message to avoid Production Use
 if [ $active_license -gt 0 ]
+then
   echo "[INFO] - CREATE WARNING "
-  warning_message=$(curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq -r .[0])
+  warning_message=$(curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost") 2>/dev/null >/dev/null
 fi
 
-if [ $active_license -gt 0 ] && [ $warning_message == "{}" ]
+if [ $active_license -gt 0 ] && ([[ $warning_message == "{}" ]] || [[ $warning_message == "" ]])
 then
   curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Evaluation System","shortMessage":"DO NOT USE IN PRODUCTION","longMessage":"This System was set up for a Graylog Product Evaluation. For a secure and production-ready setup please get in touch with your Graylog Customer Success Manager who will help you to deploy your Graylog Stack following best practices. ","isActive":true,"isDismissible":true,"atLogin":true,"isGlobal":false,"variant":"warning","hiddenTitle":false}' 2>/dev/null >/dev/null
 fi
@@ -47,19 +49,23 @@ fi
 if [ $active_license -gt 0 ] 
 then
   echo "[INFO] - CREATE DATALAKE "
-  active_backend=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/backends -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Data Lake","description":"Data Lake","settings":{"type":"fs-1","output_path":"/usr/share/graylog/data/datalake","usage_threshold":85}}' | jq -r .id) 2>/dev/null >/dev/null
+  active_backend=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/backends -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Data Lake","description":"Data Lake","settings":{"type":"fs-1","output_path":"/usr/share/graylog/data/datalake","usage_threshold":15}}' | jq -r .id) 2>/dev/null >/dev/null
 
   echo "[INFO] - ENABLE DATALAKE "
   curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"$active_backend\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":null}" 2>/dev/null >/dev/null
-fi 
+
+  echo "[INFO] - CONFIGURE DATALAKE MAX RETENTION OF 7 DAYS "
+  curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"$active_backend\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":\"P7D\"}" 2>/dev/null >/dev/null
+fi
 
 # Disabling Investigation AI Reports
 if [ $active_license -gt 1 ] 
+then
   echo "[INFO] - DISABLE INVESTIGATION AI REPORTS "
   active_ai_report=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost)" | jq .investigations_ai_reports_enabled )
 fi 
 
-if [ $active_ai_report == "true" ]
+if [[ $active_ai_report == "true" ]]
 then 
   curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: localhost)" 2>/dev/null >/dev/null
 fi
