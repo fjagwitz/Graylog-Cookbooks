@@ -8,8 +8,10 @@ active_license=$(curl -s http://localhost/api/plugins/org.graylog.plugins.licens
 #
 
 # Adding Header Badge
-echo "[INFO] - ENABLE HEADER BADGE "
-enabled_header_badge=$(curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.customization.HeaderBadge -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .badge_enable)
+if [ $active_license -gt 0 ]
+  echo "[INFO] - ENABLE HEADER BADGE "
+  enabled_header_badge=$(curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.customization.HeaderBadge -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .badge_enable)
+fi
 
 if [ $active_license -gt 0 ] && ([[ $enabled_header_badge != "true" ]] || [[ $enabled_header_badge != "" ]])
 then
@@ -17,8 +19,10 @@ then
 fi
 
 # Adding Warning Message to avoid Production Use
-echo "[INFO] - CREATE WARNING "
-warning_message=$(curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq -r .[0])
+if [ $active_license -gt 0 ]
+  echo "[INFO] - CREATE WARNING "
+  warning_message=$(curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq -r .[0])
+fi
 
 if [ $active_license -gt 0 ] && [ $warning_message == "{}" ]
 then
@@ -59,8 +63,5 @@ if [ $active_ai_report == "true" ]
 then 
   curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: localhost)" 2>/dev/null >/dev/null
 fi
-
-# Deleting this Script
-sudo rm -- "$0"
 
 exit 0
