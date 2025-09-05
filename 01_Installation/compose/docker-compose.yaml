@@ -29,6 +29,9 @@ services:
       # Gelf Input
       - 12201:12201
       - 12201:12201/udp 
+      # Forwarder Input
+      - 13301:13301
+      - 13302:13302
 
     volumes:
       - "${GL_GRAYLOG_NGINX1}/nginx.conf:/etc/nginx/nginx.conf:ro"
