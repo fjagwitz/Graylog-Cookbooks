@@ -75,6 +75,8 @@ The installation script will create a few folders and populate these with helpfu
         |       |--/notifications
         |       |
         |       |--/prometheus
+        |       |
+        |       |--/sources
         |
         |
         |--/opensearch
@@ -91,6 +93,7 @@ The installation script will create a few folders and populate these with helpfu
 
 - **/archives** _(must be owned by the user:group with the id 1100)_: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
 - [**/contentpacks**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/contentpacks): this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
+- **/datalake** _(must be owned by the user:group with the id 1100)_: this folder contains data that is prepared for requirement-driven ingestion (Data Routing).
 - **/journal** _(must be owned by the user:group with the id 1100)_: this folder is used for the Graylog Journal. It must provide at least 5GB of Storage. You can mount any remote storage to that folder.
 - [**/lookuptables**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/lookuptables): this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - **/maxmind**: this folder contains the GeoIP databases to be used by the Graylog Geo-Location Processor.
@@ -98,7 +101,7 @@ The installation script will create a few folders and populate these with helpfu
 - **/nginx1/ssl**: this folder contains the nginx certificates for https connections.
 - **/notifications** _(must be owned by the user:group with the id 1100)_: this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
 - [**/prometheus**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/prometheus): this folder contains configuration data to get metrics from Graylog to Grafana.
-- **/datalake** _(must be owned by the user:group with the id 1100)_: this folder contains data that is prepared for requirement-driven ingestion (Data Routing).
+- [**/sources**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/sources): this folder contains sources that help you getting started with Graylog
 
 **/opt/opensearch** _(must be owned by the user:group with the id 1000)_:
 
