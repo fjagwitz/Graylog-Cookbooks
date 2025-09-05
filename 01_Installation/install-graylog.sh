@@ -129,7 +129,9 @@ environmentfile="/etc/environment"
 echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
-GL_GRAYLOG="${GL_GRAYLOG_FOLDER}/graylog"
+GL_GRAYLOG="${GL_GRAYLOG_FOLDER}/graylog" 
+echo "GL_GRAYLOG_INSTALLPATH=${GL_GRAYLOG}" | sudo tee -a ${environmentfile} > /dev/null
+
 GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
 
@@ -143,6 +145,8 @@ echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG}/nginx2\"" | sudo tee -a ${environmentfil
 echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_SOURCES=\"${GL_GRAYLOG}/sources\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_SCRIPTS=\"$GL_GRAYLOG_INSTALLPATH/sources/scripts\""
+
 
 echo "GL_OPENSEARCH_DATA=\"${GL_GRAYLOG_FOLDER}/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
 source ${environmentfile}
@@ -188,8 +192,8 @@ sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKU
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
 # Copy Post-Install Script to Base Directory
-sudo cp ${installpath}/01_Installation/post-install.sh ${GL_GRAYLOG}
-sudo chmod +x ${GL_GRAYLOG}/post-install.sh
+sudo cp ${installpath}/01_Installation/post-install.sh ${GL_GRAYLOG_SCRIPTS}
+sudo chmod +x ${GL_GRAYLOG_SCRIPTS}/post-install.sh
 
 # Pull Graylog Containers
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
@@ -237,7 +241,9 @@ sudo service smbd restart
 
 # Installation Cleanup
 sudo rm -rf ${installpath}
-sudo rm -rf ${aptproxyconf}
+
+# Installation Complete, starting Graylog Stack in Compose
+echo "[INFO] - PREPARATION COMPLETE, STARTING GRAYLOG "
 
 # Start Graylog Stack
 echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
@@ -340,7 +346,9 @@ echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG}/your_graylog_credentials.txt
 echo ""
 echo "[INFO] - URL: \"http(s)://${GL_GRAYLOG_ADDRESS}\" || CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
 echo ""
-echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\" " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
+echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GL_GRAYLOG} " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
 echo ""
 
-exit
+exec ${GL_GRAYLOG_SCRIPTS/post-install.sh}
+
+exit 0
