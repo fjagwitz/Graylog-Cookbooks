@@ -29,7 +29,7 @@ services:
       # Gelf Input
       - 12201:12201
       - 12201:12201/udp 
-      # Forwarder Input
+      # Graylog Enterprise Forwarder Input
       - 13301:13301
       - 13302:13302
 
