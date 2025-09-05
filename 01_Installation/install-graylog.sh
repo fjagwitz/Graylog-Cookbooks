@@ -349,6 +349,4 @@ echo ""
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GL_GRAYLOG} " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
 echo ""
 
-exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh &
-
 exit 0
