@@ -134,7 +134,7 @@ echo "GL_GRAYLOG_INSTALLPATH=\"${GL_GRAYLOG}\"" | sudo tee -a ${environmentfile}
 
 GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
-GL_GRAYLOG_SCRIPTS="$GL_GRAYLOG/sources/scripts"
+GL_GRAYLOG_SCRIPTS="${GL_GRAYLOG}/sources/scripts"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
