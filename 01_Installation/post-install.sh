@@ -92,7 +92,7 @@ then
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 1 ]
   then
     echo "[INFO] - DISABLE INVESTIGATION AI REPORTS "
-    active_ai_report=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null)
+    active_ai_report=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
   fi 
 
   if [[ $active_ai_report == "true" ]] || [[ $active_ai_report == "" ]]
