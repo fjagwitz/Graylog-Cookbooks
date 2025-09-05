@@ -130,7 +130,7 @@ echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
 echo "[INFO] - SET ENVIRONMENT VARIABLES "
 
 GL_GRAYLOG="${GL_GRAYLOG_FOLDER}/graylog" 
-echo "GL_GRAYLOG_INSTALLPATH=${GL_GRAYLOG}" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_INSTALLPATH=\"${GL_GRAYLOG}\"" | sudo tee -a ${environmentfile} > /dev/null
 
 GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
@@ -349,6 +349,6 @@ echo ""
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GL_GRAYLOG} " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
 echo ""
 
-exec ${GL_GRAYLOG_SCRIPTS/post-install.sh}
+exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh
 
 exit 0
