@@ -258,9 +258,6 @@ done
 echo "[INFO] - FINALIZE SYSTEM CONFIGURATION "
 
 # Adding Inputs to make sure Ports map to Nginx configuration
-# Graylog Forwarder Input
-#curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 13300 UDP Fortinet | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5556, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
-
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
 curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 262144, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 

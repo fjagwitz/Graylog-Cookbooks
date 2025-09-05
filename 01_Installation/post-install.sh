@@ -16,6 +16,15 @@ done
 
 if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ]
 then 
+  # Adding Graylog Forwarder Input
+  # 
+  # Graylog Forwarder Input
+  if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ]
+  then
+  echo "[INFO] - CREATE GRAYLOG FORWARDER INPUT "
+    curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 13301 Forwarder | Evaluation Input", "type": "org.graylog.plugins.forwarder.input.ForwarderServiceInput", "attributes": { "forwarder_grpc_tls_private_key_file_password": "", "forwarder_message_transmission_port": 13301, "forwarder_configuration_port": 13302, "forwarder_grpc_enable_tls": false, "forwarder_bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+  fi
+  
   # Adding Header Badge
   #
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ]
