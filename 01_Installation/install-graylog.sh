@@ -134,6 +134,7 @@ echo "GL_GRAYLOG_INSTALLPATH=${GL_GRAYLOG}" | sudo tee -a ${environmentfile} > /
 
 GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
 GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
+GL_GRAYLOG_SCRIPTS="$GL_GRAYLOG/sources/scripts"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -145,7 +146,6 @@ echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG}/nginx2\"" | sudo tee -a ${environmentfil
 echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_SOURCES=\"${GL_GRAYLOG}/sources\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_SCRIPTS=\"$GL_GRAYLOG/sources/scripts\""
 
 
 echo "GL_OPENSEARCH_DATA=\"${GL_GRAYLOG_FOLDER}/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
