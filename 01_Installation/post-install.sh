@@ -1,6 +1,6 @@
 #!/bin/bash
 environmentfile="/etc/environment"
-sudo source $environmentfile
+source $environmentfile
 
 GL_GRAYLOG_ADMIN=$(cat $GL_GRAYLOG_INSTALLPATH/your_graylog_credentials.txt | awk -F'"' '{print $2}')
 GL_GRAYLOG_PASSWORD=$(cat $GL_GRAYLOG_INSTALLPATH/your_graylog_credentials.txt | awk -F'"' '{print $4}')
