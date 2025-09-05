@@ -5,11 +5,6 @@ source $environmentfile
 GL_GRAYLOG_ADMIN=$(cat $GL_GRAYLOG_INSTALLPATH/your_graylog_credentials.txt | awk -F'"' '{print $2}')
 GL_GRAYLOG_PASSWORD=$(cat $GL_GRAYLOG_INSTALLPATH/your_graylog_credentials.txt | awk -F'"' '{print $4}')
 
-# Checking Graylog License
-#echo "[INFO] - CHECK GRAYLOG LICENSE "
-# active_license=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length)
-#
-
 while [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -eq 0 ]
 do
   echo "[INFO] - WAIT FOR THE SYSTEM TO BE LICENSED "
@@ -45,11 +40,11 @@ then
   fi
 
   # Changing Colour Scheme to Graylog 5
-  if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
-  then
-    echo "[INFO] - CHANGE COLOUR SCHEME TO v5 "
-    curl -s http://localhost/api/plugins/org.graylog.plugins.customization/theme -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"light":{"global":{"background":"#eeeff2","link":"#578dcc"},"brand":{"tertiary":"#3e434c"},"variant":{"default":"#9aa8bd","danger":"#eb5454","info":"#578dcc","primary":"#697586","success":"#7eb356","warning":"#eedf64"}},"dark":{"global":{"background":"#222222","contentBackground":"#303030","link":"#629de2"},"brand":{"tertiary":"#ffffff"},"variant":{"default":"#595959","danger":"#e74c3c","info":"#578dcc","primary":"#697586","success":"#709e4c","warning":"#e3d45f"}}}' 2>/dev/null >/dev/null
-  fi
+  # if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
+  # then
+  #   echo "[INFO] - CHANGE COLOUR SCHEME TO v5 "
+  #   curl -s http://localhost/api/plugins/org.graylog.plugins.customization/theme -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"light":{"global":{"background":"#eeeff2","link":"#578dcc"},"brand":{"tertiary":"#3e434c"},"variant":{"default":"#9aa8bd","danger":"#eb5454","info":"#578dcc","primary":"#697586","success":"#7eb356","warning":"#eedf64"}},"dark":{"global":{"background":"#222222","contentBackground":"#303030","link":"#629de2"},"brand":{"tertiary":"#ffffff"},"variant":{"default":"#595959","danger":"#e74c3c","info":"#578dcc","primary":"#697586","success":"#709e4c","warning":"#e3d45f"}}}' 2>/dev/null >/dev/null
+  # fi
 
   # Enabling Warm Tier 
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
