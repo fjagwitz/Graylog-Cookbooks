@@ -5,6 +5,8 @@ source $environmentfile
 GL_GRAYLOG_ADMIN=$(cat $GL_GRAYLOG_INSTALLPATH/your_graylog_credentials.txt | awk -F'"' '{print $2}')
 GL_GRAYLOG_PASSWORD=$(cat $GL_GRAYLOG_INSTALLPATH/your_graylog_credentials.txt | awk -F'"' '{print $4}')
 
+# Checking whether or not the system is getting a license
+#
 while [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -eq 0 ]
 do
   echo "[INFO] - WAIT FOR THE SYSTEM TO BE LICENSED "
@@ -16,6 +18,7 @@ if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses
 then 
 
   # Adding Header Badge
+  #
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ]
   then
     echo "[INFO] - ENABLE HEADER BADGE "
@@ -28,6 +31,7 @@ then
   fi
 
   # Adding Warning Message to avoid Production Use
+  #
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ]
   then
     echo "[INFO] - CREATE WARNING "
@@ -40,6 +44,7 @@ then
   fi
 
   # Changing Colour Scheme to Graylog 5
+  #
   # if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
   # then
   #   echo "[INFO] - CHANGE COLOUR SCHEME TO v5 "
@@ -47,6 +52,7 @@ then
   # fi
 
   # Enabling Warm Tier 
+  #
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
   then
     echo "[INFO] - ENABLE WARM TIER "
@@ -54,6 +60,7 @@ then
   fi
 
   # Creating Data Lake Backend
+  #
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
   then
     echo "[INFO] - CREATE DATALAKE "
@@ -74,6 +81,7 @@ then
   done
 
   # Disabling Investigation AI Reports
+  #
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 1 ] 
   then
     echo "[INFO] - DISABLE INVESTIGATION AI REPORTS "
