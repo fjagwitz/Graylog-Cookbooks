@@ -145,7 +145,7 @@ echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG}/nginx2\"" | sudo tee -a ${environmentfil
 echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_SOURCES=\"${GL_GRAYLOG}/sources\"" | sudo tee -a ${environmentfile} > /dev/null
-echo "GL_GRAYLOG_SCRIPTS=\"$GL_GRAYLOG_INSTALLPATH/sources/scripts\""
+echo "GL_GRAYLOG_SCRIPTS=\"$GL_GRAYLOG/sources/scripts\""
 
 
 echo "GL_OPENSEARCH_DATA=\"${GL_GRAYLOG_FOLDER}/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
