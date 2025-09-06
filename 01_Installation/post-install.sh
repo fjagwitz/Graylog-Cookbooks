@@ -102,7 +102,11 @@ then
   fi
 
   echo "[INFO] - CONFIGURE DATALAKE FOR SELF-MONITORING STREAM"
-  curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/stream/config/enable -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"stream_ids\":[\"${GL_MONITORING_STREAM}\"],\"enabled\":true}"
+  curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/stream/config/enable -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"stream_ids\":[\"${GL_GRAYLOG_MONITORING_STREAM}\"],\"enabled\":true}" 2>/dev/null >/dev/null
+
+  # Cleanup /etc/environment
+  # 
+  grep -vwE "(GL_GRAYLOG_MONITORING_STREAM)" $environmentfile | sudo tee $environmentfile
 
   while [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -eq 1 ]
   do
