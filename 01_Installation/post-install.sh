@@ -14,7 +14,7 @@ do
   sleep 5s
 done
 
-sleep 900s
+sleep 300s
 
 if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ]
 then 
