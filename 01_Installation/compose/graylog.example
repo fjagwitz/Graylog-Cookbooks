@@ -1,6 +1,5 @@
 ## Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/server.conf.html)
 #
-GRAYLOG_IS_LEADER = "true"
 GRAYLOG_PASSWORD_SECRET = ""
 GRAYLOG_ROOT_USERNAME = ""
 GRAYLOG_ROOT_PASSWORD_SHA2 = ""
@@ -10,10 +9,13 @@ GRAYLOG_ROOT_EMAIL = ""
 #
 GRAYLOG_ROOT_TIMEZONE = "UTC" 
 
+## Set Graylog Java Heap Size
+#
+GRAYLOG_SERVER_JAVA_OPTS = "-Xms4096m -Xmx4096m"
+
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
 GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:9000"
-GRAYLOG_HTTP_PUBLISH_URI = "http://graylog1:9000"
 GRAYLOG_MONGODB_URI = "mongodb://mongodb1:27017/graylog"
 GRAYLOG_ELASTICSEARCH_HOSTS = "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
 GRAYLOG_TELEMETRY_ENABLED = "false"
@@ -28,7 +30,7 @@ GRAYLOG_ALLOWED_AUXILIARY_PATH = "/etc/graylog/server"
 ## Graylog Proxy Settings (list of patterns separated by “,” - may start or end with a “*” for wildcards)
 #
 # GRAYLOG_HTTP_PROXY_URI = ""
-# GRAYLOG_HTTP_NON_PROXY_HOSTS = "localhost, graylog1, mongodb1, datanode*, lookuptables, prometheus1, grafana1"
+# GRAYLOG_HTTP_NON_PROXY_HOSTS = "localhost, graylog1, graylog2, mongodb1, datanode*, lookuptables, prometheus1, grafana1"
 
 ## Graylog Reporting Configurations
 #
@@ -60,7 +62,7 @@ GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = ""
 GRAYLOG_PROMETHEUS_EXPORTER_ENABLED = "true"
 GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
 
-## Indices naming
+## Indices naming proving this is a non-production environment
 #
 GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-evaluation-events"
 GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-evaluation-system-events"

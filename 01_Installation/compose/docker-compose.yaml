@@ -29,6 +29,9 @@ services:
       # Gelf Input
       - 12201:12201
       - 12201:12201/udp 
+      # Graylog Enterprise Forwarder Input
+      - 13301:13301
+      - 13302:13302
 
     volumes:
       - "${GL_GRAYLOG_NGINX1}/nginx.conf:/etc/nginx/nginx.conf:ro"
@@ -47,7 +50,7 @@ services:
     restart: "always"
 
   mongodb1:
-    image: "mongo:7"
+    image: "mongo:8"
     hostname: "mongodb1"
     logging: 
       driver: "gelf"
@@ -58,7 +61,7 @@ services:
     restart: "always"
 
   datanode1:
-    image: "opensearchproject/opensearch:2.15.0"
+    image: "opensearchproject/opensearch:2.19.3"
     hostname: "datanode1"
     logging: 
       driver: "gelf"
@@ -69,7 +72,7 @@ services:
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode1"
       - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/searchable_snapshots"
+      - "path.repo=/usr/share/opensearch/warm_tier"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"      
       - "discovery.seed_hosts=datanode2,datanode3"
@@ -85,12 +88,12 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
+      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
       - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"    
     restart: "on-failure"
 
   datanode2:
-    image: "opensearchproject/opensearch:2.15.0"
+    image: "opensearchproject/opensearch:2.19.3"
     hostname: "datanode2"
     logging: 
       driver: "gelf"
@@ -101,7 +104,7 @@ services:
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode2"
       - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/searchable_snapshots"
+      - "path.repo=/usr/share/opensearch/warm_tier"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode3"
@@ -117,12 +120,12 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
+      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
       - "${GL_OPENSEARCH_DATA}/datanode2:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode3:
-    image: "opensearchproject/opensearch:2.15.0"
+    image: "opensearchproject/opensearch:2.19.3"
     hostname: "datanode3"
     logging: 
       driver: "gelf"
@@ -133,7 +136,7 @@ services:
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode3"
       - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/searchable_snapshots"
+      - "path.repo=/usr/share/opensearch/warm_tier"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode2"
@@ -149,12 +152,12 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
+      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
       - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode9:
-    image: "opensearchproject/opensearch:2.15.0"
+    image: "opensearchproject/opensearch:2.19.3"
     hostname: "datanode9"
     logging: 
       driver: "gelf"
@@ -165,8 +168,8 @@ services:
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode9"
       - "node.roles=search"
-      - "node.search.cache.size=50gb"
-      - "path.repo=/usr/share/opensearch/searchable_snapshots"
+      - "node.search.cache.size=10gb"
+      - "path.repo=/usr/share/opensearch/warm_tier"
       - "cluster.name=evaluation-cluster-opensearch"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode2,datanode3"
@@ -182,11 +185,11 @@ services:
         soft: 262144
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/searchable_snapshots:/usr/share/opensearch/searchable_snapshots"
+      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/${GL_GRAYLOG_VERSION}:6.1"
+    image: "graylog/${GL_GRAYLOG_VERSION}:6.3"
     hostname: "graylog1"
     logging: 
       driver: "gelf"
@@ -198,13 +201,49 @@ services:
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
-    env_file: "graylog1.env"
+    env_file: "graylog.env"
+    environment: 
+      - "GRAYLOG_IS_LEADER=true"
+      - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
     volumes:
-      - "${GL_GRAYLOG_JOURNAL}:/usr/share/graylog/data/journal"
+      - "graylog-data-01:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_WAREHOUSE}:/usr/share/graylog/data/warehouse"
+      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/datalake"
+      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
+      - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
+      # only required if you want to use predefined content packs
+      - "${GL_GRAYLOG_CONTENTPACKS}:/etc/graylog/server/contentpacks:ro"
+      # only required if you want to work with Geolocation Data
+      - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
+      # only required if you want to work with Lookup Tables for Enrichment
+      - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
+    restart: "on-failure"
+
+  graylog2:
+    image: "graylog/${GL_GRAYLOG_VERSION}:6.3"
+    hostname: "graylog2"
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+    depends_on:
+      - "mongodb1"
+      - "datanode1"
+      - "datanode2"
+      - "datanode3"
+    entrypoint: "/docker-entrypoint.sh"
+    env_file: "graylog.env"
+    environment: 
+      - "GRAYLOG_IS_LEADER=false"
+      - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
+    volumes:
+      - "graylog-data-02:/usr/share/graylog/data/journal"
+      # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
+      - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
+      # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
+      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/datalake"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
       # only required if you want to use predefined content packs
@@ -249,6 +288,7 @@ services:
 
 volumes:
   graylog-data-01:
+  graylog-data-02:
   mongodb-data-01:
   grafana-data-01:
   prometheus-data-01:

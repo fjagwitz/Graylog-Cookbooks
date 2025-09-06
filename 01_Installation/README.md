@@ -1,28 +1,26 @@
-# Graylog Installation on Ubuntu Systems
-
-    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
-
 ## Prepare Server System
 
 Create a virtual machine:
 
 - CPU Cores: at least 8
 - Memory: at least 32 GB
-- Storage: at least 480 GB
+- Storage: at least 600 GB (depending on the amount of data you plan to Ingest over a defined timeframe)
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 
-_Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure the CPU type as "host", otherwise you will observe Opensearch Containers to be caught in a restart loop (see https://github.com/ansible/awx/issues/11879). 
+_Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure the CPU type as "host", otherwise you will observe Opensearch Containers being caught in a restart loop (see https://github.com/ansible/awx/issues/11879). 
+
+_Heads-up_: Make sure to work with **Memory Reservation** for your VM as you MUST avoid the hypervisor to use Graylog's Memory for other services. 
 
 Depending on your setup, you might want to add hypervisor-specific guest tools and additional software required by organizational policy.
 
 ## Install Graylog
 
-Before you start, make a Snapshot of your Ubuntu machine; the Installation Script contains practically no error handling; in case it breaks at some point you can revert the machine to the initial state and restart the Installation Script.
+**Before** you start, make a **Snapshot** of your Ubuntu machine; the Installation Script contains practically **no error handling**; in case it breaks at some point you can **revert** the machine to the initial state and restart the Installation Script.
 
 Get it from here:
 
-    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
+    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/Graylog-6.3/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
 
 The system is accessible via
 
@@ -51,6 +49,8 @@ The installation script will create a few folders and populate these with helpfu
         |       |
         |       |--/contentpacks
         |       |
+        |       |--/datalake
+        |       |
         |       |--/journal
         |       |
         |       |--/lookuptables
@@ -76,7 +76,7 @@ The installation script will create a few folders and populate these with helpfu
         |       |
         |       |--/prometheus
         |       |
-        |       |--/warehouse
+        |       |--/sources
         |
         |
         |--/opensearch
@@ -87,22 +87,23 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/datanode3
                 |
-                |--/searchable_snapshots
+                |--/warm_tier
 
 **/opt/graylog**:
 
 - **/archives** _(must be owned by the user:group with the id 1100)_: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
 - [**/contentpacks**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/contentpacks): this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
+- **/datalake** _(must be owned by the user:group with the id 1100)_: this folder contains data that is prepared for requirement-driven ingestion (Data Routing). You can mount any remote storage to that folder.
 - **/journal** _(must be owned by the user:group with the id 1100)_: this folder is used for the Graylog Journal. It must provide at least 5GB of Storage. You can mount any remote storage to that folder.
 - [**/lookuptables**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/lookuptables): this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - **/maxmind**: this folder contains the GeoIP databases to be used by the Graylog Geo-Location Processor.
-- [**/nginx**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/nginx): this folder contains the nginx configuration files for the nginx container.
-- **/nginx/ssl**: this folder contains the nginx certificates for https connections.
+- [**/nginx1**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/nginx1): this folder contains the nginx configuration files for the nginx container.
+- **/nginx1/ssl**: this folder contains the nginx certificates for https connections.
 - **/notifications** _(must be owned by the user:group with the id 1100)_: this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
 - [**/prometheus**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/prometheus): this folder contains configuration data to get metrics from Graylog to Grafana.
-- **/warehouse** _(must be owned by the user:group with the id 1100)_: this folder contains data that is prepared for requirement-driven ingestion (Data Routing).
+- [**/sources**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/sources): this folder contains sources that help you getting started with Graylog
 
 **/opt/opensearch** _(must be owned by the user:group with the id 1000)_:
 
 - **datanode[1-3]**: these folders contain the Opensearch Data. You can mount any remote storage to that folder.
-- **searchable_snapshots**: these folders contain Opensearch searchable snapshots (Data Tiering).
+- **warm_tier**: these folders contain Opensearch searchable snapshots (Data Tiering / Warm Tier). You can mount any remote storage to that folder.
