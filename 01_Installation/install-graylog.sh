@@ -305,6 +305,7 @@ GL_MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u 
 
 # Creating Stream for Docker Logs from Graylog Evaluation Stack
 GL_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"matching_type\": \"AND\", \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"index_set_id\": ${GL_MONITORING_INDEX} }" | jq -r '.stream_id')
+echo ${GL_MONITORING_STREAM} | sudo tee -a $environmentfile
 
 # Creating Stream Rule for Docker Logs from Graylog Evaluation Stack
 curl -s http://localhost/api/streams/${GL_MONITORING_STREAM}/rules -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${GL_MONITORING_INPUT} }" 2>/dev/null >/dev/null

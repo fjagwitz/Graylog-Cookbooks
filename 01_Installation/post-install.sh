@@ -101,6 +101,9 @@ then
     curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"$active_backend\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":\"P7D\"}" 2>/dev/null >/dev/null
   fi
 
+  echo "[INFO] - CONFIGURE DATALAKE FOR SELF-MONITORING STREAM"
+  curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/stream/config/enable -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"stream_ids\":[\"${GL_MONITORING_STREAM}\"],\"enabled\":true}"
+
   while [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -eq 1 ]
   do
     echo "[INFO] - WAIT FOR THE SYSTEM TO BE LICENSED WITH A SECURITY LICENSE"
