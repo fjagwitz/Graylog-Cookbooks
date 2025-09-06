@@ -49,7 +49,7 @@ then
 
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] && ([[ $warning_message == "{}" ]] || [[ $warning_message == "" ]])
   then
-    curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Evaluation System","shortMessage":"DO NOT USE IN PRODUCTION","longMessage":"This System was set up for a Graylog Product Evaluation. For a secure and production-ready setup please get in touch with your Graylog Customer Success Manager who will help you to deploy your Graylog Stack following best practices. ","isActive":true,"isDismissible":true,"atLogin":true,"isGlobal":false,"variant":"warning","hiddenTitle":false}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Evaluation System","shortMessage":"DO NOT USE IN PRODUCTION","longMessage":"This System was set up for a Graylog Product Evaluation and MUST NOT be used in production. For a secure and production-ready setup please get in touch with your Graylog Customer Success Manager who will help you to deploy your Graylog Stack following best practices.","isActive":true,"isDismissible":true,"atLogin":true,"isGlobal":false,"variant":"warning","hiddenTitle":false}' 2>/dev/null >/dev/null
   fi
 
   # Changing Colour Scheme to Graylog 5
