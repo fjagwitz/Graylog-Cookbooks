@@ -76,6 +76,17 @@ then
     curl -s http://localhost/api/plugins/org.graylog.plugins.datatiering/datatiering/repositories -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"fs","name":"warm_tier","location":"/usr/share/opensearch/warm_tier"}' 2>/dev/null >/dev/null
   fi
 
+  # Creating Index Set Template for Evaluation Purposes
+  #
+  if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
+  then
+    echo "[INFO] - CREATE EVALUATION INDEX SET TEMPLATE "
+    index_set_template=$(curl -s http://localhost/api/system/indices/index_sets/templates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title": "Evaluation Storage","description": "Use case: Graylog Product Evaluation","index_set_config": {"shards": 1,"replicas": 0,"index_optimization_max_num_segments": 1,"index_optimization_disabled": false,"field_type_refresh_interval": 5000,"data_tiering": {"type": "hot_warm","index_lifetime_min": "P7D","index_lifetime_max": "P10D","warm_tier_enabled": true,"index_hot_lifetime_min": "P3D","warm_tier_repository_name": "warm_tier","archive_before_deletion": true},"index_analyzer": "standard","use_legacy_rotation": false}}' | jq -r .id) 2>/dev/null >/dev/null
+
+    echo "[INFO] - CONFIGURE EVALUATION INDEX SET TEMPLATE "
+    curl -s http://localhost/api/system/indices/index_set_defaults -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"$index_set_template\"}"
+  fi
+
   # Creating Data Lake Backend
   #
   if [ $(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .status | jq length) -gt 0 ] 
