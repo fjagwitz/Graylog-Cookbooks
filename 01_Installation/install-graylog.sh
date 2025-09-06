@@ -3,6 +3,15 @@ GL_GRAYLOG_VERSION_NUMBER="6.3"
 
 echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG ${GL_GRAYLOG_VERSION_NUMBER}"
 
+# Request Snapshot creation
+read -p "[INPUT] - Please confirm that you created a Snapshot of this VM before running this Script [yes/no]]: " SNAPSHOT_CREATED
+SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-yes}
+
+if [[ ${SNAPSHOT_CREATED} == "no" ]]
+then
+  exit
+fi
+
 # Request System Credentials
 read -p "[INPUT] - Please add the name of your central Administration User (must not exist in /etc/passwd) [admin]: " GL_GRAYLOG_ADMIN
 GL_GRAYLOG_ADMIN=${GL_GRAYLOG_ADMIN:-admin}
