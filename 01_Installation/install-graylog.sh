@@ -1,5 +1,5 @@
 #!/bin/bash
-GL_GRAYLOG_VERSION_NUMBER="6.3"
+GL_GRAYLOG_VERSION_NUMBER="6.3.3"
 
 echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG ${GL_GRAYLOG_VERSION_NUMBER}"
 
@@ -146,6 +146,7 @@ GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
 GL_GRAYLOG_SCRIPTS="${GL_GRAYLOG}/sources/scripts"
 
 echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_ASSETDATA=\"${GL_GRAYLOG}/assetdata\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG}/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -163,7 +164,7 @@ source ${environmentfile}
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,warm_tier}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,contentpacks,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,datalake,sources/{scripts,binaries,other}}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,assetdata,contentpacks,datalake,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,sources/{scripts,binaries,other}}
 
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "
@@ -241,7 +242,7 @@ sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPOR
 echo "[INFO] - CONFIGURE FILESHARES "
 sudo chmod 755 ${GL_GRAYLOG_LOOKUPTABLES}/* ${GL_GRAYLOG_SOURCES}/*
 sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
-sudo setfacl -Rm u:${GL_GRAYLOG_ADMIN}:rwx,d:u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_SOURCES}
+sudo setfacl -Rm u:${GL_GRAYLOG_ADMIN}:rwx,d:u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_ASSETDATA} ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_SOURCES}
 sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
 sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
 echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN} > /dev/null
@@ -265,6 +266,24 @@ do
 done
 
 echo "[INFO] - FINALIZE SYSTEM CONFIGURATION "
+
+# Installing Graylog Sidecar
+sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
+sudo dpkg -i graylog-sidecar-repository_1-5_all.deb
+sudo apt-get update
+sudo apt-get install graylog-sidecar
+sudo rm graylog-sidecar-repository_1-5_all.deb
+
+# Creating Sidecar Token
+SIDECAR_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
+
+SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${SIDECAR_ID}/tokens/EVALUATION-LOCAL-SIDECAR -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
+
+# Configuring Graylog Sidecar
+SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
+sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
+sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
+sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
 
 # Adding Inputs to make sure Ports map to Nginx configuration
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
@@ -349,6 +368,11 @@ curl -s http://${GL_GRAYLOG_ADMIN}:admin@localhost/grafana/api/admin/users/1/pas
 
 ## Configure Prometheus Connector 
 curl -s http://${GL_GRAYLOG_ADMIN}:$GL_GRAYLOG_PASSWORD@localhost/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null > /dev/null 
+
+# Starting the Sidecar Service
+sudo graylog-sidecar -service install
+sudo systemctl enable graylog-sidecar
+sudo systemctl start graylog-sidecar
 
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
