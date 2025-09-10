@@ -180,13 +180,13 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-City.m
 sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Country.mmdb
 # OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
-# Download Sidecar for Windows Binary
-echo "[INFO] - DOWNLOAD SIDECAR FOR WINDOWS "
+# Download Graylog Sidecar for Windows
+echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS "
 sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar
 sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar -LOs https://github.com/Graylog2/collector-sidecar/releases/download/1.5.1/graylog-sidecar-1.5.1-1.msi
 
-# Download Filebeat 
-echo "[INFO] - DOWNLOAD FILEBEAT STANDALONE FOR WINDOWS "
+# Download Elastic Filebeat Standalone
+echo "[INFO] - DOWNLOAD ELASTIC FILEBEAT STANDALONE FOR WINDOWS "
 sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone
 sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone -LOs https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.19.3-windows-x86_64.zip ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
 sudo unzip ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip -d ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
@@ -195,14 +195,15 @@ sudo rm -rf ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-w
 sudo rm ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
 
 # Download NXLog - provide a README with instructions on how to do that
+echo "[INFO] - DOWNLOAD NXLOG AGENT COMMUNITY EDITION FOR WINDOWS (PREPARATORY STEP) "
 sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition
 sudo touch ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
-echo "How to integrate: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
-echo "Where to download: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
+echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
+echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
 
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
-#sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
+# sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
 sudo git clone -q --single-branch --branch Graylog-${GL_GRAYLOG_VERSION_NUMBER} https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
 
 # Copy Files from Git Repo into the proper directories
