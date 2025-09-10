@@ -78,7 +78,7 @@ fi
 
 # Installing additional Tools on Ubuntu
 echo "[INFO] - INSTALL ADDITIONAL TOOLS "
-sudo apt-get -qq install vim git jq tcpdump pwgen samba acl 2>/dev/null >/dev/null
+sudo apt-get -qq install vim git jq tcpdump pwgen samba acl htop at unzip 2>/dev/null >/dev/null
 installcheck=$(apt list --installed 2>/dev/null | grep samba)
 
 if [ "$installcheck" == "" ]
@@ -180,9 +180,25 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-City.m
 sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Country.mmdb
 # OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
 
-# Download Filebeat for Windows Binary
+# Download Sidecar for Windows Binary
+echo "[INFO] - DOWNLOAD SIDECAR FOR WINDOWS "
+sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar
+sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar -LOs https://github.com/Graylog2/collector-sidecar/releases/download/1.5.1/graylog-sidecar-1.5.1-1.msi
 
-sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Country.mmdb
+# Download Filebeat 
+echo "[INFO] - DOWNLOAD FILEBEAT STANDALONE FOR WINDOWS "
+sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone
+sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone -LOs https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.19.3-windows-x86_64.zip ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
+sudo unzip ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip -d ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
+sudo cp ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64/filebeat.exe ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/
+sudo rm -rf ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64
+sudo rm ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
+
+# Download NXLog - provide a README with instructions on how to do that
+sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition
+sudo touch ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
+echo "How to integrate: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
+echo "Where to download: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
 
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
