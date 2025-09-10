@@ -197,8 +197,8 @@ sudo rm ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windo
 # Download NXLog - provide a README with instructions on how to do that
 sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition
 sudo touch ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
-echo "How to integrate: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
-echo "Where to download: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
+echo "How to integrate: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
+echo "Where to download: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
 
 # Cloning Git Repo containing prepared content
 echo "[INFO] - CLONE GIT REPO "
