@@ -132,6 +132,14 @@ sudo sysctl -p > /dev/null
 installpath="/tmp/graylog"
 sudo mkdir -p ${installpath}
 
+# Determine Graylog Version Binary: Graylog Open / Graylog Enterprise
+if [[ ${GL_GRAYLOG_VERSION} != [Oo]pensource ]]
+then
+  GL_GRAYLOG_VERSION="graylog-enterprise"
+else
+  GL_GRAYLOG_VERSION="graylog"
+fi
+
 # Create Environment Variables
 environmentfile="/etc/environment"
 
@@ -184,8 +192,9 @@ sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Countr
 echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS "
 sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar
 sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar -LOs https://github.com/Graylog2/collector-sidecar/releases/download/1.5.1/graylog-sidecar-1.5.1-1.msi
+sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar -LOs https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml
 
-# Download Elastic Filebeat Standalone
+# Download Elastic Filebeat StandaloneSidecar
 echo "[INFO] - DOWNLOAD ELASTIC FILEBEAT STANDALONE FOR WINDOWS "
 sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone
 sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone -LOs https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.19.3-windows-x86_64.zip ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
@@ -219,8 +228,11 @@ sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKU
 sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
 
 # Copy Post-Install Script to Base Directory
-sudo cp ${installpath}/01_Installation/post-install.sh ${GL_GRAYLOG_SCRIPTS}
-sudo chmod +x ${GL_GRAYLOG_SCRIPTS}/post-install.sh
+if [[ ${GL_GRAYLOG_VERSION} == "graylog-enterprise" ]]
+then
+  sudo cp ${installpath}/01_Installation/post-install.sh ${GL_GRAYLOG_SCRIPTS}
+  sudo chmod +x ${GL_GRAYLOG_SCRIPTS}/post-install.sh
+fi
 
 # Pull Graylog Containers
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
@@ -232,12 +244,6 @@ echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"$(pwgen -N 1 -s 48)\"" | sudo tee -
 echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # The Graylog Version, in case one wants to use Graylog Open
-if [[ ${GL_GRAYLOG_VERSION} != [Oo]pensource ]]
-then
-  GL_GRAYLOG_VERSION="graylog-enterprise"
-else
-  GL_GRAYLOG_VERSION="graylog"
-fi
 echo "GL_GRAYLOG_VERSION=\"${GL_GRAYLOG_VERSION}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
 # Configure Docker Logging
@@ -291,16 +297,33 @@ sudo apt-get update
 sudo apt-get install graylog-sidecar
 sudo rm graylog-sidecar-repository_1-5_all.deb
 
-# Creating Sidecar Token
+# Creating Sidecar Token for Graylog Host
 SIDECAR_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
 
 SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${SIDECAR_ID}/tokens/EVALUATION-LOCAL-SIDECAR -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
 
-# Configuring Graylog Sidecar
+# Configuring Graylog Sidecar for Graylog Host
 SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
 sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
 sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
 sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
+
+# Creating Sidecar Token for Windows Hosts
+SIDECAR_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
+SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${SIDECAR_ID}/tokens/EVALUATION-WINDOWS-SIDECAR -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
+
+# Configuring Graylog Sidecar for Windows Hosts
+SIDECAR_YAML="${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar/sidecar.yml"
+sudo mv ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar/sidecar-windows-msi-example.yml ${SIDECAR_YAML}
+sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
+# Replace Graylog Host URL
+sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GL_GRAYLOG_ADDRESS}/api/\"\g" ${SIDECAR_YAML}
+# Add Graylog Sidecar Token
+sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
+# Disable TLS validation enforcement
+sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YAML}
+# Add Evaluation Tag
+sudo sed -i "s\tags: [[]]\tags: [ \"evaluation\" ]\g" ${SIDECAR_YAML}
 
 # Adding Inputs to make sure Ports map to Nginx configuration
 # Beats Input for Winlogbeat, Auditbeat, Filebeat
@@ -400,6 +423,8 @@ echo ""
 echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GL_GRAYLOG} " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
 echo ""
 
-exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh &
+if [[ ${GL_GRAYLOG_VERSION} == "graylog-enterprise" ]]
+  exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh &
+fi
 
 exit 0
