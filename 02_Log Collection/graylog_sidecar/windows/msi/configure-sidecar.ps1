@@ -1,23 +1,37 @@
-$sidecarYml = Get-Content .\sidecar-example.yml
-# Make sure to have the correct URL of the Graylog API. In case you have no reverse proxy in front of your Graylog Cluster, the Server URL should contain Port 9000, such as https://my.graylog.intern:9000/api
+# Leave the Sidecar Example file created by Graylog"s Sidecar MSI exactly where it is
+$sidecarExampleYmlFile = "$env:ProgramFiles\Graylog\sidecar\sidecar-example.yml"
+$sidecarYmlFile= "$env:ProgramFiles\Graylog\sidecar\sidecar.yml"
+
+# The URL to the Graylog server API.
+# Default: "http://127.0.0.1:9000/api/"
 $serverURL = "https://my.graylog.intern/api"
 
-# Make sure to create an API token (https://go2docs.graylog.org/current/getting_in_log_data/install_sidecar_on_windows.htm#create-an-api-token) for your Sidecar in the Graylog Web UI; such Sidecar tokens can be used for multiple Sidecars
-$serverApiToken = "abc"
+# The API token to use to authenticate against the Graylog server API.
+# How to create an API token (https://go2docs.graylog.org/current/getting_in_log_data/install_sidecar_on_windows.htm#create-an-api-token)
+$serverApiToken = "jpmalvsh9n1pcbrjttkpp393tidkhglhgrkify40esg5ajim00v"
 
-# Configure the Update Interval (how often will Graylog Sidecar check for an updated Collector Configuration); default is 10 seconds, this example uses 60 seconds
-$updateInterval = "60"
+# The update interval in secods. This configures how often the sidecar will
+# contact the Graylog server for keep-alive and configuration update requests.
+# Default: 10
+$updateInterval = "30"
 
-# Configure whether or not the Sidecar will skip the TLS certificate. Should be "false", except in a few cases where you know what you do
+# This configures if the sidecar should skip the verification of TLS connections.
+# Default: false
 $tlsSkipVerify = "false"
 
-# Configure whether or not the Sidecar will send a status to your Graylog Cluster
+# This enables/disables the transmission of detailed sidecar information like
+# collector statues, metrics and log file lists. It can be disabled to reduce
+# load on the Graylog server if needed. (disables some features in the server UI)
+# Default: true
 $sendStatus = "true"
 
 # Add tags to your sidecar.yml that allow the Graylog Cluster to identify what type of server this is and what collector configurations apply best to this system
+# Defining tags is something you can do along your requirements, no constraints (e.g. by server role or installed applications)
+# This example assumes that the sidecar will be installed on a domain controller with the adds role installed
+
 $tags = @"
 tags:
-  - default
+  - windows
   - adds
 "@
 
@@ -40,18 +54,27 @@ collector_binaries_accesslist:
   - "C:\\Program Files\\nxlog\\nxlog.exe"
 "@
 
-$sidecarYml=$sidecarYml.Replace('server_url: "http://127.0.0.1:9000/api/"', "server_url: `"$serverURL`"")
-$sidecarYml=$sidecarYml.Replace('server_api_token: ""', "server_api_token: `"$serverApiToken`"")
-$sidecarYml=$sidecarYml.Replace('update_interval: 10', "update_interval: $updateInterval")
-$sidecarYml=$sidecarYml.Replace('tls_skip_verify: false', "tls_skip_verify: $tlsSkipVerify")
-$sidecarYml=$sidecarYml.Replace('send_status: true', "send_status: $sendStatus")
-$sidecarYml=$sidecarYml.Replace("tags: []", "$tags")
+$sidecarYml = Get-Content $sidecarExampleYmlFile
+
+$sidecarYml=$sidecarYml -Replace "(server_url:\s\S*)", "server_url: `"$serverURL`""
+$sidecarYml=$sidecarYml -Replace "(server_api_token:\s\S*)", "server_api_token: `"$serverApiToken`""
+$sidecarYml=$sidecarYml -Replace "(update_interval:\s\S*)", "update_interval: $updateInterval"
+$sidecarYml=$sidecarYml -Replace "(tls_skip_verify:\s\S*)", "tls_skip_verify: $tlsSkipVerify"
+$sidecarYml=$sidecarYml -Replace "(send_status:\s\S*)", "send_status: $sendStatus"
+$sidecarYml=$sidecarYml -Replace 'tags:\s\S*', $tags
 
 $sidecarYml=$sidecarYml + $collectorAcl
 
-Set-Content $sidecarYml -LiteralPath .\sidecar.yml -Encoding UTF8 -Force
+Set-Content $sidecarYml -LiteralPath $sidecarYmlFile -Encoding UTF8 -Force
 
-# Having all Systems on UTC is a good practice in the logging world. Uncomment based on your requirements. 
+##############################################################################
+#
+# Having all Systems on UTC is a good practice in the logging world: 
+# https://www.tinybird.co/blog-posts/database-timestamps-timezones
+# Uncomment based on your requirements
+#
+##############################################################################
+
 # Set-TimeZone -Id UTC
 
 Exit 
