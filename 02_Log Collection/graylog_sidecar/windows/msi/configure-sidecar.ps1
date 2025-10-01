@@ -82,7 +82,7 @@ $sidecarYml=$sidecarYml -Replace 'tags:\s\S*', $tags
 
 $sidecarYml=$sidecarYml + $collectorAcl
 
-Set-Content $sidecarYml -LiteralPath $sidecarYmlFile -Encoding UTF8 -Force
+Set-Content $sidecarYml -LiteralPath $sidecarYmlFile -Encoding ASCII -Force
 
 ##############################################################################
 #
