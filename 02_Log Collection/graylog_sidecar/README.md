@@ -1,4 +1,3 @@
-# Graylog-Cookbooks
 ## Sidecar Installation
 
 Graylog Sidecar can be installed on [Windows](https://go2docs.graylog.org/current/getting_in_log_data/install_sidecar_on_windows.htm#InstalltheSidecarServiceinWindows) via EXE or MSI Installer. 
