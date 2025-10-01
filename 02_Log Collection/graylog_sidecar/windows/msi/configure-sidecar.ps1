@@ -1,6 +1,8 @@
-# Leave the Sidecar Example file created by Graylog"s Sidecar MSI exactly where it is
-$sidecarExampleYmlFile = "$env:ProgramFiles\Graylog\sidecar\sidecar-example.yml"
-$sidecarYmlFile= "$env:ProgramFiles\Graylog\sidecar\sidecar.yml"
+##############################################################################
+#
+# Make sure to change all of the values below to make them appropriate for your environment
+#
+##############################################################################
 
 # The URL to the Graylog server API.
 # Default: "http://127.0.0.1:9000/api/"
@@ -54,6 +56,21 @@ collector_binaries_accesslist:
   - "C:\\Program Files\\nxlog\\nxlog.exe"
 "@
 
+##############################################################################
+#
+# Make sure you changed all of the values above to make them appropriate for your environment
+#
+##############################################################################
+
+##############################################################################
+#
+# Do not touch the following lines
+#
+##############################################################################
+
+$sidecarExampleYmlFile = "$env:ProgramFiles\Graylog\sidecar\sidecar-example.yml"
+$sidecarYmlFile= "$env:ProgramFiles\Graylog\sidecar\sidecar.yml"
+
 $sidecarYml = Get-Content $sidecarExampleYmlFile
 
 $sidecarYml=$sidecarYml -Replace "(server_url:\s\S*)", "server_url: `"$serverURL`""
@@ -71,7 +88,7 @@ Set-Content $sidecarYml -LiteralPath $sidecarYmlFile -Encoding UTF8 -Force
 #
 # Having all Systems on UTC is a good practice in the logging world: 
 # https://www.tinybird.co/blog-posts/database-timestamps-timezones
-# Uncomment based on your requirements
+# Consider uncommenting the line below that sets system time to UTC
 #
 ##############################################################################
 
