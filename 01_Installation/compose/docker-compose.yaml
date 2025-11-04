@@ -68,7 +68,7 @@ services:
       options: 
         gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
+      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode1"
       - "node.roles=cluster_manager,data"
@@ -100,7 +100,7 @@ services:
       options: 
         gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
+      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode2"
       - "node.roles=cluster_manager,data"
@@ -132,7 +132,7 @@ services:
       options: 
         gelf-address: ${GL_GRAYLOG_LOG_TARGET}
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
+      - "OPENSEARCH_JAVA_OPTS=-Xms1024m -Xmx1024m"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode3"
       - "node.roles=cluster_manager,data"

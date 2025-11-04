@@ -11,7 +11,7 @@ GRAYLOG_ROOT_TIMEZONE = "UTC"
 
 ## Set Graylog Java Heap Size
 #
-GRAYLOG_SERVER_JAVA_OPTS = "-Xms4096m -Xmx4096m"
+GRAYLOG_SERVER_JAVA_OPTS = "-Xms1024m -Xmx1024m"
 
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
