@@ -172,7 +172,7 @@ source ${environmentfile}
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,warm_tier}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,assetdata,contentpacks,datalake,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,sources/{scripts,binaries,other}}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,assetdata,contentpacks,datalake,inputs,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,sources/{scripts,binaries,other}}
 
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "

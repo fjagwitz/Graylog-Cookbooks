@@ -189,7 +189,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/${GL_GRAYLOG_VERSION}:6.3"
+    image: "graylog/${GL_GRAYLOG_VERSION}:7.0"
     hostname: "graylog1"
     logging: 
       driver: "gelf"
@@ -209,16 +209,18 @@ services:
       - "graylog-data-01:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
-      # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/datalake"
-      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
-      - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
       # only required if you want to use predefined content packs
       - "${GL_GRAYLOG_CONTENTPACKS}:/etc/graylog/server/contentpacks:ro"
-      # only required if you want to work with Geolocation Data
-      - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
+      # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
+      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/datalake"
+      # only required if you want to use encrypted Syslog (stores the required certificates)
+      - "${GL_GRAYLOG_INPUT}:/etc/graylog/server/inputs:ro"
       # only required if you want to work with Lookup Tables for Enrichment
       - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
+      # only required if you want to work with Geolocation Data
+      - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
+      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
+      - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
     restart: "on-failure"
 
   graylog2:
