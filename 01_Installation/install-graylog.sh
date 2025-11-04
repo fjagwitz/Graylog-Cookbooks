@@ -50,7 +50,7 @@ else
 fi
 
 echo "[INFO] - CHECKING CPU CORES "
-if [[ $numberCores -lt 8 ]]
+if [[ $numberCores -lt 4 ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXITING "
   exit
@@ -68,7 +68,7 @@ else
 fi
 
 echo "[INFO] - CHECKING MEMORY "
-if [[ $randomAccessMemory -lt 32000 ]]
+if [[ $randomAccessMemory -lt 8000 ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "
   exit
