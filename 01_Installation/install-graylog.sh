@@ -425,6 +425,7 @@ echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWOR
 echo ""
 
 if [[ ${GL_GRAYLOG_VERSION} == "graylog-enterprise" ]]
+then
   exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh &
 fi
 
