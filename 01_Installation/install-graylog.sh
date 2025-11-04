@@ -157,6 +157,7 @@ echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmen
 echo "GL_GRAYLOG_ASSETDATA=\"${GL_GRAYLOG}/assetdata\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_INPUT_TLS=\"${GL_GRAYLOG}/input_tls\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG}/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG}/maxmind\"" | sudo tee -a ${environmentfile} > /dev/null
 echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG}/nginx1\"" | sudo tee -a ${environmentfile} > /dev/null
@@ -172,7 +173,7 @@ source ${environmentfile}
 # Create required Folders in the Filesystem
 echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,warm_tier}
-sudo mkdir -p ${GL_GRAYLOG}/{archives,assetdata,contentpacks,datalake,inputs,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,sources/{scripts,binaries,other}}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,assetdata,contentpacks,datalake,input_tls,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,sources/{scripts,binaries,other}}
 
 # Set Folder permissions
 echo "[INFO] - SET FOLDER PERMISSIONS "
