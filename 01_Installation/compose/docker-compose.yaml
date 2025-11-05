@@ -5,12 +5,13 @@ services:
     depends_on:
       - "graylog1"
     ports: 
-      # WebUI
+      # Graylog WebUI for User/Admin Access
       - 443:443
       - 80:80
-      # API
+      # Graylog API for System Access
       - 3443:3443
       - 380:380
+      # Graylog Inputs for Log Ingestion
       # Syslog Input
       - 514:514
       - 514:514/udp
@@ -20,9 +21,8 @@ services:
       # RAW Input 
       - 5555:5555
       - 5555:5555/udp
-      # Fortinet Input 
-      - 5556:5556
-      - 5556:5556/udp
+      # Syslog TCP over TLS Input
+      - 6514:6514
       # Graylog Gelf Input (Self-Monitoring)
       - 9900:9900
       - 9900:9900/udp 
