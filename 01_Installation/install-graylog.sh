@@ -50,7 +50,7 @@ else
 fi
 
 echo "[INFO] - CHECKING CPU CORES "
-if [[ $numberCores -lt 4 ]]
+if [[ $numberCores -lt 8 ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXITING "
   exit
@@ -68,7 +68,7 @@ else
 fi
 
 echo "[INFO] - CHECKING MEMORY "
-if [[ $randomAccessMemory -lt 8000 ]]
+if [[ $randomAccessMemory -lt 30000 ]]
 then
   echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "
   exit
@@ -78,7 +78,7 @@ fi
 
 # Installing additional Tools on Ubuntu
 echo "[INFO] - INSTALL ADDITIONAL TOOLS "
-sudo apt-get -qq install vim git jq tcpdump pwgen samba acl htop at unzip 2>/dev/null >/dev/null
+sudo apt-get -qq install vim git jq tcpdump pwgen samba acl htop unzip 2>/dev/null >/dev/null
 installcheck=$(apt list --installed 2>/dev/null | grep samba)
 
 if [ "$installcheck" == "" ]
@@ -175,10 +175,10 @@ echo "[INFO] - CREATE FOLDERS "
 sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,warm_tier}
 sudo mkdir -p ${GL_GRAYLOG}/{archives,assetdata,contentpacks,datalake,input_tls,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,sources/{scripts,binaries,other}}
 
-# Set Folder permissions
+# Set Folder permissions for folders where containers need write permissions; INPUT_TLS needs ownership as private keys are usually set to be readable by owner only (600)
 echo "[INFO] - SET FOLDER PERMISSIONS "
 sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
-sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_DATALAKE} ${GL_GRAYLOG_NOTIFICATIONS}
+sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_DATALAKE} ${GL_GRAYLOG_INPUT_TLS} ${GL_GRAYLOG_NOTIFICATIONS}
 
 # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
 echo "[INFO] - DOWNLOAD MAXMIND DATABASES "

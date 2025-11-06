@@ -11,7 +11,7 @@ GRAYLOG_ROOT_TIMEZONE = "UTC"
 
 ## Set Graylog Java Heap Size
 #
-GRAYLOG_SERVER_JAVA_OPTS = "-Xms1024m -Xmx1024m"
+GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx8g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
 
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
@@ -57,6 +57,10 @@ GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX = ""
 GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL = ""
 GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = ""
 
+## Journal Configurations
+GRAYLOG_MESSAGE_JOURNAL_MAX_AGE = 24h
+GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 10gb
+
 ## Grafana Metrics Monitoring
 #
 GRAYLOG_PROMETHEUS_EXPORTER_ENABLED = "true"
@@ -66,4 +70,3 @@ GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
 #
 GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-evaluation-events"
 GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-evaluation-system-events"
-
