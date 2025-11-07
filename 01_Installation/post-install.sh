@@ -24,6 +24,7 @@ do
 done
 
 if [ $GL_GRAYLOG_LICENSE_ENTERPRISE -eq "true" ]
+then
   # Adding Graylog Forwarder Input
   # 
   echo "[INFO] - CREATE GRAYLOG FORWARDER INPUT "
@@ -113,7 +114,7 @@ do
 done
 
 if [ $GL_GRAYLOG_LICENSE_SECURITY -eq "true" ]
-
+then
   # Disabling Investigation AI Reports
   #
   active_ai_report=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
