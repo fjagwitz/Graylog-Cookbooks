@@ -23,7 +23,7 @@ do
   sleep 1m
 done
 
-if [ $GL_GRAYLOG_LICENSE_ENTERPRISE -eq "true" ]
+if [[ $GL_GRAYLOG_LICENSE_ENTERPRISE -eq "true" ]]
 then
   # Adding Graylog Forwarder Input
   # 
