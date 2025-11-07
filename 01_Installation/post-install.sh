@@ -16,7 +16,7 @@ GL_GRAYLOG_LICENSE_SECURITY=""
 ## Configuring Enterprise Features
 #
 
-while [ $GL_GRAYLOG_LICENSE_ENTERPRISE -ne "true" ]
+while [[ $GL_GRAYLOG_LICENSE_ENTERPRISE -ne "true" ]]
 do 
   echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
   GL_GRAYLOG_LICENSE_ENTERPRISE=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
@@ -45,7 +45,7 @@ then
   # Adding Warning Message to avoid Production Use
   #
   echo "[INFO] - CREATE WARNING MESSAGE "
-  warning_message=$(curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[].isActive)
+  warning_message=$(curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[].isActive) 2>/dev/null >/dev/null
 
   if [[ $warning_message != "true" ]] 
   then
@@ -100,20 +100,20 @@ then
   # Cleanup /etc/environment
   # 
   grep -vwE "(GL_GRAYLOG_MONITORING_STREAM)" $environmentfile | sudo tee $environmentfile 2>/dev/null >/dev/null
-
+fi
 
 #
 ## Configuring Security Features
 #
 
-while [ $GL_GRAYLOG_LICENSE_SECURITY -ne "true" ]
+while [[ $GL_GRAYLOG_LICENSE_SECURITY -ne "true" ]]
 do 
   echo "[INFO] - WAITING FOR GRAYLOG SECURITY LICENSE TO BE PROVISIONED "
   GL_GRAYLOG_LICENSE_SECURITY=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
   sleep 1m
 done
 
-if [ $GL_GRAYLOG_LICENSE_SECURITY -eq "true" ]
+if [[ $GL_GRAYLOG_LICENSE_SECURITY -eq "true" ]]
 then
   # Disabling Investigation AI Reports
   #
