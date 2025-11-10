@@ -28,6 +28,8 @@ do
   sleep 5s
 done
 
+sleep 1m
+
 echo "[INFO] - STOPPING GRAYLOG STACK "
 
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 2>/dev/null >/dev/null
