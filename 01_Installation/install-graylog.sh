@@ -339,7 +339,7 @@ GL_MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u 
 GL_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"index_set_id\": ${GL_MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
 
 # Adding the Stream to the environment file to prepare for the Post-Install Script
-echo "GL_GRAYLOG_MONITORING_STREAM=\"${GL_MONITORING_STREAM}\"" | sudo tee -a $environmentfile 2>/dev/null >/dev/null
+#echo "GL_GRAYLOG_MONITORING_STREAM=\"${GL_MONITORING_STREAM}\"" | sudo tee -a $environmentfile 2>/dev/null >/dev/null
 
 # Creating Stream Rule for Docker Logs from Graylog Evaluation Stack
 curl -s http://localhost/api/streams/${GL_MONITORING_STREAM}/rules -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${GL_MONITORING_INPUT} }" 2>/dev/null >/dev/null
@@ -391,7 +391,7 @@ echo ""
 
 if [[ ${GL_GRAYLOG_VERSION} == "graylog-enterprise" ]]
 then
-  exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh &
+  exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh ${GL_GRAYLOG} ${GL_MONITORING_STREAM} &
 fi
 
 exit 0

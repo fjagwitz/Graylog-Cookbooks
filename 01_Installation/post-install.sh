@@ -1,9 +1,11 @@
 #!/bin/bash
-environmentfile="/etc/environment"
+GL_GRAYLOG=$1
+GL_GRAYLOG_MONITORING_STREAM=$2
+
+environmentfile=$3
 source $environmentfile
 
 echo "[INFO] - STARTING POST-INSTALLATION STEPS "
-
 
 ## Pass Info about Monitoring Stream without using /etc/environment
 ## Use API Token instead of basic authentication
@@ -19,7 +21,7 @@ GL_GRAYLOG_LICENSE_SECURITY=""
 ## Configuring Enterprise Features
 #
 
-while [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} -ne "true" ]]
+while [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
 do 
   echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
   GL_GRAYLOG_LICENSE_ENTERPRISE=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
@@ -71,7 +73,7 @@ for input in $(curl -s http://localhost/api/cluster/inputstates -u "${GL_GRAYLOG
   curl -s http://localhost/api/cluster/inputstates/$input -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
 
-if [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} -eq "true" ]]
+if [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} == "true" ]]
 then
   # Adding Graylog Forwarder Input
   # 
@@ -147,21 +149,21 @@ then
 
   # Cleanup /etc/environment
   # 
-  grep -vwE "(GL_GRAYLOG_MONITORING_STREAM)" $environmentfile | sudo tee $environmentfile 2>/dev/null >/dev/null
+  # grep -vwE "(GL_GRAYLOG_MONITORING_STREAM)" $environmentfile | sudo tee $environmentfile 2>/dev/null >/dev/null
 fi
 
 #
 ## Configuring Security Features
 #
 
-while [[ $GL_GRAYLOG_LICENSE_SECURITY -ne "true" ]]
+while [[ $GL_GRAYLOG_LICENSE_SECURITY != "true" ]]
 do 
   echo "[INFO] - WAITING FOR GRAYLOG SECURITY LICENSE TO BE PROVISIONED "
   GL_GRAYLOG_LICENSE_SECURITY=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
   sleep 1m
 done
 
-if [[ $GL_GRAYLOG_LICENSE_SECURITY -eq "true" ]]
+if [[ $GL_GRAYLOG_LICENSE_SECURITY == "true" ]]
 then
   # Disabling Investigation AI Reports
   #
