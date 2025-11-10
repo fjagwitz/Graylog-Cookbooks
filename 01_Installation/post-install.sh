@@ -2,6 +2,9 @@
 environmentfile="/etc/environment"
 source $environmentfile
 
+echo "[INFO] - STARTING POST-INSTALLATION STEPS "
+
+
 ## Pass Info about Monitoring Stream without using /etc/environment
 ## Use API Token instead of basic authentication
 
@@ -16,16 +19,59 @@ GL_GRAYLOG_LICENSE_SECURITY=""
 ## Configuring Enterprise Features
 #
 
-while [[ $GL_GRAYLOG_LICENSE_ENTERPRISE -ne "true" ]]
+while [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} -ne "true" ]]
 do 
   echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
   GL_GRAYLOG_LICENSE_ENTERPRISE=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
   sleep 1m
 done
 
-sleep 1m
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
 
-if [[ $GL_GRAYLOG_LICENSE_ENTERPRISE -eq "true" ]]
+
+while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
+do
+  echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
+  sleep 10s
+done
+
+# Adding Inputs to make sure Ports map to Nginx configuration
+#
+# Port 514 Syslog UDP Input for Network Devices
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 514 Syslog TCP Input for Network Devices
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 5045 Beats Input for Winlogbeat, Auditbeat, Filebeat
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+  
+# Port 5555 RAW TCP Input
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    
+# Port 5555 RAW UDP Input
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 6514 Syslog TCP over TLS Input for Network Devices
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 6514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": true, "tls_key_password": "test123" }}' 2>/dev/null >/dev/null
+
+# Port 12201 GELF TCP Input for NXLog
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 12201 GELF UDP Input for NXLog
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Stopping all Inputs to allow a controlled Log Source Onboarding
+echo "[INFO] - STOPPING ALL INPUTS" 
+for input in $(curl -s http://localhost/api/cluster/inputstates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET | jq -r '.[] | map(.) | .[].id'); do
+  curl -s http://localhost/api/cluster/inputstates/$input -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+done
+
+if [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} -eq "true" ]]
 then
   # Adding Graylog Forwarder Input
   # 
