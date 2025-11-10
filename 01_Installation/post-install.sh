@@ -109,16 +109,18 @@ then
   curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"$active_backend\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":\"P7D\"}" 2>/dev/null >/dev/null
   
   echo "[INFO] - CONFIGURE DATALAKE FOR SELF-MONITORING STREAM"
-  curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/stream/config/enable -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"stream_ids\":[\"${GL_GRAYLOG_MONITORING_STREAM}\"],\"enabled\":true}" 2>/dev/null >/dev/null
+  curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/stream/config/enable -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"stream_ids\":[\"${GL_GRAYLOG_MONITORING_STREAM}\"],\"enabled\":true}" 2>/dev/null >/dev/null
 
 
   # Activate Illuminate for Linux Auditbeat
   #
-  echo "[INFO] - INSTALL GRAYLOG SIDECAR "
+  echo "[INFO] - INSTALL ILLUMINATE PACKAGES FOR AUDITBEAT "
 
   curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"processing_pack_ids":["illuminate-linux-auditbeat"],"spotlight_pack_ids":["61d75c3e-3551-4b97-bbb5-ea8181472cb0"]}}' 2>/dev/null >/dev/null
 
   # Installing Graylog Sidecar
+  echo "[INFO] - INSTALL GRAYLOG SIDECAR "
+
   sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
   sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
   sudo apt-get update 2>/dev/null >/dev/null
@@ -136,9 +138,12 @@ then
   sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
   sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
 
+  # Starting the Sidecar Service
+  echo "[INFO] - START GRAYLOG SIDECAR "
 
-  # Apply warm tier configuration for Linux Auditbeat Index
-  #
+  sudo graylog-sidecar -service install 2>/dev/null >/dev/null
+  sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
+  sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
 
   # Cleanup /etc/environment
   # 

@@ -392,11 +392,6 @@ curl -s http://${GL_GRAYLOG_ADMIN}:admin@localhost/grafana/api/admin/users/1/pas
 ## Configure Prometheus Connector 
 curl -s http://${GL_GRAYLOG_ADMIN}:$GL_GRAYLOG_PASSWORD@localhost/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null > /dev/null 
 
-# Starting the Sidecar Service
-sudo graylog-sidecar -service install 2>/dev/null >/dev/null
-sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
-sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
-
 echo ""
 echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
 echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG}/your_graylog_credentials.txt "
