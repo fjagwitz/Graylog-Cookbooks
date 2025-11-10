@@ -9,6 +9,7 @@ SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-yes}
 
 if [[ ${SNAPSHOT_CREATED} == "no" ]]
 then
+  echo "[INFO] - PLEASE CREATE A SNAPSHOT BEFORE YOU CONTINUE "
   exit
 fi
 
