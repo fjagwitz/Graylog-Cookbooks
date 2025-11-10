@@ -25,22 +25,24 @@ while [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
 do 
   echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
   GL_GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
-  sleep 1m
+  sleep 5s
 done
 
-echo "[INFO] - STOPPING GRAYLOG STACK "
-
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 2>/dev/null >/dev/null
-
-echo "[INFO] - STARTING GRAYLOG STACK "
-
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d 2>/dev/null >/dev/null
-
-while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
-do
-  echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
-  sleep 10s
-done
+## DEBUG
+#
+#echo "[INFO] - STOPPING GRAYLOG STACK "
+#
+#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 2>/dev/null >/dev/null
+#
+#echo "[INFO] - STARTING GRAYLOG STACK "
+#
+#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d 2>/dev/null >/dev/null
+#
+#while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
+#do
+#  echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
+#  sleep 10s
+#done
 
 if [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} == "true" ]]
 then
@@ -152,7 +154,7 @@ while [[ $GL_GRAYLOG_LICENSE_SECURITY != "true" ]]
 do 
   echo "[INFO] - WAITING FOR GRAYLOG SECURITY LICENSE TO BE PROVISIONED "
   GL_GRAYLOG_LICENSE_SECURITY=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
-  sleep 1m
+  sleep 5s
 done
 
 if [[ $GL_GRAYLOG_LICENSE_SECURITY == "true" ]]
