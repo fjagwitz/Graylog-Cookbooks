@@ -28,21 +28,19 @@ do
   sleep 5s
 done
 
-## DEBUG
-#
-#echo "[INFO] - STOPPING GRAYLOG STACK "
-#
-#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 2>/dev/null >/dev/null
-#
-#echo "[INFO] - STARTING GRAYLOG STACK "
-#
-#sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d 2>/dev/null >/dev/null
-#
-#while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
-#do
-#  echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
-#  sleep 10s
-#done
+echo "[INFO] - STOPPING GRAYLOG STACK "
+
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 2>/dev/null >/dev/null
+
+echo "[INFO] - STARTING GRAYLOG STACK "
+
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d 2>/dev/null >/dev/null
+
+while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
+do
+  echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
+  sleep 5s
+done
 
 if [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} == "true" ]]
 then
@@ -116,6 +114,7 @@ then
 
   # Activate Illuminate for Linux Auditbeat
   #
+  echo "[INFO] - INSTALL GRAYLOG SIDECAR "
 
   curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"processing_pack_ids":["illuminate-linux-auditbeat"],"spotlight_pack_ids":["61d75c3e-3551-4b97-bbb5-ea8181472cb0"]}}' 2>/dev/null >/dev/null
 
