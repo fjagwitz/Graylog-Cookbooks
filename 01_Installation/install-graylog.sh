@@ -408,7 +408,7 @@ echo ""
 
 if [[ ${GL_GRAYLOG_VERSION} == "graylog-enterprise" ]]
 then
-  exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh ${GL_GRAYLOG} ${GL_MONITORING_STREAM} &
+  exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh ${GL_GRAYLOG} ${GL_MONITORING_STREAM} $environmentfile &
 fi
 
 exit 0
