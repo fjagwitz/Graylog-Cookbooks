@@ -28,8 +28,13 @@ do
   sleep 1m
 done
 
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d
+echo "[INFO] - STOPPING GRAYLOG STACK "
+
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml down 2>/dev/null >/dev/null
+
+echo "[INFO] - STARTING GRAYLOG STACK "
+
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d 2>/dev/null >/dev/null
 
 while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
 do
@@ -81,12 +86,12 @@ then
   # Enabling Warm Tier 
   #
   echo "[INFO] - ENABLE WARM TIER "
-  curl -s http://localhost/api/plugins/org.graylog.plugins.datatiering/datatiering/repositories -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"fs","name":"linux_auditbeat","location":"/usr/share/opensearch/warm_tier"}' 2>/dev/null >/dev/null
+  warm_tier_name=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datatiering/datatiering/repositories -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"fs","name":"warm_tier","location":"/usr/share/opensearch/warm_tier"}' | jq -r .name) 2>/dev/null >/dev/null
 
   # Creating Index Set Template for Evaluation Purposes
   #
   echo "[INFO] - CREATE EVALUATION INDEX SET TEMPLATE "
-  index_set_template=$(curl -s http://localhost/api/system/indices/index_sets/templates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title": "Evaluation Storage","description": "Use case: Graylog Product Evaluation","index_set_config": {"shards": 1,"replicas": 0,"index_optimization_max_num_segments": 1,"index_optimization_disabled": false,"field_type_refresh_interval": 5000,"data_tiering": {"type": "hot_warm","index_lifetime_min": "P7D","index_lifetime_max": "P10D","warm_tier_enabled": true,"index_hot_lifetime_min": "P3D","warm_tier_repository_name": "warm_tier","archive_before_deletion": true},"index_analyzer": "standard","use_legacy_rotation": false}}' | jq -r .id) 
+  index_set_template=$(curl -s http://localhost/api/system/indices/index_sets/templates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"title\": \"Evaluation Storage\",\"description\": \"Use case: Graylog Product Evaluation\",\"index_set_config\": {\"shards\": 1,\"replicas\": 0,\"index_optimization_max_num_segments\": 1,\"index_optimization_disabled\": false,\"field_type_refresh_interval\": 5000,\"data_tiering\": {\"type\": \"hot_warm\",\"index_lifetime_min\": \"P7D\",\"index_lifetime_max\": \"P10D\",\"warm_tier_enabled\": true,\"index_hot_lifetime_min\": \"P3D\",\"warm_tier_repository_name\": \"$warm_tier_name\",\"archive_before_deletion\": true},\"index_analyzer\": \"standard\",\"use_legacy_rotation\": false}}" | jq -r .id) 
 
   echo "[INFO] - CONFIGURE EVALUATION INDEX SET TEMPLATE AS DEFAULT"
   curl -s http://localhost/api/system/indices/index_set_defaults -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"$index_set_template\"}" 2>/dev/null >/dev/null
@@ -94,10 +99,11 @@ then
   # Creating Data Lake Backend
   #
   echo "[INFO] - CREATE DATALAKE "
-  active_backend=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/backends -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Data Lake","description":"Data Lake","settings":{"type":"fs-1","output_path":"/usr/share/graylog/data/datalake","usage_threshold":15}}' | jq -r .id) 2>/dev/null >/dev/null
+
+  active_backend=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/backends -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"File System Data Lake","description":"Data Lake on the local Filesystem","settings":{"type":"fs-1","output_path":"/usr/share/graylog/data/datalake","usage_threshold":80}}' | jq -r .id) 2>/dev/null >/dev/null
 
   echo "[INFO] - ENABLE DATALAKE "
-  curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"$active_backend\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":null}" 2>/dev/null >/dev/null
+  curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"$active_backend\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":null}" 2>/dev/null >/dev/null
 
   echo "[INFO] - CONFIGURE DATALAKE MAX RETENTION OF 7 DAYS "
   curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"$active_backend\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":\"P7D\"}" 2>/dev/null >/dev/null
@@ -105,8 +111,30 @@ then
   echo "[INFO] - CONFIGURE DATALAKE FOR SELF-MONITORING STREAM"
   curl -s http://localhost/api/plugins/org.graylog.plugins.datawarehouse/data_warehouse/stream/config/enable -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"stream_ids\":[\"${GL_GRAYLOG_MONITORING_STREAM}\"],\"enabled\":true}" 2>/dev/null >/dev/null
 
+
   # Activate Illuminate for Linux Auditbeat
   #
+
+  curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"processing_pack_ids":["illuminate-linux-auditbeat"],"spotlight_pack_ids":["61d75c3e-3551-4b97-bbb5-ea8181472cb0"]}}' 2>/dev/null >/dev/null
+
+  # Installing Graylog Sidecar
+  sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+  sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+  sudo apt-get update 2>/dev/null >/dev/null
+  sudo apt-get install graylog-sidecar 2>/dev/null >/dev/null
+  sudo rm graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+
+  # Creating Sidecar Token for Graylog Host
+  SIDECAR_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
+
+  SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${SIDECAR_ID}/tokens/EVALUATION-LOCAL-SIDECAR -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
+
+  # Configuring Graylog Sidecar for Graylog Host
+  SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
+  sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
+  sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
+  sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
+
 
   # Apply warm tier configuration for Linux Auditbeat Index
   #

@@ -326,24 +326,6 @@ for input in $(curl -s http://localhost/api/cluster/inputstates -u "${GL_GRAYLOG
   curl -s http://localhost/api/cluster/inputstates/$input -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 done
 
-# Installing Graylog Sidecar
-sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
-sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
-sudo apt-get update 2>/dev/null >/dev/null
-sudo apt-get install graylog-sidecar 2>/dev/null >/dev/null
-sudo rm graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
-
-# Creating Sidecar Token for Graylog Host
-SIDECAR_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
-
-SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${SIDECAR_ID}/tokens/EVALUATION-LOCAL-SIDECAR -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
-
-# Configuring Graylog Sidecar for Graylog Host
-SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
-sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
-sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
-sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
-
 # Creating Sidecar Token for Windows Hosts
 SIDECAR_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
 SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${SIDECAR_ID}/tokens/EVALUATION-WINDOWS-SIDECAR -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
