@@ -1,0 +1,410 @@
+#!/bin/bash
+GL_GRAYLOG_VERSION_NUMBER="7.0"
+
+echo "[INFO] - PREPARING THE SYSTEM FOR GRAYLOG ${GL_GRAYLOG_VERSION_NUMBER}"
+
+# Request Snapshot creation
+read -p "[INPUT] - Please confirm that you created a Snapshot of this VM before running this Script [yes/no]]: " SNAPSHOT_CREATED
+SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-yes}
+
+if [[ ${SNAPSHOT_CREATED} == "no" ]]
+then
+  echo "[INFO] - PLEASE CREATE A SNAPSHOT BEFORE YOU CONTINUE "
+  exit
+fi
+
+# Request System Credentials
+read -p "[INPUT] - Please add the name of your central Administration User (must not exist in /etc/passwd) [admin]: " GL_GRAYLOG_ADMIN
+GL_GRAYLOG_ADMIN=${GL_GRAYLOG_ADMIN:-admin}
+read -p "[INPUT] - Please add the central Administration Password [MyP@ssw0rd]: "$'\n' -s GL_GRAYLOG_PASSWORD
+GL_GRAYLOG_PASSWORD=${GL_GRAYLOG_PASSWORD:-MyP@ssw0rd}
+read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " GL_GRAYLOG_ADDRESS
+GL_GRAYLOG_ADDRESS=${GL_GRAYLOG_ADDRESS:-eval.graylog.local}
+read -p "[INPUT] - Please add the folder where you want Graylog to be installed [/opt]: " GL_GRAYLOG_FOLDER
+GL_GRAYLOG_FOLDER=${GL_GRAYLOG_FOLDER:-/opt}
+read -p "[INPUT] - Please add the Graylog Version you want to install (Opensource / Enterprise) [Enterprise]: " GL_GRAYLOG_VERSION
+GL_GRAYLOG_VERSION=${GL_GRAYLOG_VERSION:-enterprise}
+
+# Check Minimum Requirements on Linux Server
+numberCores=$(cat /proc/cpuinfo | grep processor | wc -l)
+randomAccessMemory=$(printf '%.*f\n' 0 $(grep MemTotal /proc/meminfo | awk '{print $2/1024 }' | awk -F'.' '{print $1 }'))
+operatingSystem=$(lsb_release -d | awk -F":" '{print $2}' | awk -F" " '{print $1}' | xargs)
+
+connectionTest=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 )
+
+echo "[INFO] - VERIFYING INTERNET CONNECTION"
+if [ "${connectionTest}" != "" ]
+then
+  echo "[INFO] - INTERNET CONNECTION OK "
+else
+  echo "[ERROR] - INTERNET CONNECTION NOT ACTIVE, CHECK YOUR PROXY SETTINGS - EXITING "
+  exit
+fi
+
+echo "[INFO] - CHECKING OPERATING SYSTEM "
+if [[ "$operatingSystem" == "Ubuntu" ]]
+then
+  echo "[INFO] - OPERATING SYSTEM CHECK SUCCESSFUL: $(lsb_release -d | awk -F":" '{print $2}' | xargs) "
+else
+  echo "[ERROR] - OPERATING SYSTEM CHECK FAILED: $(lsb_release -d | awk -F":" '{print $2}' | xargs) "
+  exit
+fi
+
+echo "[INFO] - CHECKING CPU CORES "
+if [[ $numberCores -lt 8 ]]
+then
+  echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 8 CPU CORES - EXITING "
+  exit
+else
+  echo "[INFO] - CPU CHECK SUCCESSFUL: $numberCores CORES "
+fi
+
+echo "[INFO] - CHECKING CPU FLAGS "
+if [[ $(lscpu | grep Flags | grep avx) == "" ]]
+then
+  echo "[ERROR] - THIS SYSTEM NEEDS A CPU WITH AVX FLAGS - EXITING "
+  exit
+else
+  echo "[INFO] - CPU CHECK SUCCESSFUL: AVX FLAGS PRESENT "
+fi
+
+echo "[INFO] - CHECKING MEMORY "
+if [[ $randomAccessMemory -lt 30000 ]]
+then
+  echo "[ERROR] - THIS SYSTEM NEEDS AT LEAST 32 GB MEMORY - EXITING "
+  exit
+else
+  echo "[INFO] - MEMORY CHECK SUCCESSFUL: $randomAccessMemory MB "
+fi
+
+# Installing additional Tools on Ubuntu
+echo "[INFO] - INSTALL ADDITIONAL TOOLS "
+sudo apt-get -qq install vim git jq tcpdump pwgen samba acl htop unzip 2>/dev/null >/dev/null
+installcheck=$(apt list --installed 2>/dev/null | grep samba)
+
+if [ "$installcheck" == "" ]
+then
+  echo "[ERROR] - APT PACKAGE INSTALLATION FAILED - EXITING "
+  exit 
+fi
+
+if [[ "$(command -v docker)" == "/usr/bin/docker" ]]; 
+then
+  echo "[INFO] - DOCKER CHECK SUCCESSFUL, CONTINUE "
+else
+  echo "[INFO] - DOCKER CHECK FAILED, WILL BE INSTALLED NOW "
+  # Removing preconfigured Docker Installation from Ubuntu (just in case)
+  echo "[INFO] - DOCKER CLEANUP "
+  for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get -qq remove $pkg 2>/dev/null >/dev/null; done
+
+  # Adding Docker Repository
+  echo "[INFO] - ADDING DOCKER REPOSITORY "
+  sudo apt-get -qq install ca-certificates curl 2>/dev/null >/dev/null
+  sudo install -m 0755 -d /etc/apt/keyrings > /dev/null
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc > /dev/null
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+  echo   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get -qq update 2>/dev/null >/dev/null
+
+  # Installing Docker on Ubuntu
+  echo "[INFO] - DOCKER INSTALLATION "
+  sudo apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>/dev/null >/dev/null
+
+  # Checking Docker Installation Success
+  if [[ "$(command -v docker)" == "/usr/bin/docker" ]]
+  then
+    echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
+  else
+    echo "[ERROR] - DOCKER INSTALLATION FAILED, EXITING"
+    exit
+  fi
+fi
+
+# Adding current User to Docker Admin Group
+sudo usermod -aG docker $USER
+
+# Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.15/install-and-configure/install-opensearch/index/#important-settings)
+echo "[INFO] - SET OPENSEARCH SETTINGS "
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf > /dev/null
+sudo sysctl -p > /dev/null
+
+# Configure temporary installpath
+installpath="/tmp/graylog"
+sudo mkdir -p ${installpath}
+
+# Determine Graylog Version Binary: Graylog Open / Graylog Enterprise
+if [[ ${GL_GRAYLOG_VERSION} != [Oo]pensource ]]
+then
+  GL_GRAYLOG_VERSION="graylog-enterprise"
+else
+  GL_GRAYLOG_VERSION="graylog"
+fi
+
+# Create Environment Variables
+environmentfile="/etc/environment"
+
+echo "[INFO] - GRAYLOG INSTALLATION ABOUT TO START "
+echo "[INFO] - SET ENVIRONMENT VARIABLES "
+
+GL_GRAYLOG="${GL_GRAYLOG_FOLDER}/graylog" 
+echo "GL_GRAYLOG_INSTALLPATH=\"${GL_GRAYLOG}\"" | sudo tee -a ${environmentfile} > /dev/null
+
+GL_COMPOSE_ENV="${GL_GRAYLOG}/.env"
+GL_GRAYLOG_COMPOSE_ENV="${GL_GRAYLOG}/graylog.env"
+GL_GRAYLOG_SCRIPTS="${GL_GRAYLOG}/sources/scripts"
+
+echo "GL_GRAYLOG_ARCHIVES=\"${GL_GRAYLOG}/archives\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_ASSETDATA=\"${GL_GRAYLOG}/assetdata\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_DATALAKE=\"${GL_GRAYLOG}/datalake\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_CONTENTPACKS=\"${GL_GRAYLOG}/contentpacks\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_INPUT_TLS=\"${GL_GRAYLOG}/input_tls\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_LOOKUPTABLES=\"${GL_GRAYLOG}/lookuptables\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_MAXMIND=\"${GL_GRAYLOG}/maxmind\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_NGINX1=\"${GL_GRAYLOG}/nginx1\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_NGINX2=\"${GL_GRAYLOG}/nginx2\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_NOTIFICATIONS=\"${GL_GRAYLOG}/notifications\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_PROMETHEUS=\"${GL_GRAYLOG}/prometheus\"" | sudo tee -a ${environmentfile} > /dev/null
+echo "GL_GRAYLOG_SOURCES=\"${GL_GRAYLOG}/sources\"" | sudo tee -a ${environmentfile} > /dev/null
+
+
+echo "GL_OPENSEARCH_DATA=\"${GL_GRAYLOG_FOLDER}/opensearch\"" | sudo tee -a ${environmentfile} > /dev/null
+source ${environmentfile}
+
+# Create required Folders in the Filesystem
+echo "[INFO] - CREATE FOLDERS "
+sudo mkdir -p ${GL_OPENSEARCH_DATA}/{datanode1,datanode2,datanode3,warm_tier}
+sudo mkdir -p ${GL_GRAYLOG}/{archives,assetdata,contentpacks,datalake,input_tls,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,sources/{scripts,binaries,other}}
+
+# Set Folder permissions for folders where containers need write permissions; INPUT_TLS needs ownership as private keys are usually set to be readable by owner only (600)
+echo "[INFO] - SET FOLDER PERMISSIONS "
+sudo chown -R 1000:1000 ${GL_OPENSEARCH_DATA}
+sudo chown -R 1100:1100 ${GL_GRAYLOG_ARCHIVES} ${GL_GRAYLOG_DATALAKE} ${GL_GRAYLOG_INPUT_TLS} ${GL_GRAYLOG_NOTIFICATIONS}
+
+# Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
+echo "[INFO] - DOWNLOAD MAXMIND DATABASES "
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-ASN.mmdb
+# OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb 
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-City.mmdb
+# OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb 
+sudo curl --output-dir ${GL_GRAYLOG_MAXMIND} -LOs https://git.io/GeoLite2-Country.mmdb
+# OR use https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb 
+
+# Download Graylog Sidecar for Windows
+echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS "
+sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar
+sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar -LOs https://github.com/Graylog2/collector-sidecar/releases/download/1.5.1/graylog-sidecar-1.5.1-1.msi
+sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar -LOs https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml
+
+# Download Elastic Filebeat StandaloneSidecar
+echo "[INFO] - DOWNLOAD ELASTIC FILEBEAT STANDALONE FOR WINDOWS "
+sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone
+sudo curl --output-dir ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone -LOs https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.19.3-windows-x86_64.zip ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
+sudo unzip ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip -d ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
+sudo cp ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64/filebeat.exe ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/
+sudo rm -rf ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64
+sudo rm ${GL_GRAYLOG_SOURCES}/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
+
+# Download NXLog - provide a README with instructions on how to do that
+echo "[INFO] - DOWNLOAD NXLOG AGENT COMMUNITY EDITION FOR WINDOWS (PREPARATORY STEP) "
+sudo mkdir ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition
+sudo touch ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt
+echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
+echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GL_GRAYLOG_SOURCES}/binaries/NXLog_Community_Edition/README.txt 2>/dev/null >/dev/null
+
+# Cloning Git Repo containing prepared content
+echo "[INFO] - CLONE GIT REPO "
+# sudo git clone -q https://github.com/fjagwitz/Graylog-Cookbooks.git  ${installpath}
+sudo git clone -q --single-branch --branch Graylog-${GL_GRAYLOG_VERSION_NUMBER} https://github.com/fjagwitz/Graylog-Cookbooks.git ${installpath}
+
+# Copy Files from Git Repo into the proper directories
+echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
+sudo cp ${installpath}/01_Installation/compose/nginx1/*.conf ${GL_GRAYLOG_NGINX1}
+sudo cp ${installpath}/01_Installation/compose/nginx1/ssl ${GL_GRAYLOG_NGINX1} -R
+sudo cp ${installpath}/01_Installation/compose/nginx2/*.conf ${GL_GRAYLOG_NGINX2}
+sudo cp ${installpath}/01_Installation/compose/docker-compose.yaml ${GL_GRAYLOG}
+sudo cp ${installpath}/01_Installation/compose/env.example ${GL_GRAYLOG}/.env
+sudo cp ${installpath}/01_Installation/compose/graylog.example ${GL_GRAYLOG}/graylog.env
+sudo cp ${installpath}/01_Installation/compose/prometheus/* ${GL_GRAYLOG_PROMETHEUS}
+sudo cp ${installpath}/01_Installation/compose/lookuptables/* ${GL_GRAYLOG_LOOKUPTABLES}
+sudo cp ${installpath}/01_Installation/compose/contentpacks/* ${GL_GRAYLOG_CONTENTPACKS}
+
+# Copy Post-Install Script to Base Directory
+if [[ ${GL_GRAYLOG_VERSION} == "graylog-enterprise" ]]
+then
+  sudo cp ${installpath}/01_Installation/post-install.sh ${GL_GRAYLOG_SCRIPTS}
+  sudo chmod +x ${GL_GRAYLOG_SCRIPTS}/post-install.sh
+fi
+
+# Pull Graylog Containers
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
+
+# This can be kept as-is, because Opensearch will not be available from outside the Docker Network
+echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+
+# The Graylog URI for additional Services like Grafana 
+echo "GL_GRAYLOG_ADDRESS=\"${GL_GRAYLOG_ADDRESS}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+
+# The Graylog Version, in case one wants to use Graylog Open
+echo "GL_GRAYLOG_VERSION=\"${GL_GRAYLOG_VERSION}\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+
+# Configure Docker Logging
+echo "GL_GRAYLOG_LOG_TARGET = \"udp://localhost:9900\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
+
+# Adapt Variables in the graylog.env-file
+echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
+GL_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
+GL_ROOT_PASSWORD_SHA2=$(echo ${GL_GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
+
+sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\GRAYLOG_ROOT_USERNAME = \"${GL_GRAYLOG_ADMIN}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${GL_ROOT_PASSWORD_SHA2}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${GL_PASSWORD_SECRET}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GL_GRAYLOG_ADDRESS}/\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GL_GRAYLOG_ADDRESS}\"\g" ${GL_GRAYLOG_COMPOSE_ENV}
+
+# Install Samba to make local Data Adapters accessible from Windows
+echo "[INFO] - CONFIGURE FILESHARES "
+sudo chmod 755 ${GL_GRAYLOG_LOOKUPTABLES}/* ${GL_GRAYLOG_SOURCES}/*
+sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
+sudo setfacl -Rm u:${GL_GRAYLOG_ADMIN}:rwx,d:u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_ASSETDATA} ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_SOURCES}
+sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
+echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN} > /dev/null
+sudo sed -i -e "s/valid users = GLADMIN/valid users = ${GL_GRAYLOG_ADMIN}/g" /etc/samba/smb.conf 
+sudo service smbd restart
+
+# Installation Cleanup
+sudo rm -rf ${installpath}
+
+# Installation Complete, starting Graylog Stack in Compose
+echo "[INFO] - PREPARATION COMPLETE, STARTING GRAYLOG "
+
+# Start Graylog Stack
+echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
+sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
+
+while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
+do
+  echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
+  sleep 10s
+done
+
+echo "[INFO] - FINALIZE SYSTEM CONFIGURATION "
+
+# Adding Inputs to make sure Ports map to Nginx configuration
+#
+# Port 514 Syslog UDP Input for Network Devices
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 514 Syslog TCP Input for Network Devices
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 5045 Beats Input for Winlogbeat, Auditbeat, Filebeat
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+  
+# Port 5555 RAW TCP Input
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    
+# Port 5555 RAW UDP Input
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 6514 Syslog TCP over TLS Input for Network Devices
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 6514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": true, "tls_key_password": "test123" }}' 2>/dev/null >/dev/null
+
+# Port 12201 GELF TCP Input for NXLog
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Port 12201 GELF UDP Input for NXLog
+curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+# Stopping all Inputs to allow a controlled Log Source Onboarding
+echo "[INFO] - STOPPING ALL INPUTS" 
+for input in $(curl -s http://localhost/api/cluster/inputstates -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET | jq -r '.[] | map(.) | .[].id'); do
+  curl -s http://localhost/api/cluster/inputstates/$input -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+done
+
+# Creating Sidecar Token for Windows Hosts
+SIDECAR_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
+SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${SIDECAR_ID}/tokens/EVALUATION-WINDOWS-SIDECAR -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
+
+# Configuring Graylog Sidecar for Windows Hosts
+SIDECAR_YAML="${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar/sidecar.yml"
+sudo mv ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar/sidecar-windows-msi-example.yml ${SIDECAR_YAML}
+sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
+# Replace Graylog Host URL
+sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GL_GRAYLOG_ADDRESS}/api/\"\g" ${SIDECAR_YAML}
+# Add Graylog Sidecar Token
+sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
+# Disable TLS validation enforcement
+sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YAML}
+# Add Evaluation Tag
+sudo sed -i "s\tags: [[]]\tags: [ \"evaluation\" ]\g" ${SIDECAR_YAML}
+
+# GELF UDP Input for NXLog
+GL_MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
+
+# Creating FieldType Profile for Docker Logs from Graylog Evaluation Stack
+GL_MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
+
+# Creating Index for Docker Logs from Graylog Evaluation Stack
+GL_MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"shards\": 1, \"replicas\": 0, \"rotation_strategy_class\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy\", \"rotation_strategy\": {\"type\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"retention_strategy_class\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy\", \"retention_strategy\": { \"type\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig\", \"max_number_of_indices\": 20 }, \"data_tiering\": {\"type\": \"hot_only\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"title\": \"Self Monitoring Messages (Evaluation)\", \"description\": \"Stores Evaluation System Self Monitoring Messages\", \"index_prefix\": \"gl-self-monitoring\", \"index_analyzer\": \"standard\", \"index_optimization_max_num_segments\": 1, \"index_optimization_disabled\": false, \"field_type_refresh_interval\": 5000, \"field_type_profile\": ${GL_MONITORING_FIELD_TYPE_PROFILE}, \"use_legacy_rotation\": false, \"writable\": true}" | jq '.id')
+
+# Creating Stream for Docker Logs from Graylog Evaluation Stack
+GL_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"index_set_id\": ${GL_MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
+
+# Adding the Stream to the environment file to prepare for the Post-Install Script
+#echo "GL_GRAYLOG_MONITORING_STREAM=\"${GL_MONITORING_STREAM}\"" | sudo tee -a $environmentfile 2>/dev/null >/dev/null
+
+# Creating Stream Rule for Docker Logs from Graylog Evaluation Stack
+curl -s http://localhost/api/streams/${GL_MONITORING_STREAM}/rules -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${GL_MONITORING_INPUT} }" 2>/dev/null >/dev/null
+
+# Start Stream for Docker Logs from Graylog Evaluation Stack
+curl -s http://localhost/api/streams/${GL_MONITORING_STREAM}/resume -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
+
+# Activating OTX Lists
+curl -s http://localhost/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+
+# Activating Tor Exit Nodes Lists
+curl -s http://localhost/api/system/content_packs/9350a70a-8453-f516-7041-517b4df0b832/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+
+# Activating Spamhaus Drop Lists
+curl -s http://localhost/api/system/content_packs/90be5e03-cb16-c802-6462-a244b4a342f3/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+
+# Activating WHOIS Adapter
+curl -s http://localhost/api/system/content_packs/1794d39d-077f-7360-b92b-95411b05fbce/1/installations -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+
+# Activating the GeoIP Resolver Plugin
+curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
+
+# Activating the ThreatIntel Plugin
+curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}' 2>/dev/null >/dev/null
+
+# Disable AWS Instance Lookup and re-order processors (place GeoIP enrichment at the end to ensure custom pipelines get the appropriate value)
+curl -s http://localhost/api/system/messageprocessors/config -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"processor_order":[{"name":"AWS Instance Name Lookup","class_name":"org.graylog.aws.processors.instancelookup.AWSInstanceNameLookupProcessor"},{"name":"Illuminate Processor","class_name":"org.graylog.plugins.illuminate.processing.IlluminateMessageProcessor"},{"name":"Message Filter Chain","class_name":"org.graylog2.messageprocessors.MessageFilterChainProcessor"},{"name":"Stream Rule Processor","class_name":"org.graylog2.messageprocessors.StreamMatcherFilterProcessor"},{"name":"Pipeline Processor","class_name":"org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter"},{"name":"GeoIP Resolver","class_name":"org.graylog.plugins.map.geoip.processor.GeoIpProcessor"}],"disabled_processors":["org.graylog.aws.processors.instancelookup.AWSInstanceNameLookupProcessor"]}' 2>/dev/null >/dev/null
+
+## Reconfigure Grafana Credentials
+curl -s http://admin:admin@localhost/grafana/api/users/1 -H 'Content-Type:application/json' -X PUT -d "{ \"name\" : \"Evaluation Admin\", \"login\" : \"${GL_GRAYLOG_ADMIN}\" }" 2>/dev/null > /dev/null 
+curl -s http://${GL_GRAYLOG_ADMIN}:admin@localhost/grafana/api/admin/users/1/password -H 'Content-Type: application/json' -X PUT -d "{ \"password\" : \"$GL_GRAYLOG_PASSWORD\" }" 2>/dev/null > /dev/null 
+
+## Configure Prometheus Connector 
+curl -s http://${GL_GRAYLOG_ADMIN}:$GL_GRAYLOG_PASSWORD@localhost/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null > /dev/null 
+
+echo ""
+echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
+echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG}/your_graylog_credentials.txt "
+echo ""
+echo "[INFO] - URL: \"http(s)://${GL_GRAYLOG_ADDRESS}\" || CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
+echo ""
+echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GL_GRAYLOG} " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
+echo ""
+
+if [[ ${GL_GRAYLOG_VERSION} == "graylog-enterprise" ]]
+then
+  exec ${GL_GRAYLOG_SCRIPTS}/post-install.sh ${GL_GRAYLOG} ${GL_MONITORING_STREAM} $environmentfile &
+fi
+
+exit 0
