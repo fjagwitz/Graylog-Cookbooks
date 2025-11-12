@@ -17,35 +17,25 @@
 GRAYLOG_VERSION="7.0"
 INSTALL_LOG="./graylog-eval-installation.log"
 SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen acl htop unzip" 
+SYSTEM_PROXY=$(cat /etc/environment | grep http_proxy | cut -d "=" -f 2 | tr -d '"')
+
 
 
 ###############################################################################
 #
 # Functions Definition
 
-function_installScriptDependencies () {
-    for PACKAGE in ${SCRIPT_DEPENDENCIES}
-    do
-        sudo apt-get -qq install ${PACKAGE} | logger -s
-    done
-}
-
 function_checkSnapshot () {
 
     read -p "[INPUT] - Please confirm that you created a Snapshot of this VM before running this Script [yes/no]]: " SNAPSHOT_CREATED
 
-    local SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-yes}
+    local SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-no}
 
     if [[ ${SNAPSHOT_CREATED} != "yes" ]]
     then
-        echo "[ERROR] - User did not confirm a snapshot was created - exiting"
-        sleep 5
+        echo "[ERROR] - No snapshot was created, please create one - exiting"
         exit
-    else
-        echo "[INFO] - User confirmed a snapshot was created"
     fi 
-
-    echo ${SNAPSHOT_CREATED}
 }
 
 function_defineAdminName () {
@@ -54,26 +44,30 @@ function_defineAdminName () {
     do
         read -p "[INPUT] - Please add the name of your central Administration User [admin]: " GRAYLOG_ADMIN
         
-        local GRAYLOG_ADMIN=${GRAYLOG_ADMIN:-admin}
+        local ADMIN_NAME=${ADMIN_NAME:-admin}
         local FORBIDDEN_USERNAMES=$(cat /etc/passwd | awk -F":" '{print $1}')
         
-        if [[ ${GRAYLOG_ADMIN} =~ ^[A-Za-z0-9_-]{4,12}$ ]]
+        if [[ ${ADMIN_NAME} =~ ^[A-Za-z0-9_-]{4,12}$ ]]
         then
             for USER_NAME in ${FORBIDDEN_USERNAMES}
             do
-                if [[ ${GRAYLOG_ADMIN} == ${USER_NAME} ]]
+                if [[ ${ADMIN_NAME} == ${USER_NAME} ]]
                 then                    
-                    echo "[INFO] - A valid Username consists of 4-12 letters and MUST NOT be available on this system"
+                    echo "[INFO] - A valid Username MUST NOT be available on this system, try again"
                     VALID_ADMIN="false"
                     break
                 else
                     VALID_ADMIN="true"
+
+                    # Set global Variable for Graylog Admin
+                    GRAYLOG_ADMIN=${ADMIN_NAME}
                 fi
             done
         fi
-    done
 
-    echo ${GRAYLOG_ADMIN}
+        echo "[INFO] - A valid Username consists of 4-12 letters, try again"
+
+    done
 }
 
 function_defineAdminPassword () {
@@ -88,56 +82,87 @@ function_defineAdminPassword () {
         local GRAYLOG_PASSWORD2=${GRAYLOG_PASSWORD_B:-MyP@ssw0rd}     
     done
 
-    echo ${GRAYLOG_PASSWORD1}
+    GRAYLOG_PASSWORD=${GRAYLOG_PASSWORD1}
 } 
 
 function_getSystemFqdn () {
 
-    local LOCAL_IPS=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/")
+    local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ')    
+    local VALID_FQDN="false"
 
     while [[ ${VALID_FQDN} != "true" ]]
-    do    
-        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " GRAYLOG_FQDN
-        local GRAYLOG_FQDN=${GRAYLOG_FQDN:-eval.graylog.local}
-        local FQDN_IP=$(nslookup ${GRAYLOG_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}')
-        local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/")
-
-        echo $FQDN_IP
-        echo $SYSTEM_IP
+    do
+        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " SYSTEM_FQDN
+        local SYSTEM_FQDN=${SYSTEM_FQDN:-eval.graylog.local}
+        local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ')
 
         for IP in ${SYSTEM_IP}
         do
-            echo "this is our ip: $IP"
-            echo "this is our FQDN IP: $FQDN_IP"
-
             if [[ ${IP} == ${FQDN_IP} ]]
             then
-                break
+                VALID_FQDN="true"
             fi
         done
 
-        #VALID_FQDN="true"
+        if [[ ${VALID_FQDN} != "true" ]]
+        then
+            read -p "[INPUT] - The FQDN you provided does not seem to be resolvable; continue anyway? [yes/no]: " CHECK_IGNORE
+            local CHECK_IGNORE=${CHECK_IGNORE: no}
+            
+            if [[ ${CHECK_IGNORE} == "yes" ]]
+            then
+                echo "[WARN] - Continue without validated FQDN, expecting Product issues "
+                VALID_FQDN="true" 
+            fi
+        fi
     done
 
-    echo $GRAYLOG_FQDN
+    # Set global Variable for Graylog FQDN
+    GRAYLOG_FQDN=${SYSTEM_FQDN}
 }
 
-#function_getProxySettings() {}
+function_checkInternetConnectivity () {
+
+    local CONNECTIVITY_TEST=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 )
+    
+    if [[ ${CONNECTIVITY_TEST} == "" ]]
+    then
+        echo "[INFO] - Internet Connection not available, please validate - exiting"
+        exit
+    fi
+}
+
+function_checkSystemRequirements () {
+
+
+
+    
+}
+
+function_installScriptDependencies () {
+
+    echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} "
+
+    sudo apt -qq update -y 2>/dev/null >/dev/null 
+    sudo apt -qq upgrade -y 2>/dev/null >/dev/null 
+    sudo apt -qq autoremove -y 2>/dev/null >/dev/null
+
+    sudo apt install ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
+}
+
 
 ###############################################################################
 #
 # Dynamic Variables Definition
 
 #SNAPSHOT_CREATED=$(function_checkSnapshot)
+#GRAYLOG_ADMIN=$(function_defineAdminName)
 #GRAYLOG_PASSWORD=$(function_defineAdminPassword)
+#GRAYLOG_FQDN=$(function_getSystemFqdn)
+#GRAYLOG_PROXY=$(function_checkInternetConnectivity)
+
+###############################################################################
+#
+# Graylog Installation
+
 function_getSystemFqdn
-
-# echo ${SNAPSHOT_CREATED}
-#echo ${GRAYLOG_PASSWORD}
-
-##
-## 
-## echo ${SNAPSHOT_CREATED} | logger -si "[INFO] - User confirmed snapshot was created" --priority user.warning
-##
-##
-##
