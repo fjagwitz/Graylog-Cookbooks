@@ -251,7 +251,7 @@ function_installGraylogStack () {
     echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
     local ITEMS=$(ls ${INSTALLPATH}/01_Installation/compose | xargs)
 
-    for ITEM IN ${ITEMS}
+    for ITEM in ${ITEMS}
     do
         cp -R ${ITEM} ${GRAYLOG_PATH}
     done
