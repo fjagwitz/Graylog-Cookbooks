@@ -173,16 +173,18 @@ function_checkSystemRequirements () {
 
 function_installScriptDependencies () {
 
-    echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} " 
-
+    echo "[INFO] - PERFORMING SYSTEM UPDATE "   
     sudo apt -qq update -y 2>/dev/null >/dev/null 
-    sudo apt -qq upgrade -y 2>/dev/null >/dev/null 
+    sudo apt -qq upgrade -y 2>/dev/null >/dev/null
+    echo "[INFO] - PERFORMING SYSTEM CLEANUP "  
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
-
+    echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} " 
     sudo apt install ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
 }
 
 function_installDocker () {
+
+    echo "[INFO] - Installing Docker CE " 
 
     local DOCKER_OS_PACKAGES="docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc"
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
