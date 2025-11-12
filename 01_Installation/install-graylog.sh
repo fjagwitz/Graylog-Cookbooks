@@ -179,7 +179,7 @@ function_installScriptDependencies () {
     echo "[INFO] - PERFORMING SYSTEM CLEANUP "  
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} " 
-    sudo apt install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
+    sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
 }
 
 function_installDocker () {
@@ -214,7 +214,7 @@ function_installDocker () {
 
         # Installing Docker on Ubuntu
         echo "[INFO] - DOCKER INSTALLATION "
-        sudo apt-get -qq install ${DOCKER_CE_PACKAGES} 2>/dev/null >/dev/null
+        sudo apt -qq install -y ${DOCKER_CE_PACKAGES} 2>/dev/null >/dev/null
 
         # Checking Docker Installation Success
         if [ "$(docker -v | cut -d " " -f1 )" == "Docker" ]
