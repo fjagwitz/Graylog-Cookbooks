@@ -236,9 +236,6 @@ then
   sudo chmod +x ${GL_GRAYLOG_SCRIPTS}/post-install.sh
 fi
 
-# Pull Graylog Containers
-sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml pull -d --quiet-pull 2>/dev/null >/dev/null
-
 # This can be kept as-is, because Opensearch will not be available from outside the Docker Network
 echo "GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD=\"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${GL_COMPOSE_ENV} > /dev/null
 
