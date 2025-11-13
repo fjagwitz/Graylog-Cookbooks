@@ -290,7 +290,7 @@ services:
     ports:
       - 445:445
     volumes:
-      - ./shared:/storage
+      - ./samba:/storage
     restart: always
 
 volumes:
