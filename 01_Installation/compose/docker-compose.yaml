@@ -4,6 +4,7 @@ services:
     hostname: "nginx1"
     depends_on:
       - "graylog1"
+      - "graylog2"
     ports: 
       # Graylog WebUI for User/Admin Access
       - 443:443
@@ -213,9 +214,6 @@ services:
       - "datanode1"
       - "datanode2"
       - "datanode3"
-    ports: 
-      - 1024-16384:1024-16384
-      - 1024-16384/udp:1024-16384/udp
     entrypoint: "/docker-entrypoint.sh"
     env_file: "graylog.env"
     environment: 
