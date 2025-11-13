@@ -246,7 +246,7 @@ services:
     depends_on:
       - "prometheus1"
     environment:
-     GF_SERVER_ROOT_URL: "https://${GL_GRAYLOG_ADDRESS}/grafana"
+     GF_SERVER_ROOT_URL: "https://eval.graylog.local/grafana"
      GF_INSTALL_PLUGINS: ""
     volumes:
      - "grafana-data-01:/var/lib/grafana"
