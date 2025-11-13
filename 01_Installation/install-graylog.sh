@@ -182,7 +182,7 @@ function_installScriptDependencies () {
     #sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
     do
-        echo "[INFO] - INSTALLING ADDITONAL PACKAGE: ${DEP}"
+        echo "[INFO] - INSTALLING ADDITONAL PACKAGE: ${DEP^^}"
         sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
     done
 }
