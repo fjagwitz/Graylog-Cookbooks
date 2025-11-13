@@ -35,7 +35,7 @@ SYSTEM_PROXY=$(cat /etc/environment | grep http_proxy | cut -d "=" -f 2 | tr -d 
 
 function_checkSnapshot () {
 
-    read -p "[INPUT] - Please confirm that you created a Snapshot of this VM before running this Script [yes/no]]: " SNAPSHOT_CREATED
+    read -p "[INPUT] - Please confirm that you created a Snapshot of this VM before running this Script [yes/no]: " SNAPSHOT_CREATED
 
     local SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-no}
 
@@ -72,9 +72,8 @@ function_defineAdminName () {
                 fi
             done
         fi
+        echo "[INFO] - A valid Username consists of 4-12 letters, try again" 
     done
-
-    echo "[INFO] - A valid Username consists of 4-12 letters, try again" 
 }
 
 function_defineAdminPassword () {
@@ -263,7 +262,7 @@ function_installGraylogStack () {
     do
         echo "DEBUG: cp -R ${ITEM} ${GRAYLOG_PATH}"
         sleep 1
-        cp -R ${ITEM} ${GRAYLOG_PATH}
+        cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
     done
 
     # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
