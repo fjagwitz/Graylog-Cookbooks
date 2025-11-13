@@ -178,8 +178,13 @@ function_installScriptDependencies () {
     sudo apt -qq upgrade -y 2>/dev/null >/dev/null
     echo "[INFO] - PERFORMING SYSTEM CLEANUP "  
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
-    echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} " 
-    sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
+    #echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} " 
+    #sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
+    for DEP in ${SCRIPT_DEPENDENCIES}
+    do
+        echo "[INFO] - INSTALLING ADDITONAL PACKAGE: ${DEP}"
+        sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
+    done
 }
 
 function_installDocker () {
