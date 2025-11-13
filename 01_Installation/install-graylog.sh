@@ -253,15 +253,8 @@ function_installGraylogStack () {
     echo "[INFO] - POPULATE FOLDERS FROM GIT REPO CONTENT "
     local ITEMS=$(ls ${INSTALLPATH}/01_Installation/compose | xargs)
 
-    ###
-    # debug
-    echo "Dateien zum Kopieren: $ITEMS"
-    sleep 3
-
     for ITEM in ${ITEMS}
     do
-        echo "DEBUG: cp -R ${ITEM} ${GRAYLOG_PATH}"
-        sleep 1
         cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
     done
 
