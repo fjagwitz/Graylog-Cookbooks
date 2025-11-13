@@ -71,8 +71,8 @@ function_defineAdminName () {
                     GRAYLOG_ADMIN=${ADMIN_NAME}
                 fi
             done
+            echo "[INFO] - A valid Username consists of 4-12 letters, try again" 
         fi
-        echo "[INFO] - A valid Username consists of 4-12 letters, try again" 
     done
 }
 
