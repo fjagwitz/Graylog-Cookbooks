@@ -41,7 +41,7 @@ function_checkSnapshot () {
 
     if [[ ${SNAPSHOT_CREATED} != "yes" ]]
     then
-        echo "[ERROR] - No snapshot was created, please create one - exiting" 
+        echo "[ERROR] - NO SNAPSHOT WAS CREATED, PLEASE CREATE ONE - EXITING" 
         exit
     fi 
 }
@@ -61,7 +61,7 @@ function_defineAdminName () {
             do
                 if [[ ${ADMIN_NAME} == ${USER_NAME} ]]
                 then                    
-                    echo "[INFO] - A valid Username MUST NOT be available on this system, try again" 
+                    echo "[INFO] - A VALID USERNAME MUST NOT BE AVAILABLE ON THIS SYSTEM, TRY AGAIN" 
                     VALID_ADMIN="false"
                     break
                 else
@@ -72,7 +72,7 @@ function_defineAdminName () {
                 fi
             done
         else
-            echo "[INFO] - A valid Username consists of 4-12 letters, try again" 
+            echo "[INFO] - A VALID USERNAME CONSISTS OF 4-12 LETTERS, TRY AGAIN" 
         fi
     done
 }
@@ -118,7 +118,7 @@ function_getSystemFqdn () {
             
             if [[ ${CHECK_IGNORE} == "yes" ]]
             then
-                echo "[WARN] - Continue without validated FQDN, expecting Product issues " 
+                echo "[WARN] - CONTINUE WITHOUT VALIDATED FQDN, EXPECTING PRODUCT ISSUES " 
                 VALID_FQDN="true" 
             fi
         fi
@@ -138,34 +138,34 @@ function_checkSystemRequirements () {
 
     if [ ${OPERATING_SYSTEM,,} == "ubuntu" ] && [ ${RANDOM_ACCESS_MEMORY} -ge 32 ] && [ ${CPU_CORES_NUMBER} -ge 8 ] && [ ${CPU_REQUIRED_FLAGS,,} == "avx" ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
-        echo "[INFO] - System Requirements Check successful: 
+        echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
 
                 Operating System: ${OPERATING_SYSTEM}
                 Memory          : ${RANDOM_ACCESS_MEMORY} GB
                 CPU Cores       : ${CPU_CORES_NUMBER} vCPU
-                CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available (for running MongoDB)
+                CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available
                 Internet        : Available
                 "
     else
         if [ ${INTERNET_CONNECTIVITY} -ne 200 ]
         then
-            echo "[ERROR] - Internet is not available from this machine "
+            echo "[ERROR] - INTERNET IS NOT AVAILABLE FROM THIS MACHINE "
         fi
         if [ ${OPERATING_SYSTEM,,} != "ubuntu" ]
         then
-            echo "[ERROR] - Operating System MUST be Ubuntu, but is ${OPERATING_SYSTEM}" 
+            echo "[ERROR] - OPERATING SYSTEM MUST BE UBUNTU, BUT IS ${OPERATING_SYSTEM}" 
         fi
         if [ ${RANDOM_ACCESS_MEMORY} -lt 32 ]
         then
-            echo "[ERROR] - Memory must be at least 32 GB, but is only ${RANDOM_ACCESS_MEMORY} GB" 
+            echo "[ERROR] - MEMORY MUST BE AT LEAST 32 GB, BUT IS ONLY ${RANDOM_ACCESS_MEMORY} GB" 
         fi
         if [ ${CPU_CORES_NUMBER} -lt 8 ]
         then
-            echo "[ERROR] - The System must have at least 8 vCPU Cores, but has only ${CPU_CORES_NUMBER}" 
+            echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST 8 VCPU CORES, BUT HAS ONLY ${CPU_CORES_NUMBER}" 
         fi
         if [ ${CPU_REQUIRED_FLAGS^^} != "AVX" ]
         then
-            echo "[ERROR] - The CPU must support the AVX Flag for running MongoDB, but does not" 
+            echo "[ERROR] - THE CPU MUST SUPPORT THE AVX FLAG FOR RUNNING MONGODB, BUT DOES NOT" 
         fi
         exit
     fi
@@ -178,8 +178,6 @@ function_installScriptDependencies () {
     sudo apt -qq upgrade -y 2>/dev/null >/dev/null
     echo "[INFO] - PERFORMING SYSTEM CLEANUP "  
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
-    #echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} " 
-    #sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
     do
         echo "[INFO] - INSTALLING ADDITONAL PACKAGE: ${DEP^^}"
@@ -189,7 +187,7 @@ function_installScriptDependencies () {
 
 function_installDocker () {
 
-    echo "[INFO] - Installing Docker CE " 
+    echo "[INFO] - INSTALLING DOCKER CE " 
 
     local DOCKER_OS_PACKAGES="docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc"
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
