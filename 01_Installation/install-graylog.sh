@@ -278,6 +278,9 @@ function_installGraylogStack () {
     echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${DATABASE_ENV} > /dev/null
     echo "OPENSEARCH_JAVA_OPTS = \"-Xms4096m -Xmx4096m\"" | sudo tee -a ${DATABASE_ENV} > /dev/null
 
+    # Renaming Environment File for Graylog
+    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
+
     # Populating Environment File for Graylog
     echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
     local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
