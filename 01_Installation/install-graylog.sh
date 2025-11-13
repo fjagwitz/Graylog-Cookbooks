@@ -327,7 +327,7 @@ function_downloadAdditionalBinaries () {
     # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
     for DB_TYPE in ${MAXMIND_DB_TYPES}
     do
-        echo "[INFO] - DOWNLOAD MAXMIND DATABASE: (${DB_TYPE})"
+        echo "[INFO] - DOWNLOAD MAXMIND DATABASE: ${DB_TYPE^^}"
         sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE}.mmdb
         
         # Alternative Source: 
