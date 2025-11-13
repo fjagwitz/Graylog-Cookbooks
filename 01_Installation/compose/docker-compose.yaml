@@ -4,7 +4,6 @@ services:
     hostname: "nginx1"
     depends_on:
       - "graylog1"
-      - "graylog2"
     ports: 
       # Graylog WebUI for User/Admin Access
       - 443:443
@@ -17,19 +16,19 @@ services:
       - 514:514
       - 514:514/udp
     volumes:
-      - "/opt/graylog/nginx1/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "/opt/graylog/nginx1/http.conf:/etc/nginx/conf.d/http.conf:ro"
-      - "/opt/graylog/nginx1/stream.conf:/etc/nginx/conf.d/stream.conf:ro"
-      - "/opt/graylog/nginx1/ssl:/etc/nginx/ssl:ro"
+      - "./nginx1/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "./nginx1/http.conf:/etc/nginx/conf.d/http.conf:ro"
+      - "./nginx1/stream.conf:/etc/nginx/conf.d/stream.conf:ro"
+      - "./nginx1/ssl:/etc/nginx/ssl:ro"
     restart: "always"
 
   nginx2: 
     image: "nginx:latest"
     hostname: "lookuptables"
     volumes: 
-      - "/opt/graylog/nginx2/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "/opt/graylog/nginx2/http.conf:/etc/nginx/conf.d/http.conf:ro"
-      - "/opt/graylog/lookuptables:/lookuptables:ro"
+      - "./nginx2/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "./nginx2/http.conf:/etc/nginx/conf.d/http.conf:ro"
+      - "./lookuptables:/lookuptables:ro"
     restart: "always"
 
   mongodb1:
@@ -40,7 +39,7 @@ services:
       options: 
         gelf-address: "udp://localhost:9900"
     volumes:
-      - "/opt/graylog/configuration:/data/db"
+      - "./configuration:/data/db"
     restart: "always"
 
   datanode1:
@@ -70,8 +69,8 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "/opt/graylog/database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "/opt/graylog/database/datanode1:/usr/share/opensearch/data"    
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/datanode1:/usr/share/opensearch/data"    
     restart: "on-failure"
 
   datanode2:
@@ -101,8 +100,8 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "/opt/graylog/database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "/opt/graylog/database/datanode2:/usr/share/opensearch/data"
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/datanode2:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode3:
@@ -132,8 +131,8 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "/opt/graylog/database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "/opt/graylog/database/datanode3:/usr/share/opensearch/data"
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode9:
@@ -164,7 +163,7 @@ services:
         soft: 262144
         hard: 262144
     volumes:
-      - "/opt/graylog/database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
     restart: "on-failure"
 
   graylog1:
@@ -187,19 +186,19 @@ services:
     volumes:
       - "graylog-journal-01:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "/opt/graylog/archives:/usr/share/graylog/data/archives"
+      - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
-      - "/opt/graylog/contentpacks:/etc/graylog/server/contentpacks:ro"
+      - "./contentpacks:/etc/graylog/server/contentpacks:ro"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "/opt/graylog/datalake:/usr/share/graylog/data/datalake"
+      - "./datalake:/usr/share/graylog/data/datalake"
       # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "/opt/graylog/input_tls:/etc/graylog/server/input_tls:ro"
+      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
-      - "/opt/graylog/lookuptables:/etc/graylog/server/lookuptables:ro"
+      - "./lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
-      - "/opt/graylog/maxmind:/etc/graylog/server/mmdb:ro"
+      - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
-      - "/opt/graylog/notifications:/etc/graylog/server/notifications"
+      - "./notifications:/etc/graylog/server/notifications"
     restart: "on-failure"
 
   graylog2:
@@ -214,6 +213,9 @@ services:
       - "datanode1"
       - "datanode2"
       - "datanode3"
+    ports: 
+      - 1024-16384:1024-16384
+      - 1024-16384/udp:1024-16384/udp
     entrypoint: "/docker-entrypoint.sh"
     env_file: "graylog.env"
     environment: 
@@ -222,19 +224,19 @@ services:
     volumes:
       - "graylog-journal-02:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "/opt/graylog/archives:/usr/share/graylog/data/archives"
+      - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
-      - "/opt/graylog/contentpacks:/etc/graylog/server/contentpacks:ro"
+      - "./contentpacks:/etc/graylog/server/contentpacks:ro"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "/opt/graylog/datalake:/usr/share/graylog/data/datalake"
+      - "./datalake:/usr/share/graylog/data/datalake"
       # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "/opt/graylog/input_tls:/etc/graylog/server/input_tls:ro"
+      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
-      - "/opt/graylog/lookuptables:/etc/graylog/server/lookuptables:ro"
+      - "./lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
-      - "/opt/graylog/maxmind:/etc/graylog/server/mmdb:ro"
+      - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
-      - "/opt/graylog/notifications:/etc/graylog/server/notifications"
+      - "./notifications:/etc/graylog/server/notifications"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
@@ -266,8 +268,23 @@ services:
       - '--web.listen-address=0.0.0.0:9090'
     volumes:
       - "prometheus-data-01:/prometheus"
-      - "/opt/graylog/prometheus/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
+      - "./prometheus/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
     restart: unless-stopped
+
+    # This container can be skipped based on your needs
+    samba1:
+      image: dockurr/samba
+      container_name: samba
+      environment:
+        NAME: "Data"
+        USER: "samba"
+        PASS: "secret"
+      ports:
+        - 445:445
+      volumes:
+        - ./samba:/storage
+      restart: always
+
 
 volumes:
   graylog-journal-01:

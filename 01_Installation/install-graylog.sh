@@ -273,12 +273,12 @@ function_installGraylogStack () {
         sudo chown -R 1100:1100 ${GRAYLOG_PATH}/${FOLDER}
     done
 
+    # Renaming Environment File for Graylog
+    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
+
     # Populating Environment File for Opensearch
     echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${DATABASE_ENV} > /dev/null
     echo "OPENSEARCH_JAVA_OPTS = \"-Xms4096m -Xmx4096m\"" | sudo tee -a ${DATABASE_ENV} > /dev/null
-
-    # Renaming Environment File for Graylog
-    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
 
     # Populating Environment File for Graylog
     echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
@@ -291,6 +291,8 @@ function_installGraylogStack () {
     sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GRAYLOG_FQDN}/\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
+
+    sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_COMPOSE}
 
     # Configure Samba to make local Data Adapters accessible from Windows
     #echo "[INFO] - CONFIGURE FILESHARES "
