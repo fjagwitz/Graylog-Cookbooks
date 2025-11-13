@@ -271,20 +271,19 @@ services:
       - "./prometheus/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
     restart: unless-stopped
 
-    # This container can be skipped based on your needs
-    samba1:
-      image: dockurr/samba
-      container_name: samba
-      environment:
-        NAME: "Data"
-        USER: "samba"
-        PASS: "secret"
-      ports:
-        - 445:445
-      volumes:
-        - ./samba:/storage
-      restart: always
-
+  # This container can be skipped based on your needs
+  samba1:
+    image: dockurr/samba
+    container_name: samba
+    environment:
+      NAME: "Data"
+      USER: "samba"
+      PASS: "secret"
+    ports:
+      - 445:445
+    volumes:
+      - ./samba:/storage
+    restart: always
 
 volumes:
   graylog-journal-01:
