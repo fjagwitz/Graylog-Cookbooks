@@ -196,15 +196,15 @@ services:
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./datalake:/usr/share/graylog/data/datalake"
       # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "./input_tls:/etc/graylog/server/input_tls:ro"
+      - "./shared/input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
-      - "./lookuptables:/etc/graylog/server/lookuptables:ro"
+      - "./shared/lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
       - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
       # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/usr/local/share/ca-certificates/"
+      - "./shared/rootcerts:/usr/local/share/ca-certificates/"
     restart: "on-failure"
 
   graylog2:
@@ -236,15 +236,15 @@ services:
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./datalake:/usr/share/graylog/data/datalake"
       # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "./input_tls:/etc/graylog/server/input_tls:ro"
+      - "./shared/input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
-      - "./lookuptables:/etc/graylog/server/lookuptables:ro"
+      - "./shared/lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
       - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
       # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/usr/local/share/ca-certificates/"
+      - "./shared/rootcerts:/usr/local/share/ca-certificates/"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
@@ -284,13 +284,13 @@ services:
     image: dockurr/samba
     container_name: samba
     environment:
-      NAME: "Data"
+      NAME: "GRAYLOG"
       USER: "samba"
       PASS: "secret"
     ports:
       - 445:445
     volumes:
-      - ./samba:/storage
+      - ./shared:/storage
     restart: always
 
 volumes:

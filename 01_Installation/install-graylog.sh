@@ -245,7 +245,7 @@ function_installGraylogStack () {
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE FOLDERS "
-    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,rootcerts,samba,sources/{scripts,binaries/{Graylog_Sidecar,Filebeat_Standalone,NXLog_CommunityEdition},other}}
+    sudo mkdir -p ${GRAYLOG_PATH}/{archives,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,shared/{assetdata,input_tls,logsamples,lookuptables,rootcerts},sources/{scripts,binaries/{Graylog_Sidecar,Filebeat_Standalone,NXLog_CommunityEdition},other}}
 
     echo "[INFO] - CLONE GIT REPO "
     sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH}
