@@ -50,7 +50,7 @@ function_defineAdminName () {
 
     while [[ ${VALID_ADMIN} != "true" ]]
     do
-        read -p "[INPUT] - Please add the name of your central Administration User [admin]: " GRAYLOG_ADMIN
+        read -p "[INPUT] - Please add the name of your central Administration User [admin]: " ADMIN_NAME
         
         local ADMIN_NAME=${ADMIN_NAME:-admin}
         local FORBIDDEN_USERNAMES=$(cat /etc/passwd | awk -F":" '{print $1}')
