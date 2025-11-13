@@ -301,7 +301,7 @@ function_installGraylogStack () {
 
 
     # Installation Cleanup
-    sudo rm -rf ${installpath}
+    sudo rm -rf ${INSTALLPATH}
 
     # Installation Complete, starting Graylog Stack in Compose
     echo "[INFO] - PREPARATION COMPLETE, CONTINUE "
