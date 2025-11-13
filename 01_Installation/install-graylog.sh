@@ -174,13 +174,13 @@ function_checkSystemRequirements () {
 function_installScriptDependencies () {
 
     echo "[INFO] - PERFORMING SYSTEM UPDATE "   
-    sudo apt -qq update -y 2>/dev/null >/dev/null 
-    sudo apt -qq upgrade -y 2>/dev/null >/dev/null
+    sudo apt -qq update -y #2>/dev/null >/dev/null 
+    sudo apt -qq upgrade -y #2>/dev/null >/dev/null
     echo "[INFO] - PERFORMING SYSTEM CLEANUP "  
-    sudo apt -qq autoremove -y 2>/dev/null >/dev/null
+    sudo apt -qq autoremove -y #2>/dev/null >/dev/null
     echo "[INFO] - Installing required packages: ${SCRIPT_DEPENDENCIES} " 
     sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 
-    #2>/dev/null >/dev/null
+    ##2>/dev/null >/dev/null
 }
 
 function_installDocker () {
@@ -201,7 +201,7 @@ function_installDocker () {
         echo "[INFO] - DOCKER CLEANUP "
         for PKG in ${DOCKER_PACKAGES} 
         do 
-            sudo apt-get -qq remove $PKG 2>/dev/null >/dev/null
+            sudo apt-get -qq remove $PKG #2>/dev/null >/dev/null
         done
 
         # Adding Docker Repository
@@ -211,11 +211,11 @@ function_installDocker () {
         sudo chmod a+r ${DOCKER_KEY}
 
         echo   "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        sudo apt-get -qq update 2>/dev/null >/dev/null
+        sudo apt-get -qq update #2>/dev/null >/dev/null
 
         # Installing Docker on Ubuntu
         echo "[INFO] - DOCKER INSTALLATION "
-        sudo apt -qq install -y ${DOCKER_CE_PACKAGES} 2>/dev/null >/dev/null
+        sudo apt -qq install -y ${DOCKER_CE_PACKAGES} #2>/dev/null >/dev/null
 
         # Checking Docker Installation Success
         if [ "$(docker -v | cut -d " " -f1 )" == "Docker" ]
@@ -336,7 +336,7 @@ function_downloadAdditionalBinaries () {
     # Download Elastic Filebeat StandaloneSidecar
     echo "[INFO] - DOWNLOAD ELASTIC FILEBEAT STANDALONE FOR WINDOWS "
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_ZIP}
-    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
+    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ #2>/dev/null >/dev/null
     sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/
     sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64
     sudo rm ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-8.19.3-windows-x86_64.zip
@@ -344,8 +344,8 @@ function_downloadAdditionalBinaries () {
     # Download NXLog - provide a README with instructions on how to do that
     echo "[INFO] - DOWNLOAD NXLOG AGENT COMMUNITY EDITION FOR WINDOWS (PREPARATORY STEP) "
     sudo touch ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt
-    echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
-    echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
+    echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt #2>/dev/null >/dev/null
+    echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt #2>/dev/null >/dev/null
 }
 
 ###############################################################################
