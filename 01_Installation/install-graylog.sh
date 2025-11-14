@@ -301,7 +301,8 @@ function_installGraylogStack () {
 
     for FOLDER in ${SHARED_FOLDERS}
     do
-        sudo chmod 755 ${GRAYLOG_PATH}/${FOLDER}/* 
+        sudo chmod -R 755 ${GRAYLOG_PATH}/${FOLDER}
+        echo "[DEBUG] - find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644"
         find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644
     done
 
