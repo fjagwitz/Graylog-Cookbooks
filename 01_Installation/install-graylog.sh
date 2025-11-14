@@ -302,8 +302,7 @@ function_installGraylogStack () {
     for FOLDER in ${SHARED_FOLDERS}
     do
         sudo chmod -R 755 ${GRAYLOG_PATH}/${FOLDER}
-        echo "[DEBUG] - find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644"
-        find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644
+        find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644 2>/dev/null >/dev/null
     done
 
     echo "${GRAYLOG_ADMIN}:$(id -u):siem:$(id -g):${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null
