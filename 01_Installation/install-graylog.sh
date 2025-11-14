@@ -179,7 +179,7 @@ function_installScriptDependencies () {
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
     do
-        echo "[INFO] - INSTALLING ADDITONAL PACKAGE: ${DEP^^}"
+        echo "[INFO] - INSTALLING ADDITIONAL PACKAGE: ${DEP^^}"
         sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
     done
 }
