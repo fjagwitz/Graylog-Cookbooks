@@ -261,6 +261,9 @@ function_installGraylogStack () {
         cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
     done
 
+    # Start pulling Containers
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml pull --quiet-pull 2>/dev/null >/dev/null
+
     # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
     sudo chown -R 1000:1000 ${GRAYLOG_PATH}/database
 
@@ -294,8 +297,7 @@ function_installGraylogStack () {
     # Configure Samba to make local Data Adapters accessible from Windows
     echo "[INFO] - CONFIGURE FILESHARES "
     sudo chmod 755 ${GRAYLOG_PATH}/lookuptables/* ${GRAYLOG_PATH}/sources/*
-    sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
-    echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf"
+    echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null
 
     # Installation Cleanup
     sudo rm -rf ${INSTALLPATH}
