@@ -50,7 +50,7 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: "database.env"
+    env_file: "opensearch.env"
     environment:
       - "node.name=datanode1"
       - "node.roles=cluster_manager,data"
@@ -81,7 +81,7 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: "database.env"
+    env_file: "opensearch.env"
     environment:
       - "node.name=datanode2"
       - "node.roles=cluster_manager,data"
@@ -112,7 +112,7 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: "database.env"
+    env_file: "opensearch.env"
     environment:
       - "node.name=datanode3"
       - "node.roles=cluster_manager,data"
@@ -143,7 +143,7 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: "database.env"
+    env_file: "opensearch.env"
     environment:
       - "node.name=datanode9"
       - "node.roles=search"
