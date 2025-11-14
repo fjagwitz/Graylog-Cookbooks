@@ -280,7 +280,6 @@ echo "[INFO] - PREPARATION COMPLETE, STARTING GRAYLOG "
 # Start Graylog Stack
 echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
 sudo docker compose -f ${GL_GRAYLOG}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
-
 while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
 do
   echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "

@@ -282,15 +282,20 @@ services:
   # This container can be skipped based on your needs
   samba1:
     image: dockurr/samba
-    container_name: samba
-    environment:
-      NAME: "GRAYLOG"
-      USER: "samba"
-      PASS: "secret"
+    hostname: "samba1"
+    #environment:
+    #  NAME: "GRAYLOG"
+    #  USER: "samba"
+    #  PASS: "secret"
     ports:
       - 445:445
     volumes:
-      - ./samba:/storage
+      - ./samba/smb.conf:/etc/samba/smb.conf:ro
+      - ./samba/users.conf:/etc/samba/users.conf:ro
+      - ./assetdata:/storage/assetdata
+      - ./logsamples:/storage/logsamples
+      - ./lookuptables:/storage/lookuptables
+      - ./sources:/storage/sources
     restart: always
 
 volumes:

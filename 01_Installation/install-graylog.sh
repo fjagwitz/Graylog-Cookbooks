@@ -24,7 +24,7 @@ GRAYLOG_PASSWORD=""
 GRAYLOG_FQDN=""
 
 INSTALL_LOG="./graylog-eval-installation.log"
-SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen acl htop unzip curl ca-certificates" 
+SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
 SYSTEM_PROXY=$(cat /etc/environment | grep http_proxy | cut -d "=" -f 2 | tr -d '"')
 
 
@@ -292,16 +292,10 @@ function_installGraylogStack () {
     sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
 
     # Configure Samba to make local Data Adapters accessible from Windows
-    #echo "[INFO] - CONFIGURE FILESHARES "
-    #sudo chmod 755 ${GRAYLOG_PATH}/lookuptables/* ${GRAYLOG_PATH}/sources/*
-    #sudo adduser ${GL_GRAYLOG_ADMIN} --system < /dev/null > /dev/null
-    #sudo setfacl -Rm u:${GL_GRAYLOG_ADMIN}:rwx,d:u:${GL_GRAYLOG_ADMIN}:rwx ${GL_GRAYLOG_ASSETDATA} ${GL_GRAYLOG_LOOKUPTABLES} ${GL_GRAYLOG_SOURCES}
-    #sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
-    #sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
-    #echo -e "${GL_GRAYLOG_PASSWORD}\n${GL_GRAYLOG_PASSWORD}" | sudo smbpasswd -a -s ${GL_GRAYLOG_ADMIN} > /dev/null
-    #sudo sed -i -e "s/valid users = GLADMIN/valid users = ${GL_GRAYLOG_ADMIN}/g" /etc/samba/smb.conf 
-    #sudo service smbd restart
-
+    echo "[INFO] - CONFIGURE FILESHARES "
+    sudo chmod 755 ${GRAYLOG_PATH}/lookuptables/* ${GRAYLOG_PATH}/sources/*
+    sudo mv ${installpath}/01_Installation/compose/samba/smb.conf /etc/samba/smb.conf
+    echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf"
 
     # Installation Cleanup
     sudo rm -rf ${INSTALLPATH}
