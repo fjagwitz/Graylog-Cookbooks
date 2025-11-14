@@ -23,7 +23,6 @@ GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_FQDN=""
 
-INSTALL_LOG="./graylog-eval-installation.log"
 SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
 SYSTEM_PROXY=$(cat /etc/environment | grep http_proxy | cut -d "=" -f 2 | tr -d '"')
 
@@ -312,8 +311,10 @@ function_installGraylogStack () {
     sudo rm -rf ${INSTALLPATH}
 
     # Installation Complete, starting Graylog Stack in Compose
-    echo "[INFO] - PREPARATION COMPLETE, CONTINUE "
-
+    echo "[INFO] - PREPARATION COMPLETE "
+    # Start Graylog Stack
+    echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 }
 
 function_downloadAdditionalBinaries () {
@@ -359,6 +360,17 @@ function_downloadAdditionalBinaries () {
     echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
 }
 
+function_checkSystemAvailability () {
+    while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
+    do
+    echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
+    sleep 10s
+    done
+
+    echo "[INFO] - SYSTEM IS UP NOW "
+
+}
+
 ###############################################################################
 #
 # Graylog Installation
@@ -378,3 +390,5 @@ function_installDocker
 function_installGraylogStack
 
 function_downloadAdditionalBinaries
+
+function_checkSystemAvailability
