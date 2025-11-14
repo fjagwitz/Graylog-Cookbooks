@@ -35,7 +35,7 @@ SYSTEM_PROXY=$(cat /etc/environment | grep http_proxy | cut -d "=" -f 2 | tr -d 
 
 function_checkSnapshot () {
 
-    read -p "[INPUT] - Please confirm that you created a Snapshot of this VM before running this Script [yes/no]: " SNAPSHOT_CREATED
+    read -p "[INPUT] - Please confirm that you created a Snapshot of the VM before running this Script [yes/no]: " SNAPSHOT_CREATED
 
     local SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-no}
 
