@@ -312,6 +312,7 @@ function_installGraylogStack () {
 
     # Installation Complete, starting Graylog Stack in Compose
     echo "[INFO] - PREPARATION COMPLETE "
+    
     # Start Graylog Stack
     echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
