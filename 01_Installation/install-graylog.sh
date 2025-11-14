@@ -187,7 +187,7 @@ function_installScriptDependencies () {
 
 function_installDocker () {
 
-    echo "[INFO] - INSTALLING DOCKER CE " 
+    echo "[INFO] - INSTALLING ADDITIONAL PACKAGE: DOCKER CE " 
 
     local DOCKER_OS_PACKAGES="docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc"
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
@@ -302,7 +302,7 @@ function_installGraylogStack () {
     for FOLDER in ${SHARED_FOLDERS}
     do
         sudo chmod 755 ${GRAYLOG_PATH}/${FOLDER}/* 
-        find ./${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644
+        find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644
     done
 
     echo "${GRAYLOG_ADMIN}:$(id -u):siem:$(id -g):${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null
