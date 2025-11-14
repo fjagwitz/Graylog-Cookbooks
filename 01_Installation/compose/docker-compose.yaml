@@ -281,12 +281,8 @@ services:
 
   # This container can be skipped based on your needs
   samba1:
-    image: dockurr/samba
+    image: dockurr/samba:4.21
     hostname: "samba1"
-    #environment:
-    #  NAME: "GRAYLOG"
-    #  USER: "samba"
-    #  PASS: "secret"
     ports:
       - 445:445
     volumes:
