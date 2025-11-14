@@ -237,6 +237,7 @@ function_installGraylogStack () {
     local INSTALLPATH="/tmp/graylog"
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
+    local DATABASE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATABASE_ENV}"
 
     # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.15/install-and-configure/install-opensearch/index/#important-settings)
     echo "[INFO] - SET OPENSEARCH SETTINGS "
@@ -276,8 +277,8 @@ function_installGraylogStack () {
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
 
     # Populating Environment File for Opensearch
-    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${GRAYLOG_DATABASE_ENV} > /dev/null
-    echo "OPENSEARCH_JAVA_OPTS = \"-Xms4096m -Xmx4096m\"" | sudo tee -a ${GRAYLOG_DATABASE_ENV} > /dev/null
+    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${DATABASE_ENV} > /dev/null
+    echo "OPENSEARCH_JAVA_OPTS = \"-Xms4096m -Xmx4096m\"" | sudo tee -a ${DATABASE_ENV} > /dev/null
 
     # Populating Environment File for Graylog
     echo "[INFO] - SET GRAYLOG DOCKER ENVIRONMENT VARIABLES "
