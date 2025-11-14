@@ -298,6 +298,7 @@ function_installGraylogStack () {
 
     # Configure Samba to make local Data Adapters accessible from Windows
     echo "[INFO] - CONFIGURE FILESHARES "
+    
     local SHARED_FOLDERS="lookuptables sources"
 
     for FOLDER in ${SHARED_FOLDERS}
