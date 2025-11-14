@@ -292,12 +292,21 @@ function_installGraylogStack () {
     sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
 
+    sudo sed -i "s\hostname: \"samba1\"\hostname: \"${GRAYLOG_FQDN}\"\g" ${GRAYLOG_COMPOSE}
+
     sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
 
     # Configure Samba to make local Data Adapters accessible from Windows
     echo "[INFO] - CONFIGURE FILESHARES "
-    sudo chmod 755 ${GRAYLOG_PATH}/lookuptables/* ${GRAYLOG_PATH}/sources/*
-    echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null
+    local SHARED_FOLDERS="lookuptables sources"
+
+    for FOLDER in ${SHARED_FOLDERS}
+    do
+        sudo chmod 755 ${GRAYLOG_PATH}/${FOLDER}/* 
+        find ./${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644
+    done
+
+    echo "${GRAYLOG_ADMIN}:$(id -u):siem:$(id -g):${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null
 
     # Installation Cleanup
     sudo rm -rf ${INSTALLPATH}
