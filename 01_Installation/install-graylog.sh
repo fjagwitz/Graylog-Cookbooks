@@ -180,25 +180,23 @@ function_installScriptDependencies () {
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
     do
-        echo "[INFO] - INSTALLING ADDITIONAL PACKAGE: ${DEP^^}"
+        echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
         sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
     done
 }
 
 function_installDocker () {
 
-    echo "[INFO] - INSTALLING ADDITIONAL PACKAGE: DOCKER CE " 
+    echo "[INFO] - INSTALL ADDITIONAL PACKAGE: DOCKER CE " 
 
     local DOCKER_OS_PACKAGES="docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc"
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
     local DOCKER_URL="https://download.docker.com/linux/ubuntu"
     local DOCKER_KEY="/etc/apt/keyrings/docker.asc"
 
-    if [ "$(docker -v | cut -d " " -f1 )" == "Docker" ] 
+    if [ "$(docker -v | cut -d " " -f1 )" != "Docker" ] 
     then
-        echo "[INFO] - DOCKER INSTALLED, CONTINUE "
-    else
-        echo "[INFO] - DOCKER WILL BE INSTALLED NOW "
+        echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
         # Removing preconfigured Docker Installation from Ubuntu (just in case)
         echo "[INFO] - DOCKER CLEANUP "
         for PKG in ${DOCKER_PACKAGES} 
@@ -215,7 +213,7 @@ function_installDocker () {
         echo   "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         sudo apt-get -qq update 2>/dev/null >/dev/null
 
-        # Installing Docker on Ubuntu
+        # INSTALL Docker on Ubuntu
         echo "[INFO] - DOCKER INSTALLATION "
         sudo apt -qq install -y ${DOCKER_CE_PACKAGES} 2>/dev/null >/dev/null
 
