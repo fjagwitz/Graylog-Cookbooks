@@ -21,6 +21,7 @@ GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATABASE_ENV="opensearch.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
+GRAYLOG_ADMIN_TOKEN=""
 GRAYLOG_FQDN=""
 GRAYLOG_SIDECAR="graylog-sidecar"
 
@@ -373,9 +374,11 @@ function_checkSystemAvailability () {
 function_createUserToken () {
 
     # Creating Sidecar Token for Windows Hosts
-    USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"$1\")" | jq -r .id)
+    USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)
         
-    SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
+    USER_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"token_ttl\":\"P${2}D\"}" | jq -r .token)
+
+    echo ${USER_TOKEN}
 }
 
 function_
@@ -402,5 +405,5 @@ function_downloadAdditionalBinaries
 
 function_checkSystemAvailability
 
-function_createUserToken $GRAYLOG_ADMIN
-function_createUserToken $GRAYLOG_SIDECAR
+$GRAYLOG_ADMIN_TOKEN=function_createUserToken $GRAYLOG_ADMIN 14
+function_createUserToken $GRAYLOG_SIDECAR 730
