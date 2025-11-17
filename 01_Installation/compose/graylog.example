@@ -57,7 +57,7 @@ GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX = ""
 GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL = ""
 GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = ""
 
-## Journal Configurations
+## Journal Configurations - System is intended to process 10GB logs per day
 GRAYLOG_MESSAGE_JOURNAL_MAX_AGE = 24h
 GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 10gb
 
@@ -66,7 +66,7 @@ GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 10gb
 GRAYLOG_PROMETHEUS_EXPORTER_ENABLED = "true"
 GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
 
-## Indices naming proving this is a non-production environment
+## Indices naming
 #
-GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-evaluation-events"
-GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-evaluation-system-events"
+# GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-events"
+# GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-system-events"

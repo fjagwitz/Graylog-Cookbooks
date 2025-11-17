@@ -22,6 +22,7 @@ GRAYLOG_DATABASE_ENV="opensearch.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_FQDN=""
+GRAYLOG_SIDECAR="graylog-sidecar"
 
 SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
 SYSTEM_PROXY=$(cat /etc/environment | grep http_proxy | cut -d "=" -f 2 | tr -d '"')
@@ -372,6 +373,14 @@ function_checkSystemAvailability () {
 
 }
 
+function_createUserToken (){
+
+    # Creating Sidecar Token for Windows Hosts
+    USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username==$1)" | jq -r .id)
+    
+    SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/EVALUATION-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
+}
+
 ###############################################################################
 #
 # Graylog Installation
@@ -393,3 +402,6 @@ function_installGraylogStack
 function_downloadAdditionalBinaries
 
 function_checkSystemAvailability
+
+function_createUserToken $GRAYLOG_ADMIN
+function_createUserToken $GRAYLOG_SIDECAR
