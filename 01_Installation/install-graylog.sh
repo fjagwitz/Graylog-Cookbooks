@@ -405,5 +405,5 @@ function_downloadAdditionalBinaries
 
 function_checkSystemAvailability
 
-$GRAYLOG_ADMIN_TOKEN=function_createUserToken $GRAYLOG_ADMIN 14
+GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
 function_createUserToken $GRAYLOG_SIDECAR 730
