@@ -364,20 +364,21 @@ function_checkSystemAvailability () {
     while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     do
     echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
-    sleep 10s
+    sleep 5s
     done
 
     echo "[INFO] - SYSTEM IS UP NOW "
-
 }
 
-function_createUserToken (){
+function_createUserToken () {
 
     # Creating Sidecar Token for Windows Hosts
     USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"$1\")" | jq -r .id)
         
     SIDECAR_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"token_ttl":"P31D"}' | jq -r .token)
 }
+
+function_
 
 ###############################################################################
 #
