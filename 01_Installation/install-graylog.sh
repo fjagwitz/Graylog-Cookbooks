@@ -203,7 +203,7 @@ function_installDocker () {
     local DOCKER_URL="https://download.docker.com/linux/ubuntu"
     local DOCKER_KEY="/etc/apt/keyrings/docker.asc"
 
-    if [ "$(docker -v | cut -d " " -f1 )" != "Docker" ] 
+    if [ "$(docker -v | cut -d " " -f1 2>/dev/null)" != "Docker" ] 
     then
         echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
         # Removing preconfigured Docker Installation from Ubuntu (just in case)
