@@ -174,7 +174,7 @@ function_checkSystemRequirements () {
         fi
         if [ ${TOTAL_DISK_SPACE} -lt 600 ]
         then
-            echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST 600GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE}"
+            echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST 600GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
         fi
         exit
     fi
@@ -265,7 +265,7 @@ function_installGraylogStack () {
 
     for ITEM in ${ITEMS}
     do
-        cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
+        sudo cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
     done
 
     # Start pulling Containers
