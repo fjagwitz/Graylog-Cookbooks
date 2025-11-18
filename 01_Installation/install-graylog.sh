@@ -24,9 +24,11 @@ GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN=""
 GRAYLOG_FQDN=""
 GRAYLOG_SIDECAR="graylog-sidecar"
+GRAYLOG_LICENSE_ENTERPRISE=""
+GRAYLOG_LICENSE_SECURITY=""
 
 SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
-SYSTEM_PROXY=$(cat /etc/environment | grep http_proxy | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(cat /etc/environment | grep -w http_proxy | cut -d "=" -f 2 | tr -d '"')
 
 
 
@@ -136,12 +138,14 @@ function_checkSystemRequirements () {
     local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
+    local TOTAL_DISK_SPACE=$(df -BG --total | grep -w total | awk '{print $2}' | grep -oE [0-9]*)
 
-    if [ ${OPERATING_SYSTEM,,} == "ubuntu" ] && [ ${RANDOM_ACCESS_MEMORY} -ge 32 ] && [ ${CPU_CORES_NUMBER} -ge 8 ] && [ ${CPU_REQUIRED_FLAGS,,} == "avx" ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
+    if [ ${OPERATING_SYSTEM,,} == "ubuntu" ] && [ ${RANDOM_ACCESS_MEMORY} -ge 32 ] && [ ${CPU_CORES_NUMBER} -ge 8 ] && [ ${CPU_REQUIRED_FLAGS,,} == "avx" ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ] && [ ${TOTAL_DISK_SPACE} -ge 600 ]
     then
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
 
                 Operating System: ${OPERATING_SYSTEM}
+                Storage         : ${TOTAL_DISK_SPACE} GB
                 Memory          : ${RANDOM_ACCESS_MEMORY} GB
                 CPU Cores       : ${CPU_CORES_NUMBER} vCPU
                 CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available
@@ -167,6 +171,10 @@ function_checkSystemRequirements () {
         if [ ${CPU_REQUIRED_FLAGS^^} != "AVX" ]
         then
             echo "[ERROR] - THE CPU MUST SUPPORT THE AVX FLAG FOR RUNNING MONGODB, BUT DOES NOT" 
+        fi
+        if [ ${TOTAL_DISK_SPACE} -lt 600 ]
+        then
+            echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST 600GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE}"
         fi
         exit
     fi
@@ -365,7 +373,7 @@ function_checkSystemAvailability () {
     while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     do
     echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
-    sleep 5s
+    sleep 7s
     done
 
     echo "[INFO] - SYSTEM IS UP NOW "
@@ -381,7 +389,32 @@ function_createUserToken () {
     echo ${USER_TOKEN}
 }
 
-function_
+function_configureSelfMonitoring () {
+
+
+}
+
+function_displayClusterId () {
+
+    echo ""
+    echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
+    echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG}/your_graylog_credentials.txt "
+    echo ""
+    echo "[INFO] - URL: \"http(s)://${GL_GRAYLOG_ADDRESS}\" || CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
+    echo ""
+    echo "[INFO] - USER: \"${GL_GRAYLOG_ADMIN}\" || PASSWORD: \"${GL_GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GL_GRAYLOG} " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
+    echo ""
+}
+
+function_checkEnterpriseLicense () {
+
+    while [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
+    do 
+    echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
+    GL_GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
+    sleep 1m
+    done
+}
 
 ###############################################################################
 #
@@ -406,4 +439,10 @@ function_downloadAdditionalBinaries
 function_checkSystemAvailability
 
 GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
-function_createUserToken $GRAYLOG_SIDECAR 730
+GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
+
+function_configureSelfMonitoring
+
+function_displayClusterId
+
+function_checkEnterpriseLicense
