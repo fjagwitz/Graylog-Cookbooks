@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "id": "dc904343-a82e-4b60-a6f3-8aa0b38e41f1",
+  "rev": 1,
+  "name": "Self-Monitoring (Evaluation)",
+  "summary": "Self-Monitoring (Evaluation)",
+  "description": "Self-Monitoring (Evaluation)",
+  "vendor": "Graylog Evaluation",
+  "url": "https://github.com/fjagwitz/Graylog-Cookbooks",
+  "parameters": [],
+  "entities": []
+}

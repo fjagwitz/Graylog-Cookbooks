@@ -283,14 +283,14 @@ services:
 
   # This container can be skipped based on your needs
   samba1:
-    image: dockurr/samba:4.21
+    image: "dockurr/samba:4.21"
     hostname: "samba1"
     logging: 
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
     ports:
-      - 445:445
+      - "445:445"
     volumes:
       - ./samba/smb.conf:/etc/samba/smb.conf:ro
       - ./samba/users.conf:/etc/samba/users.conf:ro

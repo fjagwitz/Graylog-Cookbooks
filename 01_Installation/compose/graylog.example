@@ -9,6 +9,10 @@ GRAYLOG_ROOT_EMAIL = ""
 #
 GRAYLOG_ROOT_TIMEZONE = "UTC" 
 
+## Settings to allow leading wildcard Searches
+#
+GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "false"
+
 ## Set Graylog Java Heap Size
 #
 GRAYLOG_SERVER_JAVA_OPTS="-Xms2g -Xmx8g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
@@ -41,7 +45,7 @@ GRAYLOG_REPORT_DISABLE_SANDBOX = "true"
 #
 GRAYLOG_CONTENT_PACKS_LOADER_ENABLED = "true"
 GRAYLOG_CONTENT_PACKS_DIR = "/etc/graylog/server/contentpacks"
-GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Evaluation - Initial Whitelist Collection v1.json"
+GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Evaluation - Initial Whitelist Collection v1.json,Evaluation - Self-Monitoring.json"
 
 ## Email Configurations
 #
