@@ -196,25 +196,22 @@ function_installScriptDependencies () {
 
 function_installDocker () {
 
-    echo "[INFO] - INSTALL ADDITIONAL PACKAGE: DOCKER CE " 
-
     local DOCKER_OS_PACKAGES="docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc"
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
     local DOCKER_URL="https://download.docker.com/linux/ubuntu"
     local DOCKER_KEY="/etc/apt/keyrings/docker.asc"
 
-    if [ "$(docker -v | cut -d " " -f1 2>/dev/null)" != "Docker" ] 
+   
+    if [[ "$(command -v docker)" == "" ]]
     then
-        echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
-        # Removing preconfigured Docker Installation from Ubuntu (just in case)
-        echo "[INFO] - DOCKER CLEANUP "
+        echo "[INFO] - REMOVE PREINSTALLED PACKAGES - DOCKER CLEANUP "
         for PKG in ${DOCKER_PACKAGES} 
         do 
             sudo apt-get -qq remove $PKG 2>/dev/null >/dev/null
         done
 
         # Adding Docker Repository
-        echo "[INFO] - ADDING DOCKER REPOSITORY "
+        echo "[INFO] - ADD DOCKER REPOSITORY TO APT SOURCES"
         sudo install -m 0755 -d /etc/apt/keyrings > /dev/null
         sudo curl -fsSL ${DOCKER_URL}/gpg -o ${DOCKER_KEY} > /dev/null
         sudo chmod a+r ${DOCKER_KEY}
@@ -223,9 +220,12 @@ function_installDocker () {
         sudo apt-get -qq update 2>/dev/null >/dev/null
 
         # INSTALL Docker on Ubuntu
-        echo "[INFO] - DOCKER INSTALLATION "
-        sudo apt -qq install -y ${DOCKER_CE_PACKAGES} 2>/dev/null >/dev/null
-
+        for PKG in ${DOCKER_CE_PACKAGES}
+        do 
+            echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${PKG^^}"
+            sudo apt -qq install -y ${PKG} 2>/dev/null >/dev/null
+        done
+        
         # Checking Docker Installation Success
         if [ "$(docker -v | cut -d " " -f1 )" == "Docker" ]
         then
