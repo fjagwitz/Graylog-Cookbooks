@@ -391,8 +391,6 @@ function_createUserToken () {
 
 function_configureBaseFunctionality () {
 
-    echo "[DEBUG] - ${GRAYLOG_ADMIN_TOKEN}"
-
     # GELF UDP Input for NXLog
     GL_MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
 

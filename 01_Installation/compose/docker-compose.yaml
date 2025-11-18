@@ -283,6 +283,10 @@ services:
   samba1:
     image: dockurr/samba:4.21
     hostname: "samba1"
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: "udp://localhost:9900"
     ports:
       - 445:445
     volumes:
