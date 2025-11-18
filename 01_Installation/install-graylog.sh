@@ -445,11 +445,14 @@ function_displayClusterId () {
 
     echo ""
     echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GRAYLOG_PATH}/graylog.env "
-    echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "
     echo ""
-    echo "[INFO] - URL: \"http(s)://${GRAYLOG_FQDN}\" || CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
+    echo "[INFO] - CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
     echo ""
-    echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GRAYLOG_PATH} " | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
+    echo "[INFO] - URL: \"http(s)://${GRAYLOG_FQDN}\" "
+    echo ""
+    echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "    
+    echo ""
+    echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"" | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
     echo ""
 }
 
