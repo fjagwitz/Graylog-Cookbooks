@@ -391,6 +391,8 @@ function_createUserToken () {
 
 function_configureBaseFunctionality () {
 
+    echo "[DEBUG] - ${GRAYLOG_ADMIN_TOKEN}"
+    
     # GELF UDP Input for NXLog
     GL_MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
 
@@ -441,12 +443,12 @@ function_configureBaseFunctionality () {
 function_displayClusterId () {
 
     echo ""
-    echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GL_GRAYLOG}/graylog.env "
-    echo "[INFO] - CREDENTIALS STORED IN: ${GL_GRAYLOG}/your_graylog_credentials.txt "
+    echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GRAYLOG_PATH}/graylog.env "
+    echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "
     echo ""
-    echo "[INFO] - URL: \"http(s)://${GL_GRAYLOG_ADDRESS}\" || CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
+    echo "[INFO] - URL: \"http(s)://${GRAYLOG_FQDN}\" || CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
     echo ""
-    echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GL_GRAYLOG} " | sudo tee ${GL_GRAYLOG}/your_graylog_credentials.txt 
+    echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"  || INSTALLPATH: ${GRAYLOG_PATH} " | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
     echo ""
 }
 
