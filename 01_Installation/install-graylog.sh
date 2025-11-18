@@ -382,9 +382,9 @@ function_checkSystemAvailability () {
 function_createUserToken () {
 
     # Creating Sidecar Token for Windows Hosts
-    USER_ID=$(curl -s http://localhost/api/users -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)
+    USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)
         
-    USER_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GL_GRAYLOG_ADMIN}":"${GL_GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"token_ttl\":\"P${2}D\"}" | jq -r .token)
+    USER_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"token_ttl\":\"P${2}D\"}" | jq -r .token)
 
     echo ${USER_TOKEN}
 }
@@ -454,10 +454,10 @@ function_displayClusterId () {
 
 function_checkEnterpriseLicense () {
 
-    while [[ ${GL_GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
+    while [[ ${GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
     do 
     echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
-    GL_GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${GRAYLOG_ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
+    GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${GRAYLOG_ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
     sleep 1m
     done
 }
