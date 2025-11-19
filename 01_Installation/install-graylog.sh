@@ -554,18 +554,16 @@ then
 
     function_displayClusterId
     
-    echo "*/15 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH}
+    echo "*/15 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH} 2>/dev/null >/dev/null
+    echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
-    echo "[DEBUG] - ${GRAYLOG_ADMIN_TOKEN} | sudo tee ${GRAYLOG_PATH}/.post-install"
-    echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation
+    read -p "Press Enter to continue..."
 fi
 
 
 ###############################################################################
 #
 # Post-Installation Tasks
-
-echo "[DEBUG] - Admin Token: ${GRAYLOG_ADMIN_TOKEN}"
 
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "completed" ]]
 then
