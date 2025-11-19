@@ -530,11 +530,14 @@ function_createInputs () {
 SCRIPT_ALREADY_RUNNING=$(ps -aux | grep -w install-graylog.sh | wc -l)
 SCRIPT_STATUS=$(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null)
 
-if [ ${SCRIPT_STATUS} == "started" ] || [ ${SCRIPT_ALREADY_RUNNING} -gt 1 ]
+echo "DEBUG - if [ ${SCRIPT_STATUS} == "started" ] || [ ${SCRIPT_ALREADY_RUNNING} -gt 1 ]"
+
+if [ ${SCRIPT_STATUS} == "started" ] || [ ${SCRIPT_ALREADY_RUNNING} -gt 5 ]
 then
     echo "[INFO] - INSTALLATION WAS INTERRUPTED, RESET TO SNAPSHOT" 
-    exit
-elif [ ${SCRIPT_STATUS} == "" ] && [ ${SCRIPT_ALREADY_RUNNING} -eq 1 ]
+    read -p "press enter to continue..."
+    exit 
+elif [[ ${SCRIPT_STATUS} == "" ]] && [ ${SCRIPT_ALREADY_RUNNING} -eq 5 ]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
@@ -581,7 +584,7 @@ fi
 #
 # Post-Installation Tasks
 
-if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "completed" ]] && [[ $(ps -aux | grep -w install-graylog.sh | wc -l) -eq 1 ]]
+if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "completed" ]] && [[ $(ps -aux | grep -w install-graylog.sh | wc -l) -eq 5 ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
