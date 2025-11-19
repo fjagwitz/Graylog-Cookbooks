@@ -362,7 +362,7 @@ function_downloadAdditionalBinaries () {
     sudo rm ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip
 
     # Download NXLog - provide a README with instructions on how to do that
-    echo "[INFO] - DOWNLOAD NXLOG AGENT COMMUNITY EDITION FOR WINDOWS (PREPARATORY STEP) "
+    echo "[INFO] - PREPARE (NO DOWNLOAD AVAILABLE) NXLOG AGENT COMMUNITY EDITION FOR WINDOWS "
     sudo touch ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt
     echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
     echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
