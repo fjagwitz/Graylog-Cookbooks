@@ -570,6 +570,8 @@ then
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     exit
+else
+    echo "DEBUG - ERROR EXIT"
 fi
 
 
