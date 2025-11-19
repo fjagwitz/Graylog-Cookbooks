@@ -518,11 +518,11 @@ function_createInputs () {
 #
 # Graylog Installation
 
-if [ $(cat ${GRAYLOG_PATH}/.installation) == "started" ]
+if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "started" ]]
 then
     echo "[INFO] - INSTALLATION WAS INTERRUPTED, RESET TO SNAPSHOT" 
     exit
-elif [ $(cat ${GRAYLOG_PATH}/.installation) == "" ]
+elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "" ]]
 then
     echo "started" | sudo tee -a ${GRAYLOG_PATH}/.installation
 
@@ -570,13 +570,9 @@ fi
 
 echo "[DEBUG] - Admin Token: ${GRAYLOG_ADMIN_TOKEN}"
 
-if [ $(cat ${GRAYLOG_PATH}/.installation) == "completed" ]
+if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "completed" ]]
 then
     function_startGraylogStack
     function_checkSystemAvailability
     function_createInputs
-
-else
-    echo "[INFO] - INSTALLATION IN UNDEFINED STATE, RESET TO SNAPSHOT" 
-    exit
 fi
