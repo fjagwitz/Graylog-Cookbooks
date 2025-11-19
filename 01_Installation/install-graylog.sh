@@ -21,7 +21,7 @@ GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATABASE_ENV="opensearch.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
-GRAYLOG_ADMIN_TOKEN=""
+GRAYLOG_ADMIN_TOKEN="${1}"
 GRAYLOG_FQDN=""
 GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_LICENSE_ENTERPRISE=""
@@ -29,7 +29,7 @@ GRAYLOG_LICENSE_SECURITY=""
 
 SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
 SYSTEM_PROXY=$(cat /etc/environment | grep -w http_proxy | cut -d "=" -f 2 | tr -d '"')
-
+SYSTEM_CRONPATH="/etc/cron.d/graylog-stack"
 
 
 ###############################################################################
@@ -454,17 +454,12 @@ function_displayClusterId () {
 
 function_checkEnterpriseLicense () {
 
-    local CRONPATH="/etc/cron.d/graylog-stack"
-
     while [[ ${GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
     do 
     echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
     GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${GRAYLOG_ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
     sleep 1m
     done
-
-    echo "completed" | sudo tee -a ${GRAYLOG_PATH}/.installation
-    echo "* * * * * root /bin/bash $(pwd)/install-graylog.sh" | sudo tee ${CRONPATH}
 }
 
 function_startGraylogStack () {
@@ -481,11 +476,56 @@ function_stopGraylogStack () {
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
 }
 
+function_createInputs () {
+
+    # Adding Inputs to make sure Ports map to Nginx configuration
+    #
+    # Port 514 Syslog UDP Input for Network Devices
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+    # Port 514 Syslog TCP Input for Network Devices
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+    # Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+    # Port 5045 Beats Input for Winlogbeat, Auditbeat, Filebeat
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    
+    # Port 5555 RAW TCP Input
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        
+    # Port 5555 RAW UDP Input
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+    # Port 6514 Syslog TCP over TLS Input for Network Devices
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 6514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": true, "tls_key_password": "test123" }}' 2>/dev/null >/dev/null
+
+    # Port 12201 GELF TCP Input for NXLog
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+    # Port 12201 GELF UDP Input for NXLog
+    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+    # Stopping all Inputs to allow a controlled Log Source Onboarding
+    echo "[INFO] - STOPPING ALL INPUTS" 
+    for INPUT in $(curl -s http://localhost/api/cluster/inputstates  -u ${GRAYLOG_ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id'); do
+        curl -s http://localhost/api/cluster/inputstates/${INPUT}  -u ${GRAYLOG_ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+    done
+}
+
 ###############################################################################
 #
 # Graylog Installation
-if [ $(cat ${GRAYLOG_PATH} != "completed") ]
+
+if [ $(cat ${GRAYLOG_PATH}/.installation) == "started" ]
 then
+    echo "[INFO] - INSTALLATION WAS INTERRUPTED, RESET TO SNAPSHOT" 
+    exit
+elif [ $(cat ${GRAYLOG_PATH}/.installation) == "" ]
+then
+    echo "started" | sudo tee -a ${GRAYLOG_PATH}/.installation
+
     function_checkSnapshot
 
     function_defineAdminName
@@ -516,11 +556,27 @@ then
     function_checkEnterpriseLicense
 
     function_stopGraylogStack
+    
+    echo "*/5 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH}
+
+    echo "[DEBUG] - ${GRAYLOG_ADMIN_TOKEN} | sudo tee ${GRAYLOG_PATH}/.post-install"
+    echo "completed" | sudo tee -a ${GRAYLOG_PATH}/.installation
 fi
 
 
-if [ $(cat ${GRAYLOG_PATH} != "completed") ]
+###############################################################################
+#
+# Post-Installation Tasks
+
+echo "[DEBUG] - Admin Token: ${GRAYLOG_ADMIN_TOKEN}"
+
+if [ $(cat ${GRAYLOG_PATH}/.installation) == "completed" ]
 then
     function_startGraylogStack
+    function_checkSystemAvailability
+    function_createInputs
 
+else
+    echo "[INFO] - INSTALLATION IN UNDEFINED STATE, RESET TO SNAPSHOT" 
+    exit
 fi
