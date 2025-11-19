@@ -323,10 +323,6 @@ function_installGraylogStack () {
 
     # Installation Complete, starting Graylog Stack in Compose
     echo "[INFO] - PREPARATION COMPLETE "
-    
-    # Start Graylog Stack
-    echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 }
 
 function_downloadAdditionalBinaries () {
@@ -458,41 +454,73 @@ function_displayClusterId () {
 
 function_checkEnterpriseLicense () {
 
+    local CRONPATH="/etc/cron.d/graylog-stack"
+
     while [[ ${GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
     do 
     echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
     GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${GRAYLOG_ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
     sleep 1m
     done
+
+    echo "completed" | sudo tee -a ${GRAYLOG_PATH}/.installation
+    echo "* * * * * root /bin/bash $(pwd)/install-graylog.sh" | sudo tee ${CRONPATH}
+}
+
+function_startGraylogStack () {
+
+    # Start Graylog Stack
+    echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
+}
+
+function_stopGraylogStack () {
+
+    # Stop Graylog Stack
+    echo "[INFO] - STOP GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
 }
 
 ###############################################################################
 #
 # Graylog Installation
+if [ $(cat ${GRAYLOG_PATH} != "completed") ]
+then
+    function_checkSnapshot
 
-function_checkSnapshot
+    function_defineAdminName
+    function_defineAdminPassword
 
-function_defineAdminName
-function_defineAdminPassword
+    function_getSystemFqdn
 
-function_getSystemFqdn
+    function_checkSystemRequirements
 
-function_checkSystemRequirements
+    function_installScriptDependencies
+    function_installDocker
 
-function_installScriptDependencies
-function_installDocker
+    function_installGraylogStack
 
-function_installGraylogStack
+    function_startGraylogStack
 
-function_downloadAdditionalBinaries
+    function_downloadAdditionalBinaries
 
-function_checkSystemAvailability
+    function_checkSystemAvailability
 
-GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
-GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
+    GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
+    GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
-function_configureBaseFunctionality
+    function_configureBaseFunctionality
 
-function_displayClusterId
+    function_displayClusterId
 
-function_checkEnterpriseLicense
+    function_checkEnterpriseLicense
+
+    function_stopGraylogStack
+fi
+
+
+if [ $(cat ${GRAYLOG_PATH} != "completed") ]
+then
+    function_startGraylogStack
+
+fi
