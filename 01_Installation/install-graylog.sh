@@ -566,7 +566,7 @@ then
 
     function_displayClusterId
     
-    echo "*/15 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH} 2>/dev/null >/dev/null
+    echo "*/5 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH} 2>/dev/null >/dev/null
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     read -p "Press Enter to finish..."
