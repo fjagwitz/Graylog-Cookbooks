@@ -375,7 +375,7 @@ function_checkSystemAvailability () {
     sleep 7s
     done
 
-    echo "[INFO] - SYSTEM IS UP NOW "
+    echo "[INFO] - SYSTEM IS UP NOW"
 }
 
 function_createUserToken () {
@@ -525,7 +525,7 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
-    echo "started" | sudo tee -a ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+    echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     function_checkSnapshot
 
@@ -553,15 +553,11 @@ then
     function_configureBaseFunctionality
 
     function_displayClusterId
-
-    function_checkEnterpriseLicense
-
-    function_stopGraylogStack
     
-    echo "*/5 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH}
+    echo "*/15 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH}
 
     echo "[DEBUG] - ${GRAYLOG_ADMIN_TOKEN} | sudo tee ${GRAYLOG_PATH}/.post-install"
-    echo "completed" | sudo tee -a ${GRAYLOG_PATH}/.installation
+    echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation
 fi
 
 
@@ -573,6 +569,8 @@ echo "[DEBUG] - Admin Token: ${GRAYLOG_ADMIN_TOKEN}"
 
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "completed" ]]
 then
+    function_checkEnterpriseLicense
+    function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
     function_createInputs
