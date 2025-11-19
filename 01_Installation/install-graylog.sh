@@ -558,6 +558,7 @@ then
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     read -p "Press Enter to continue..."
+    exit
 fi
 
 
@@ -573,3 +574,7 @@ then
     function_checkSystemAvailability
     function_createInputs
 fi
+
+#sudo rm $0
+
+exit
