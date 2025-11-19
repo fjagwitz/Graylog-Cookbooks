@@ -527,17 +527,12 @@ function_createInputs () {
 ###############################################################################
 #
 # Graylog Installation
-SCRIPT_ALREADY_RUNNING=$(ps -aux | grep -w install-graylog.sh | wc -l)
-SCRIPT_STATUS=$(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null)
-
-echo "DEBUG - if [ ${SCRIPT_STATUS} == "started" ] || [ ${SCRIPT_ALREADY_RUNNING} -gt 1 ]"
-
-if [ ${SCRIPT_STATUS} == "started" ] || [ ${SCRIPT_ALREADY_RUNNING} -gt 5 ]
+if [[ $(ps -aux | grep -w install-graylog.sh | wc -l) -gt 5 ]] || [ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "started" ]
 then
     echo "[INFO] - INSTALLATION WAS INTERRUPTED, RESET TO SNAPSHOT" 
     read -p "press enter to continue..."
     exit 
-elif [[ ${SCRIPT_STATUS} == "" ]] && [ ${SCRIPT_ALREADY_RUNNING} -eq 5 ]
+elif [[ $(ps -aux | grep -w install-graylog.sh | wc -l) -eq 5 ]] || [ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "" ]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
