@@ -568,6 +568,8 @@ fi
 
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "completed" ]]
 then
+    echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+
     function_checkEnterpriseLicense
     function_stopGraylogStack
     function_startGraylogStack
