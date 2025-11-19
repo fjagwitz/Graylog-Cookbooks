@@ -524,6 +524,7 @@ then
     exit
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null) == "" ]]
 then
+    sudo mkdir -p ${GRAYLOG_PATH}
     echo "started" | sudo tee -a ${GRAYLOG_PATH}/.installation
 
     function_checkSnapshot
