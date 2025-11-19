@@ -390,6 +390,8 @@ function_createUserToken () {
 
 function_configureBaseFunctionality () {
 
+    echo "[INFO] - PERFORM BASIC CONFIGURATION STEPS "
+
     # GELF UDP Input for NXLog
     local MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
 
@@ -462,6 +464,14 @@ function_checkEnterpriseLicense () {
     done
 }
 
+function_restartGraylogContainer () {
+    local GRAYLOG_CONTAINER=$1
+    # Restart Graylog Stack
+    echo "[INFO] - RESTART GRAYLOG CONTAINERS FOR MAINTENANCE PURPOSES "
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} --quiet-pull 2>/dev/null >/dev/null
+}
+
 function_startGraylogStack () {
 
     # Start Graylog Stack
@@ -471,7 +481,7 @@ function_startGraylogStack () {
 
 function_stopGraylogStack () {
 
-    # Stop Graylog Stack
+    # Start Graylog Stack
     echo "[INFO] - STOP GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
 }
@@ -551,6 +561,8 @@ then
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
     function_configureBaseFunctionality
+ 
+    function_restartGraylogContainer graylog1
 
     function_displayClusterId
     
