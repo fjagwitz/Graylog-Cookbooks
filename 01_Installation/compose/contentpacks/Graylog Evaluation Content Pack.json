@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "39eb4abc-b0af-4851-b461-be66536f2780",
-  "rev": 3,
+  "rev": 4,
   "name": "Graylog Evaluation Content Pack",
   "summary": "Graylog Evaluation Content Pack",
   "description": "",
@@ -15,7 +15,7 @@
         "name": "dashboard",
         "version": "2"
       },
-      "id": "0ac2c84e-d9df-4ba9-9df6-9f1384d114ee",
+      "id": "df1528f0-2440-4e02-a096-395f727435a7",
       "data": {
         "summary": {
           "@type": "string",
@@ -85,26 +85,6 @@
                 {
                   "query": {
                     "type": "elasticsearch",
-                    "query_string": "image_name:graylog\\/graylog\\-enterprise\\:*"
-                  },
-                  "name": null,
-                  "timerange": {
-                    "from": 300,
-                    "type": "relative"
-                  },
-                  "offset": 0,
-                  "streams": [],
-                  "filter": null,
-                  "decorators": [],
-                  "type": "messages",
-                  "stream_categories": [],
-                  "id": "5bb89d76-005c-4d7e-bd16-e3c269ab8718",
-                  "limit": 150,
-                  "filters": []
-                },
-                {
-                  "query": {
-                    "type": "elasticsearch",
                     "query_string": "image_name:graylog\\/graylog\\-enterprise\\:* AND event_severity:(ERROR OR WARN)"
                   },
                   "name": "chart",
@@ -140,6 +120,26 @@
                   "filters": [],
                   "column_groups": [],
                   "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "image_name:graylog\\/graylog\\-enterprise\\:*"
+                  },
+                  "name": null,
+                  "timerange": {
+                    "from": 300,
+                    "type": "relative"
+                  },
+                  "offset": 0,
+                  "streams": [],
+                  "filter": null,
+                  "decorators": [],
+                  "type": "messages",
+                  "stream_categories": [],
+                  "id": "5bb89d76-005c-4d7e-bd16-e3c269ab8718",
+                  "limit": 150,
+                  "filters": []
                 }
               ]
             },
@@ -278,6 +278,26 @@
                 {
                   "query": {
                     "type": "elasticsearch",
+                    "query_string": "image_name:mongo\\:*"
+                  },
+                  "name": null,
+                  "timerange": {
+                    "from": 300,
+                    "type": "relative"
+                  },
+                  "offset": 0,
+                  "streams": [],
+                  "filter": null,
+                  "decorators": [],
+                  "type": "messages",
+                  "stream_categories": [],
+                  "id": "7ab39fab-6b91-4c22-9319-5a7e0010c19e",
+                  "limit": 150,
+                  "filters": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
                     "query_string": "image_name:mongo\\:* AND event_severity:(ERROR OR WARN)"
                   },
                   "name": "chart",
@@ -313,26 +333,6 @@
                   "filters": [],
                   "column_groups": [],
                   "sort": []
-                },
-                {
-                  "query": {
-                    "type": "elasticsearch",
-                    "query_string": "image_name:mongo\\:*"
-                  },
-                  "name": null,
-                  "timerange": {
-                    "from": 300,
-                    "type": "relative"
-                  },
-                  "offset": 0,
-                  "streams": [],
-                  "filter": null,
-                  "decorators": [],
-                  "type": "messages",
-                  "stream_categories": [],
-                  "id": "7ab39fab-6b91-4c22-9319-5a7e0010c19e",
-                  "limit": 150,
-                  "filters": []
                 },
                 {
                   "query": {
@@ -407,6 +407,43 @@
               }
             },
             "widgets": [
+              {
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:graylog\\/graylog\\-enterprise\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "cf7f7392-d81f-4f6d-b68f-2b8028fcd0d1",
+                "filters": [],
+                "description": null
+              },
               {
                 "config": {
                   "visualization": "table",
@@ -520,43 +557,6 @@
                 "id": "45db354b-2c79-4778-8acb-b6ecddfedd62",
                 "filters": [],
                 "description": null
-              },
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component"
-                  ],
-                  "units": {},
-                  "show_message_row": true,
-                  "show_summary": true,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:graylog\\/graylog\\-enterprise\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 300,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "cf7f7392-d81f-4f6d-b68f-2b8028fcd0d1",
-                "filters": [],
-                "description": null
               }
             ],
             "widget_mapping": {
@@ -571,23 +571,23 @@
               ]
             },
             "positions": {
-              "45db354b-2c79-4778-8acb-b6ecddfedd62": {
-                "col": 5,
-                "row": 1,
-                "height": 4,
-                "width": 4
-              },
               "42d2ef01-00ab-45c3-b990-d4b49d56a49f": {
                 "col": 1,
                 "row": 1,
                 "height": 4,
-                "width": 4
+                "width": 5
               },
               "cf7f7392-d81f-4f6d-b68f-2b8028fcd0d1": {
                 "col": 1,
                 "row": 5,
                 "height": 3,
-                "width": 8
+                "width": 9
+              },
+              "45db354b-2c79-4778-8acb-b6ecddfedd62": {
+                "col": 6,
+                "row": 1,
+                "height": 4,
+                "width": 4
               }
             },
             "formatting": {
@@ -665,6 +665,43 @@
               },
               {
                 "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "89c08a2b-7d44-411e-bccd-01c1d7075423",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
                   "visualization": "table",
                   "units": {},
                   "column_limit": null,
@@ -725,43 +762,6 @@
                 "id": "7761b152-9033-4ac0-a29a-c45b64688634",
                 "filters": [],
                 "description": null
-              },
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component"
-                  ],
-                  "units": {},
-                  "show_message_row": true,
-                  "show_summary": true,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 300,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "89c08a2b-7d44-411e-bccd-01c1d7075423",
-                "filters": [],
-                "description": null
               }
             ],
             "widget_mapping": {
@@ -777,7 +777,7 @@
             },
             "positions": {
               "3bfcec39-947a-421a-b700-1caf10180cf4": {
-                "col": 5,
+                "col": 6,
                 "row": 1,
                 "height": 4,
                 "width": 4
@@ -786,13 +786,13 @@
                 "col": 1,
                 "row": 1,
                 "height": 4,
-                "width": 4
+                "width": 5
               },
               "89c08a2b-7d44-411e-bccd-01c1d7075423": {
                 "col": 1,
                 "row": 5,
                 "height": 3,
-                "width": 8
+                "width": 9
               }
             },
             "formatting": {
@@ -817,6 +817,43 @@
               }
             },
             "widgets": [
+              {
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:mongo\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
+                "filters": [],
+                "description": null
+              },
               {
                 "config": {
                   "visualization": "pie",
@@ -865,43 +902,6 @@
                 "type": "aggregation",
                 "stream_categories": [],
                 "id": "18e26276-e304-4188-b0c7-2abe623aacbd",
-                "filters": [],
-                "description": null
-              },
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component"
-                  ],
-                  "units": {},
-                  "show_message_row": true,
-                  "show_summary": true,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:mongo\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 300,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
                 "filters": [],
                 "description": null
               },
@@ -982,7 +982,7 @@
             },
             "positions": {
               "18e26276-e304-4188-b0c7-2abe623aacbd": {
-                "col": 5,
+                "col": 6,
                 "row": 1,
                 "height": 4,
                 "width": 4
@@ -991,13 +991,13 @@
                 "col": 1,
                 "row": 1,
                 "height": 4,
-                "width": 4
+                "width": 5
               },
               "6578c54f-9d83-46f9-8b71-f55961a7cde8": {
                 "col": 1,
                 "row": 5,
                 "height": 3,
-                "width": 8
+                "width": 9
               }
             },
             "formatting": {
