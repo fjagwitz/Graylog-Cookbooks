@@ -259,6 +259,8 @@ function_installDocker () {
 function_installGraylogSidecar () {
     
     local SIDECAR_INSTALLED=$(dpkg -l | grep -E "(^| )graylog-sidecar($| )" | cut -d" " -f3)
+    local SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
+    local SIDECAR_TOKEN="${1}"
 
     if [[ ${SIDECAR_INSTALLED} != "graylog-sidecar" ]]
     then
@@ -269,6 +271,12 @@ function_installGraylogSidecar () {
         sudo apt-get update 2>/dev/null >/dev/null
         sudo apt-get install graylog-sidecar 2>/dev/null >/dev/null
         sudo rm graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+
+        # Configuring Graylog Sidecar for Graylog Host        
+        sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
+        sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
+        sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
+
     else
         echo "[INFO] - GRAYLOG SIDECAR ALREADY INSTALLED "
     fi
@@ -658,12 +666,6 @@ function_enableGraylogSidecar () {
 
     local SIDECAR_TOKEN=${1}
 
-    # Configuring Graylog Sidecar for Graylog Host
-    local SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
-    sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
-    sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
-    sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
-
     # Starting the Sidecar Service
     echo "[INFO] - START GRAYLOG SIDECAR "
 
@@ -709,7 +711,6 @@ then
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     function_installScriptDependencies
-    function_installGraylogSidecar
     function_installDocker
 
     function_installGraylogStack
@@ -720,6 +721,8 @@ then
 
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
+
+    function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
     function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
@@ -749,7 +752,7 @@ then
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
-    function_enableGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
+    function_enableGraylogSidecar
 
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
     sudo rm ${0}
