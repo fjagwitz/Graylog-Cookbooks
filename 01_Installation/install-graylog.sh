@@ -370,8 +370,6 @@ function_checkSystemAvailability () {
     echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
     sleep 7s
     done
-
-    echo "[INFO] - SYSTEM IS UP NOW"
 }
 
 function_createUserToken () {
