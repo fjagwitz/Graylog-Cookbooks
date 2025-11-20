@@ -673,6 +673,21 @@ function_enableGraylogSidecar () {
     sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
 }
 
+function_configureSecurityFeatures () {
+    if [[ $GL_GRAYLOG_LICENSE_SECURITY == "true" ]]
+    then
+        # Disabling Investigation AI Reports
+        #
+        local ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
+
+        if [[ ${ACTIVE_AI_REPORT} == "true" ]] || [[ ${ACTIVE_AI_REPORT} == "" ]]
+        then 
+            echo "[INFO] - DISABLE INVESTIGATION AI REPORTS "
+            curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost)" 2>/dev/null >/dev/null
+        fi
+    fi 
+}
+
 
 
 ###############################################################################
@@ -731,10 +746,10 @@ then
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN})
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
-    #function_stopGraylogStack
-    #function_startGraylogStack
-    #function_checkSystemAvailability
-    #function_createInputs ${GRAYLOG_ADMIN_TOKEN}
+    function_stopGraylogStack
+    function_startGraylogStack
+    function_checkSystemAvailability
+    function_createInputs ${GRAYLOG_ADMIN_TOKEN}
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
