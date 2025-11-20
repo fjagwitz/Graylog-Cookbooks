@@ -742,8 +742,6 @@ if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     
-    echo "[INFO] - CHECKING FOR LICENSES: HANG ON, CAN TAKE A WHILE"
-    
     function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
