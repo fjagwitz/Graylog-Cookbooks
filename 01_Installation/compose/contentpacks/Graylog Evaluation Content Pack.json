@@ -1,7 +1,7 @@
 {
-  "v": 1,
+  "v": "1",
   "id": "39eb4abc-b0af-4851-b461-be66536f2780",
-  "rev": 2,
+  "rev": 3,
   "name": "Graylog Evaluation Content Pack",
   "summary": "Graylog Evaluation Content Pack",
   "description": "",
@@ -9,135 +9,6 @@
   "url": "https://github.com/fjagwitz/Graylog-Cookbooks",
   "parameters": [],
   "entities": [
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline",
-        "version": "1"
-      },
-      "id": "d1ae8bd9-d854-4769-aead-848a44811835",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Pipeline"
-        },
-        "description": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Pipeline"
-        },
-        "source": {
-          "@type": "string",
-          "@value": "pipeline \"Evaluation - Self-Monitoring Pipeline\"\nstage 0 match either\nrule \"Evaluation - Self-Monitoring Parser Graylog 1\"\nrule \"Evaluation - Self-Monitoring Parser MongoDB 1\"\nrule \"Evaluation - Self-Monitoring Parser Opensearch 1\"\nstage 10 match either\nrule \"Evaluation - Self-Monitoring Cleanup\"\nend"
-        },
-        "connected_streams": [
-          {
-            "@type": "string",
-            "@value": "77af2294-7d82-4406-9055-95ce5c4f4052"
-          }
-        ]
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.0+a788678"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "63c57780-2f33-45ff-852e-cf4fea3c743c",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser Graylog 1"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog 1\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.0+a788678"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "396bd8b7-79ee-4029-a4e7-dd097588982c",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Cleanup"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Cleanup\"\n\nwhen\n    NOT has_field(\"event_severity\")\n    \nthen\n    drop_message();\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.0+a788678"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "url_allowlist_entry",
-        "version": "1"
-      },
-      "id": "3ae3c9f2-89de-4ee6-84ff-1305b7fd84ca",
-      "data": {
-        "id": "71301e4c-2219-49fe-8712-14bafd01d1e4",
-        "type": "regex",
-        "title": "Internal Webserver",
-        "value": "http://lookuptables/*"
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.0+a788678"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "806abef8-248e-4677-9698-58fad6224a5a",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser MongoDB 1"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser MongoDB 1\"\n\nwhen\n    contains(to_string($message.image_name),\"mongo\")\n    //true\n    \nthen\n    let mylog = to_map(parse_json(to_string(flatten_json(to_string($message.message),\"flatten\"))));\n    \n    set_fields(mylog);\n    \n    rename_field(\"attr_message_msg\",\"message\");\n    rename_field(\"attr_message_verbose_level\",\"event_severity\");\n    //set_field(\"touched\",true);\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.0+a788678"
-        }
-      ]
-    },
     {
       "v": "1",
       "type": {
@@ -1159,6 +1030,90 @@
     {
       "v": "1",
       "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "d1ae8bd9-d854-4769-aead-848a44811835",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Pipeline"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Pipeline"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Evaluation - Self-Monitoring Pipeline\"\nstage 0 match either\nrule \"Evaluation - Self-Monitoring Parser Graylog 1\"\nrule \"Evaluation - Self-Monitoring Parser MongoDB 1\"\nrule \"Evaluation - Self-Monitoring Parser Opensearch 1\"\nstage 10 match either\nrule \"Evaluation - Self-Monitoring Cleanup\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "77af2294-7d82-4406-9055-95ce5c4f4052"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.0+a788678"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "63c57780-2f33-45ff-852e-cf4fea3c743c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Parser Graylog 1"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog 1\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.0+a788678"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "396bd8b7-79ee-4029-a4e7-dd097588982c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Cleanup"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Cleanup\"\n\nwhen\n    NOT has_field(\"event_severity\")\n    \nthen\n    drop_message();\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.0+a788678"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "pipeline_rule",
         "version": "1"
       },
@@ -1187,6 +1142,31 @@
     {
       "v": "1",
       "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "8540a450-3009-4b11-813d-ac3a72155cd1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Parser MongoDB 1"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Parser MongoDB 1\"\n\nwhen\n    contains(to_string($message.image_name),\"mongo\")\n    //true\n    \nthen\n    let mylog = to_map(parse_json(to_string(flatten_json(to_string($message.message),\"flatten\"))));\n    \n    set_fields(mylog);\n    \n    rename_field(\"attr_message_msg\",\"message\");\n    rename_field(\"attr_message_verbose_level\",\"event_severity\");\n    rename_field(\"attr_message_session_name\",\"application_component\");\n    //set_field(\"touched\",true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.0+a788678"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "stream_title",
         "version": "1"
       },
@@ -1196,6 +1176,26 @@
           "@type": "string",
           "@value": "System Self Monitoring (Evaluation)"
         }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.0+a788678"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "url_allowlist_entry",
+        "version": "1"
+      },
+      "id": "3ae3c9f2-89de-4ee6-84ff-1305b7fd84ca",
+      "data": {
+        "id": "71301e4c-2219-49fe-8712-14bafd01d1e4",
+        "type": "regex",
+        "title": "Internal Webserver",
+        "value": "http://lookuptables/*"
       },
       "constraints": [
         {
