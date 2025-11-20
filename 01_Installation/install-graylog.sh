@@ -200,9 +200,13 @@ function_installScriptDependencies () {
     echo "[INFO] - PERFORM SYSTEM CLEANUP "  
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
-    do
-        echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
-        sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
+    do 
+        if [[ ${DEP} != $(dpkg -l | grep -E "(^| )${DEP}($| )" | cut -d" " -f3) ]]
+        then
+            echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
+            sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
+        else
+            echo "[INFO] - PACKAGE: ${DEP^^} ALREADY AVAILABLE"
     done
 }
 
@@ -212,9 +216,9 @@ function_installDocker () {
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
     local DOCKER_URL="https://download.docker.com/linux/ubuntu"
     local DOCKER_KEY="/etc/apt/keyrings/docker.asc"
-
+    local DOCKER_INSTALLED=$(dpkg -l | grep -E "(^| )docker-ce($| )" | cut -d" " -f3)
    
-    if [[ "$(command -v docker)" == "" ]]
+    if [[ $(dpkg -l | grep -E "(^| )docker-ce($| )" | cut -d" " -f3) != "docker-ce" ]]
     then
         echo "[INFO] - REMOVE PREINSTALLED PACKAGES - DOCKER CLEANUP "
         for PKG in ${DOCKER_PACKAGES} 
@@ -239,7 +243,7 @@ function_installDocker () {
         done
 
         # Checking Docker Installation Success
-        if [ "$(docker -v | cut -d " " -f1 )" == "Docker" ]
+        if [[ $(dpkg -l | grep -E "(^| )docker-ce($| )" | cut -d" " -f3) == "docker-ce" ]]
         then
             echo "[INFO] - DOCKER SUCCESSFULLY INSTALLED, CONTINUE "
         else
@@ -248,6 +252,24 @@ function_installDocker () {
         fi
 
         sudo usermod -aG docker $USER
+    fi
+}
+
+function_installGraylogSidecar () {
+    
+    local SIDECAR_INSTALLED=$(dpkg -l | grep -E "(^| )graylog-sidecar($| )" | cut -d" " -f3)
+
+    if [ ${SIDECAR_INSTALLED} != "graylog-sidecar" ]
+    then
+        echo "[INFO] - INSTALL GRAYLOG SIDECAR "
+        
+        sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+        sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+        sudo apt-get update 2>/dev/null >/dev/null
+        sudo apt-get install graylog-sidecar 2>/dev/null >/dev/null
+        sudo rm graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+    else
+        echo "[INFO] - GRAYLOG SIDECAR ALREADY INSTALLED "
     fi
 }
 
@@ -414,14 +436,14 @@ function_createUserToken () {
     echo ${USER_TOKEN}
 }
 
-function_configureBaseFunctionality () {
+function_createBaseConfiguration () {
     
     local ADMIN_TOKEN=${1}
 
     echo "[INFO] - EXECUTE BASIC CONFIGURATION STEPS "
 
     # GELF UDP Input for NXLog
-    local MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
+    local MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
 
     # Creating FieldType Profile for Docker Logs from Graylog Evaluation Stack
     local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
@@ -484,12 +506,32 @@ function_displayClusterId () {
 
 function_checkEnterpriseLicense () {
 
-    while [[ ${GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
+    local ADMIN_TOKEN=${1}
+    local LICENSE_ENTERPRISE="false"
+
+    while [[ ${LICENSE_ENTERPRISE} != "true" ]]
     do 
-    echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
-    GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${GRAYLOG_ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
-    sleep 15s
+        echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
+        LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
+        sleep 5s
     done
+
+    echo ${LICENSE_ENTERPRISE}
+}
+
+function_checkSecurityLicense () {
+
+    local ADMIN_TOKEN=${1}
+    local LICENSE_SECURITY="false"
+
+    while [[${LICENSE_SECURITY} != "true" ]]
+    do 
+        echo "[INFO] - WAITING FOR GRAYLOG SECURITY LICENSE TO BE PROVISIONED "
+        LICENSE_SECURITY=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
+        sleep 5s
+    done
+
+    echo ${LICENSE_SECURITY}
 }
 
 function_restartGraylogContainer () {
@@ -519,45 +561,119 @@ function_createInputs () {
     local ADMIN_TOKEN=${1}
     local INPUT_ID_SELF_MONITORING=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==9900)' | jq -r .id )
 
-    # Adding Inputs to make sure Ports map to Nginx configuration
-    #
-    # Port 514 Syslog UDP Input for Network Devices
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    if [ ${GRAYLOG_LICENSE_ENTERPRISE} == "true" ]
+    then    
+        echo "[INFO] - CREATE INPUTS FOR INCOMING LOGS" 
 
-    # Port 514 Syslog TCP Input for Network Devices
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        # Adding Inputs to make sure Ports map to Nginx configuration
+        #
+        # Port 514 Syslog UDP Input for Network Devices
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-    # Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        # Port 514 Syslog TCP Input for Network Devices
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-    # Port 5045 Beats Input for Winlogbeat, Auditbeat, Filebeat
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
-    
-    # Port 5555 RAW TCP Input
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        # Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+
+        # Port 5045 Beats Input for Winlogbeat, Auditbeat, Filebeat
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
         
-    # Port 5555 RAW UDP Input
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        # Port 5555 RAW TCP Input
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+            
+        # Port 5555 RAW UDP Input
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-    # Port 6514 Syslog TCP over TLS Input for Network Devices
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 6514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": true, "tls_key_password": "test123" }}' 2>/dev/null >/dev/null
+        # Port 6514 Syslog TCP over TLS Input for Network Devices
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "port": 6514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": true, "tls_key_password": "test123" }}' 2>/dev/null >/dev/null
 
-    # Port 12201 GELF TCP Input for NXLog
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        # Port 12201 GELF TCP Input for NXLog
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-    # Port 12201 GELF UDP Input for NXLog
-    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        # Port 12201 GELF UDP Input for NXLog
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-    # Stopping all Inputs to allow a controlled Log Source Onboarding (except Self_monitoring Input)
-    echo "[INFO] - STOP ALL INPUTS" 
-    for INPUT in $(curl -s http://localhost/api/cluster/inputstates  -u ${ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id')
-    do
-        if [ ${INPUT} != ${INPUT_ID_SELF_MONITORING} ]
-        then
-            curl -s http://localhost/api/cluster/inputstates/${INPUT}  -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
-        fi
-    done
+        echo "[INFO] - CREATE GRAYLOG FORWARDER INPUT "
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"type":"org.graylog.plugins.forwarder.input.ForwarderServiceInput","configuration":{"forwarder_bind_address":"0.0.0.0","forwarder_message_transmission_port":13301,"forwarder_configuration_port":13302,"forwarder_grpc_enable_tls":false,"forwarder_grpc_tls_trust_chain_cert_file":"","forwarder_grpc_tls_private_key_file":"","forwarder_grpc_tls_private_key_file_password":""},"title":"Graylog Enterprise Forwarder | Evaluation Input","global":true}' 2>/dev/null >/dev/null
+
+        # Stopping all Inputs to allow a controlled Log Source Onboarding (except Self_monitoring Input)
+        echo "[INFO] - STOP ALL INPUTS" 
+        for INPUT in $(curl -s http://localhost/api/cluster/inputstates -u ${ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id')
+        do
+            if [ ${INPUT} != ${INPUT_ID_SELF_MONITORING} ]
+            then
+                curl -s http://localhost/api/cluster/inputstates/${INPUT} -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+            fi
+        done
+    fi
 }
+
+function_createEvaluationConfiguration () {
+
+    local ADMIN_TOKEN=${1}
+    local SELF_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "System Self Monitoring (Evaluation)")' | jq -r .id)
+ 
+    if [ ${GRAYLOG_LICENSE_ENTERPRISE} == "true" ]
+    then        
+        echo "[INFO] - CONFIGURE ARCHIVE "
+        local ARCHIVE_BACKEND=$(curl -s http://localhost/api/plugins/org.graylog.plugins.archive/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq -r .backend_id)
+
+        curl -s http://localhost/api/plugins/org.graylog.plugins.archive/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"archive_path\": \"/usr/share/graylog/data/archives\",\"max_segment_size\": 524288000,\"segment_filename_prefix\": \"archive-segment\",\"segment_compression_type\": \"GZIP\",\"metadata_filename\": \"archive-metadata.json\",\"histogram_bucket_size\": 86400000,\"restore_index_batch_size\": 1000,\"excluded_streams\": [],\"segment_checksum_type\": \"CRC32\",\"backend_id\": \"${ARCHIVE_BACKEND}\",\"archive_failure_threshold\": 1,\"retention_time\": 30,\"restrict_to_leader\": true,\"parallelize_archive_creation\": true}" 2>/dev/null >/dev/null
+
+        echo "[INFO] - ENABLE WARM TIER "
+        WARM_TIER_NAME=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datatiering/datatiering/repositories -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"fs","name":"warm_tier","location":"/usr/share/opensearch/warm_tier"}' | jq -r .name) 2>/dev/null >/dev/null
+
+        echo "[INFO] - CREATE EVALUATION INDEX SET TEMPLATE "
+        INDEX_SET_TEMPLATE=$(curl -s http://localhost/api/system/indices/index_sets/templates -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"title\": \"Evaluation Storage\",\"description\": \"Use case: Graylog Product Evaluation\",\"index_set_config\": {\"shards\": 1,\"replicas\": 0,\"index_optimization_max_num_segments\": 1,\"index_optimization_disabled\": false,\"field_type_refresh_interval\": 5000,\"data_tiering\": {\"type\": \"hot_warm\",\"index_lifetime_min\": \"P7D\",\"index_lifetime_max\": \"P10D\",\"warm_tier_enabled\": true,\"index_hot_lifetime_min\": \"P3D\",\"warm_tier_repository_name\": \"${WARM_TIER_NAME}\",\"archive_before_deletion\": true},\"index_analyzer\": \"standard\",\"use_legacy_rotation\": false}}" | jq -r .id) 
+
+        echo "[INFO] - CONFIGURE EVALUATION INDEX SET TEMPLATE AS DEFAULT"
+        curl -s http://localhost/api/system/indices/index_set_defaults -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${INDEX_SET_TEMPLATE}\"}" 2>/dev/null >/dev/null
+
+        echo "[INFO] - CREATE DATALAKE "
+        ACTIVE_BACKEND=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/backends -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"File System Data Lake","description":"Data Lake on the local Filesystem","settings":{"type":"fs-1","output_path":"/usr/share/graylog/data/datalake","usage_threshold":80}}' | jq -r .id) 2>/dev/null >/dev/null
+
+        echo "[INFO] - ENABLE DATALAKE "
+        curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"${ACTIVE_BACKEND}\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":null}" 2>/dev/null >/dev/null
+
+        echo "[INFO] - CONFIGURE DATALAKE MAX RETENTION OF 7 DAYS "
+        curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"active_backend\":\"${ACTIVE_BACKEND}\",\"iceberg_commit_interval\":\"PT15M\",\"iceberg_target_file_size\":536870912,\"parquet_row_group_size\":134217728,\"parquet_page_size\":8192,\"journal_reader_batch_size\":500,\"optimize_job_enabled\":true,\"optimize_job_interval\":\"PT1H\",\"optimize_max_concurrent_file_rewrites\":null,\"parallel_retrieval_enabled\":true,\"retrieval_convert_threads\":-1,\"retrieval_convert_batch_size\":1,\"retrieval_inflight_requests\":3,\"retrieval_bulk_batch_size\":2500,\"retention_time\":\"P7D\"}" 2>/dev/null >/dev/null
+
+        echo "[INFO] - CONFIGURE DATALAKE FOR SELF-MONITORING STREAM"
+        curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/stream/config/enable -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"stream_ids\":[\"${SELF_MONITORING_STREAM}\"],\"enabled\":true}" 2>/dev/null >/dev/null
+    fi
+}
+
+function_enableIlluminatePackages () {
+
+    local ADMIN_TOKEN=${1}
+
+    if [ ${GRAYLOG_LICENSE_ENTERPRISE} == "true" ]
+    then
+        echo "[INFO] - INSTALL ILLUMINATE PACKAGES FOR AUDITBEAT "
+        curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"processing_pack_ids":["illuminate-linux-auditbeat"],"spotlight_pack_ids":["61d75c3e-3551-4b97-bbb5-ea8181472cb0"]}}' 2>/dev/null >/dev/null
+    fi
+}
+
+function_enableGraylogSidecar () {
+
+    local SIDECAR_TOKEN=${1}
+
+    # Configuring Graylog Sidecar for Graylog Host
+    local SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
+    sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
+    sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
+    sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
+
+    # Starting the Sidecar Service
+    echo "[INFO] - START GRAYLOG SIDECAR "
+
+    sudo graylog-sidecar -service install 2>/dev/null >/dev/null
+    sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
+    sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
+}
+
+
 
 ###############################################################################
 #
@@ -572,35 +688,30 @@ then
     sudo mkdir -p ${GRAYLOG_PATH}
 
     function_checkSnapshot
-
     function_defineAdminName
     function_defineAdminPassword
-
     function_getSystemFqdn
-
     function_checkSystemRequirements
 
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     function_installScriptDependencies
+    function_installGraylogSidecar
     function_installDocker
 
     function_installGraylogStack
-
     function_startGraylogStack
 
     function_downloadAdditionalBinaries
-
     function_checkSystemAvailability
 
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
-    function_configureBaseFunctionality ${GRAYLOG_ADMIN_TOKEN}
+    function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
  
     function_restartGraylogContainer graylog1
-
     function_displayClusterId
     
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
@@ -618,12 +729,15 @@ if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     # echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
-    #function_checkEnterpriseLicense
+    GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN})
+    GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     #function_stopGraylogStack
     #function_startGraylogStack
     #function_checkSystemAvailability
-    function_createInputs ${GRAYLOG_ADMIN_TOKEN}
-
+    #function_createInputs ${GRAYLOG_ADMIN_TOKEN}
+    function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
+    function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}
+    function_enableGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 fi
 
 exit
