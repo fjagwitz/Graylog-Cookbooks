@@ -733,7 +733,7 @@ then
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null
 
     sudo cp $0 $(pwd)/postinstall-graylog.sh
-    exec sudo $(pwd)/postinstall-graylog.sh
+    exec sudo $(pwd)/postinstall-graylog.sh &
     sudo rm -- $0
     exit
 fi
