@@ -260,7 +260,7 @@ function_installGraylogSidecar () {
     
     local SIDECAR_INSTALLED=$(dpkg -l | grep -E "(^| )graylog-sidecar($| )" | cut -d" " -f3)
 
-    if [ ${SIDECAR_INSTALLED} != "graylog-sidecar" ]
+    if [[ ${SIDECAR_INSTALLED} != "graylog-sidecar" ]]
     then
         echo "[INFO] - INSTALL GRAYLOG SIDECAR "
         
