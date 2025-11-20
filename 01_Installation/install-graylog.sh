@@ -529,7 +529,6 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
-    echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     function_checkSnapshot
 
@@ -539,6 +538,8 @@ then
     function_getSystemFqdn
 
     function_checkSystemRequirements
+
+    echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     function_installScriptDependencies
     function_installDocker
