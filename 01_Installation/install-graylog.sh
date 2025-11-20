@@ -520,6 +520,7 @@ function_checkEnterpriseLicense () {
     while [[ ${LICENSE_ENTERPRISE} != "true" ]]
     do 
         LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
+        echo "$(date) - [INFO] - WAITING FOR LICENSE (${LICENSE_ENTERPRISE})" | sudo tee -a ${GRAYLOG_PATH}/postinstall.log
         sleep 5s
     done
 
