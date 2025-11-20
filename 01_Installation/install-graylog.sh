@@ -733,7 +733,7 @@ then
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null
 
-    exec sudo $(pwd)/install.sh ${ADMINTOKEN} & exit
+    echo "exec sudo $(pwd)/install.sh ${ADMINTOKEN} & exit"
 fi
 
 
@@ -744,17 +744,21 @@ fi
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    
+    sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
+
+    GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense)
+
     function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
-    function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}
-    function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
+    function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}    
     function_enableGraylogSidecar
 
-    sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
+    GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense)
+    function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
+
     sudo rm ${0}
 fi
 
