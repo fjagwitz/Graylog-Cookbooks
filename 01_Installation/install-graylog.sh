@@ -762,6 +762,7 @@ then
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 
+    sudo rm ${GRAYLOG_PATH}/postinstall.log
     sudo rm -- ${0}
 fi
 
