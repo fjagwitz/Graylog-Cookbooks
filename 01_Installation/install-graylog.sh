@@ -520,8 +520,8 @@ function_checkEnterpriseLicense () {
     while [[ ${LICENSE_ENTERPRISE} != "true" ]]
     do 
         LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
-        echo "$(date) - [INFO] - WAITING FOR LICENSE (${LICENSE_ENTERPRISE})" | sudo tee -a ${GRAYLOG_PATH}/postinstall.log
-        sleep 5s
+        echo "$(date) - [INFO] - WAITING FOR LICENSE (${LICENSE_ENTERPRISE}) REQUESTED WITH TOKEN ${ADMIN_TOKEN}" | sudo tee -a ${GRAYLOG_PATH}/postinstall.log
+        sleep 1m
     done
 
     echo ${LICENSE_ENTERPRISE}
@@ -535,7 +535,7 @@ function_checkSecurityLicense () {
     while [[ ${LICENSE_SECURITY} != "true" ]]
     do 
         LICENSE_SECURITY=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/security")' | jq -r .active )
-        sleep 5s
+        sleep 1m
     done
 
     echo ${LICENSE_SECURITY}
@@ -749,7 +749,7 @@ then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
-    GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${ADMIN_TOKEN}) 
+    GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
 
     function_stopGraylogStack
     function_startGraylogStack
@@ -759,7 +759,7 @@ then
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}    
     function_enableGraylogSidecar
 
-    GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${ADMIN_TOKEN})
+    GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 
     sudo rm -- ${0}
