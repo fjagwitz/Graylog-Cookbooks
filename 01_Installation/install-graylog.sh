@@ -207,6 +207,7 @@ function_installScriptDependencies () {
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
         else
             echo "[INFO] - PACKAGE: ${DEP^^} ALREADY AVAILABLE"
+        fi
     done
 }
 
@@ -524,7 +525,7 @@ function_checkSecurityLicense () {
     local ADMIN_TOKEN=${1}
     local LICENSE_SECURITY="false"
 
-    while [[${LICENSE_SECURITY} != "true" ]]
+    while [[ ${LICENSE_SECURITY} != "true" ]]
     do 
         echo "[INFO] - WAITING FOR GRAYLOG SECURITY LICENSE TO BE PROVISIONED "
         LICENSE_SECURITY=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
