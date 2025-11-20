@@ -27,9 +27,14 @@ GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
 SYSTEM_PROXY=$(cat /etc/environment | grep -w http_proxy | cut -d "=" -f 2 | tr -d '"')
-SYSTEM_CRONPATH="/etc/cron.d/graylog-stack"
+SYSTEM_REQUIREMENTS_CPU="8"
+SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
+SYSTEM_REQUIREMENTS_MEMORY="32"
+SYSTEM_REQUIREMENTS_DISK="200"
+SYSTEM_REQUIREMENTS_OS="Ubuntu"
+
+SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
 
 
 ###############################################################################
@@ -140,7 +145,7 @@ function_checkSystemRequirements () {
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
     local TOTAL_DISK_SPACE=$(df -BG --total | grep -w total | awk '{print $2}' | grep -oE [0-9]*)
 
-    if [ ${OPERATING_SYSTEM,,} == "ubuntu" ] && [ ${RANDOM_ACCESS_MEMORY} -ge 32 ] && [ ${CPU_CORES_NUMBER} -ge 8 ] && [ ${CPU_REQUIRED_FLAGS,,} == "avx" ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ] && [ ${TOTAL_DISK_SPACE} -ge 600 ]
+    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ] && [ ${TOTAL_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_DISK} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
 
