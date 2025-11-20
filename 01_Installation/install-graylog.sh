@@ -195,9 +195,8 @@ function_checkSystemRequirements () {
 
 function_installScriptDependencies () {
 
-    echo "[INFO] - PERFORM SYSTEM UPDATE "   
-    sudo apt -qq update -y 2>/dev/null >/dev/null 
     echo "[INFO] - PERFORM SYSTEM CLEANUP "  
+    sudo apt -qq update -y 2>/dev/null >/dev/null 
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
     do 
