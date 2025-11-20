@@ -517,6 +517,7 @@ function_stopGraylogStack () {
 function_createInputs () {
 
     local ADMIN_TOKEN=${1}
+    local INPUT_ID_SELF_MONITORING=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==9900)' | jq -r .id )
 
     # Adding Inputs to make sure Ports map to Nginx configuration
     #
@@ -547,16 +548,15 @@ function_createInputs () {
     # Port 12201 GELF UDP Input for NXLog
     curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-    # Stopping all Inputs to allow a controlled Log Source Onboarding
+    # Stopping all Inputs to allow a controlled Log Source Onboarding (except Self_monitoring Input)
     echo "[INFO] - STOP ALL INPUTS" 
-    for INPUT in $(curl -s http://localhost/api/cluster/inputstates  -u ${ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id'); do
-        curl -s http://localhost/api/cluster/inputstates/${INPUT}  -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+    for INPUT in $(curl -s http://localhost/api/cluster/inputstates  -u ${ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id')
+    do
+        if [ ${INPUT} != ${INPUT_ID_SELF_MONITORING} ]
+        then
+            curl -s http://localhost/api/cluster/inputstates/${INPUT}  -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+        fi
     done
-
-    # Starting GELF Input on Port 9900 to continue Self-Monitoring
-    local INPUT_ID=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .[] | jq '.[] | select(.attributes.port==9900)' | jq -r .id )
-    
-    curl -s http://localhost/api/system/inputstates/${INPUT_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 }
 
 ###############################################################################
