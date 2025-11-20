@@ -380,11 +380,10 @@ function_downloadAdditionalBinaries () {
 function_prepareSidecarConfiguration () {
     
     local SIDECAR_TOKEN=${1}
-    local SIDECAR_YML="${GRAYLOG_PATH}/binaries/Graylog_Sidecar/sidecar.yml"
+    local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/sidecar.yml"
     local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
 
     # Configuring Graylog Sidecar for Windows Hosts
-    local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/sidecar.yml"
     sudo cp ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar/sidecar-windows-msi-example.yml ${SIDECAR_YML}
 
     # Replace Graylog Host URL
