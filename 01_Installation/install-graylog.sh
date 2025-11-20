@@ -44,7 +44,7 @@ SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl
 
 function_checkSnapshot () {
 
-    read -p "[INPUT] - Please confirm that you created a Snapshot of the VM before running this Script [yes/no]: " SNAPSHOT_CREATED
+    read -p "[INPUT] - Please confirm that you created a Snapshot of the VM before running this Script [no/yes]: " SNAPSHOT_CREATED
 
     local SNAPSHOT_CREATED=${SNAPSHOT_CREATED:-no}
 
