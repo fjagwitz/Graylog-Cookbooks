@@ -195,8 +195,9 @@ function_checkSystemRequirements () {
 
 function_installScriptDependencies () {
 
-    echo "[INFO] - PERFORM SYSTEM CLEANUP "  
+    echo "[INFO] - PERFORM SYSTEM UPDATE "   
     sudo apt -qq update -y 2>/dev/null >/dev/null 
+    echo "[INFO] - PERFORM SYSTEM CLEANUP "  
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
     do 
@@ -511,7 +512,6 @@ function_checkEnterpriseLicense () {
 
     while [[ ${LICENSE_ENTERPRISE} != "true" ]]
     do 
-        echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
         LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
         sleep 5s
     done
@@ -526,8 +526,7 @@ function_checkSecurityLicense () {
 
     while [[ ${LICENSE_SECURITY} != "true" ]]
     do 
-        echo "[INFO] - WAITING FOR GRAYLOG SECURITY LICENSE TO BE PROVISIONED "
-        LICENSE_SECURITY=$(curl -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status?only_legacy=false -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
+        LICENSE_SECURITY=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/security")' | jq -r .active )
         sleep 5s
     done
 
@@ -677,7 +676,6 @@ function_configureSecurityFeatures () {
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
         # Disabling Investigation AI Reports
-        #
         local ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
 
         if [[ ${ACTIVE_AI_REPORT} == "true" ]] || [[ ${ACTIVE_AI_REPORT} == "" ]]
@@ -743,20 +741,20 @@ fi
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-
+    
     echo "[INFO] - CHECKING FOR LICENSES: HANG ON, CAN TAKE A WHILE"
-    GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN})
-    GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
+    
     function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}
+    function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
-    echo "finalized" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-
+    sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
+    sudo rm ${0}
 fi
 
 exit
