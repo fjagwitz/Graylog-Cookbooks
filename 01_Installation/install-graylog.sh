@@ -162,7 +162,7 @@ function_checkSystemRequirements () {
                 Memory          : ${RANDOM_ACCESS_MEMORY} GB
                 CPU Cores       : ${CPU_CORES_NUMBER} vCPU
                 CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available
-                Internet        : ${INTERNET_CONNECTIVITY_TYPE}${SYSTEM_PROXY}
+                Internet        : ${INTERNET_CONNECTIVITY_TYPE^^}${SYSTEM_PROXY}
                 "
     else
         if [ ${INTERNET_CONNECTIVITY} -ne 200 ]
