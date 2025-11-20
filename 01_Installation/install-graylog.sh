@@ -733,7 +733,7 @@ then
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null
 
-    echo "exec sudo $(pwd)/install.sh ${ADMINTOKEN} & exit"
+    exec sudo $(pwd)/install.sh ${ADMINTOKEN} & exit
 fi
 
 
