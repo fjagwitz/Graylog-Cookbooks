@@ -184,7 +184,6 @@ function_installScriptDependencies () {
 
     echo "[INFO] - PERFORM SYSTEM UPDATE "   
     sudo apt -qq update -y 2>/dev/null >/dev/null 
-    sudo apt -qq upgrade -y 2>/dev/null >/dev/null
     echo "[INFO] - PERFORM SYSTEM CLEANUP "  
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
@@ -566,7 +565,6 @@ then
 
     function_displayClusterId
     
-    echo "*/5 * * * * root /bin/bash $(pwd)/install-graylog.sh ${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${SYSTEM_CRONPATH} 2>/dev/null >/dev/null
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     exit
