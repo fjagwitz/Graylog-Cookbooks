@@ -488,7 +488,7 @@ function_checkEnterpriseLicense () {
     do 
     echo "[INFO] - WAITING FOR GRAYLOG ENTERPRISE LICENSE TO BE PROVISIONED "
     GRAYLOG_LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${GRAYLOG_ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
-    sleep 1m
+    sleep 15s
     done
 }
 
@@ -516,40 +516,47 @@ function_stopGraylogStack () {
 
 function_createInputs () {
 
+    local ADMIN_TOKEN=${1}
+
     # Adding Inputs to make sure Ports map to Nginx configuration
     #
     # Port 514 Syslog UDP Input for Network Devices
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
     # Port 514 Syslog TCP Input for Network Devices
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 514 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
     # Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5044, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
     # Port 5045 Beats Input for Winlogbeat, Auditbeat, Filebeat
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "recv_buffer_size": 1048576, "port": 5045, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
     
     # Port 5555 RAW TCP Input
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
         
     # Port 5555 RAW UDP Input
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 UDP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.udp.RawUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 5555, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
     # Port 6514 Syslog TCP over TLS Input for Network Devices
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 6514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": true, "tls_key_password": "test123" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 6514, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": true, "tls_key_password": "test123" }}' 2>/dev/null >/dev/null
 
     # Port 12201 GELF TCP Input for NXLog
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "recv_buffer_size": 1048576, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
     # Port 12201 GELF UDP Input for NXLog
-    curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/inputs  -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
     # Stopping all Inputs to allow a controlled Log Source Onboarding
     echo "[INFO] - STOP ALL INPUTS" 
-    for INPUT in $(curl -s http://localhost/api/cluster/inputstates  -u ${GRAYLOG_ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id'); do
-        curl -s http://localhost/api/cluster/inputstates/${INPUT}  -u ${GRAYLOG_ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+    for INPUT in $(curl -s http://localhost/api/cluster/inputstates  -u ${ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id'); do
+        curl -s http://localhost/api/cluster/inputstates/${INPUT}  -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
     done
+
+    # Starting GELF Input on Port 9900 to continue Self-Monitoring
+    local INPUT_ID=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .[] | jq '.[] | select(.attributes.port==9900)' | jq -r .id )
+    
+    curl -s http://localhost/api/system/inputstates/${INPUT_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
 }
 
 ###############################################################################
@@ -609,16 +616,14 @@ fi
 
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
-    echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+    # echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
-    function_checkEnterpriseLicense
-    function_stopGraylogStack
-    function_startGraylogStack
-    function_checkSystemAvailability
-    function_createInputs
+    #function_checkEnterpriseLicense
+    #function_stopGraylogStack
+    #function_startGraylogStack
+    #function_checkSystemAvailability
+    function_createInputs ${GRAYLOG_ADMIN_TOKEN}
 
 fi
-
-#sudo rm $0
 
 exit
