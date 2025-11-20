@@ -534,12 +534,12 @@ function_createInputs () {
 ###############################################################################
 #
 # Graylog Installation
-if [[ $(cat ${GRAYLOG_PATH}/.installation) 2>/dev/null >/dev/null == "started" ]]
+if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null)  == "started" ]]
 then
     echo "[INFO] - INSTALLATION WAS INTERRUPTED, RESET TO SNAPSHOT" 
     read -p "press enter to continue..."
     exit 
-elif [[ $(cat ${GRAYLOG_PATH}/.installation) 2>/dev/null >/dev/null == "" ]]
+elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null)  == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
 
@@ -584,7 +584,7 @@ fi
 #
 # Post-Installation Tasks
 
-if [[ $(cat ${GRAYLOG_PATH}/.installation) 2>/dev/null >/dev/null == "completed" ]]
+if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null)  == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
