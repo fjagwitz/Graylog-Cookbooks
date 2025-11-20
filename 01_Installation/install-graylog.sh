@@ -743,7 +743,7 @@ fi
 
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
-    # echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+    echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN})
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
@@ -754,6 +754,9 @@ then
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
+
+    echo "finalized" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+
 fi
 
 exit
