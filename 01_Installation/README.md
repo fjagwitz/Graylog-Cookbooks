@@ -8,7 +8,7 @@ Create a virtual machine:
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 
-_Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure the CPU type as "host", otherwise you will observe MongoDB Containers being caught in a restart loop (see https://github.com/docker-library/mongo/issues/619). 
+_Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure the CPU type [with AVX support](https://www.techtutorials.tv/sections/promox/proxmox-custom-cpus), otherwise you will observe MongoDB Containers being caught in a restart loop (see https://github.com/docker-library/mongo/issues/619). 
 
 _Heads-up_: Make sure to work with **Memory Reservation** for your VM as you MUST avoid the hypervisor to use Graylog's Memory for other services. 
 
@@ -40,57 +40,57 @@ The installation script will create a few folders and populate these with helpfu
     /opt
         |
         |--/graylog
-        |       |
-        |       |--docker-compose.yaml
-        |       |--.env
-        |       |
-        |       |--/archives
-        |       |
-        |       |--/assetdata
-        |       |
-        |       |--/contentpacks
-        |       |
-        |       |--/datalake
-        |       |
-        |       |--/journal
-        |       |
-        |       |--/logsamples
-        |       |
-        |       |--/lookuptables
-        |       |
-        |       |--/maxmind
-        |       |
-        |       |--/nginx1
-        |       |     |
-        |       |     |--http.conf
-        |       |     |--nginx.conf
-        |       |     |--stream.conf
-        |       |     |
-        |       |     |--ssl
-        |       |         |--cert.crt
-        |       |         |--cert.key
-        |       |
-        |       |--/nginx2
-        |       |     |
-        |       |     |--http.conf
-        |       |     |--nginx.conf
-        |       |
-        |       |--/notifications
-        |       |
-        |       |--/prometheus
-        |       |
-        |       |--/sources
-        |
-        |
-        |--/opensearch
                 |
-                |--/datanode1
+                |--docker-compose.yaml
+                |--.env
                 |
-                |--/datanode2
+                |--/archives
                 |
-                |--/datanode3
+                |--/assetdata
                 |
-                |--/warm_tier
+                |--/contentpacks
+                |
+                |--/database
+                |       |
+                |       |--/datanode1
+                |       |
+                |       |--/datanode2
+                |       |
+                |       |--/datanode3
+                |       |
+                |       |--/warm_tier
+                |
+                |--/datalake
+                |
+                |--/journal
+                |
+                |--/logsamples
+                |
+                |--/lookuptables
+                |
+                |--/maxmind
+                |
+                |--/nginx1
+                |     |
+                |     |--http.conf
+                |     |--nginx.conf
+                |     |--stream.conf
+                |     |
+                |     |--ssl
+                |         |--cert.crt
+                |         |--cert.key
+                |
+                |--/nginx2
+                |     |
+                |     |--http.conf
+                |     |--nginx.conf
+                |
+                |--/notifications
+                |
+                |--/prometheus
+                |
+                |--/sources
+    
 
 **/opt/graylog**:
 

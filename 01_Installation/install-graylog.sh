@@ -751,6 +751,8 @@ then
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${ADMIN_TOKEN}) 
 
+    echo "License Check passed" | sudo tee ${GRAYLOG_PATH}/.license
+
     function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
@@ -762,7 +764,7 @@ then
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 
-    sudo rm ${0}
+    #sudo rm ${0}
 fi
 
 exit
