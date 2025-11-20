@@ -562,7 +562,7 @@ function_createInputs () {
     local ADMIN_TOKEN=${1}
     local INPUT_ID_SELF_MONITORING=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==9900)' | jq -r .id )
 
-    if [ ${GRAYLOG_LICENSE_ENTERPRISE} == "true" ]
+    if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then    
         echo "[INFO] - CREATE INPUTS FOR INCOMING LOGS" 
 
@@ -615,7 +615,7 @@ function_createEvaluationConfiguration () {
     local ADMIN_TOKEN=${1}
     local SELF_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "System Self Monitoring (Evaluation)")' | jq -r .id)
  
-    if [ ${GRAYLOG_LICENSE_ENTERPRISE} == "true" ]
+    if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then        
         echo "[INFO] - CONFIGURE ARCHIVE "
         local ARCHIVE_BACKEND=$(curl -s http://localhost/api/plugins/org.graylog.plugins.archive/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq -r .backend_id)
@@ -649,7 +649,7 @@ function_enableIlluminatePackages () {
 
     local ADMIN_TOKEN=${1}
 
-    if [ ${GRAYLOG_LICENSE_ENTERPRISE} == "true" ]
+    if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then
         echo "[INFO] - INSTALL ILLUMINATE PACKAGES FOR AUDITBEAT "
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"processing_pack_ids":["illuminate-linux-auditbeat"],"spotlight_pack_ids":["61d75c3e-3551-4b97-bbb5-ea8181472cb0"]}}' 2>/dev/null >/dev/null
@@ -675,7 +675,7 @@ function_enableGraylogSidecar () {
 }
 
 function_configureSecurityFeatures () {
-    if [[ $GL_GRAYLOG_LICENSE_SECURITY == "true" ]]
+    if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
         # Disabling Investigation AI Reports
         #
@@ -744,7 +744,8 @@ fi
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-
+    
+    echo "[INFO] - CHECKING FOR LICENSES: HANG ON, CAN TAKE A WHILE"
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN})
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_stopGraylogStack
