@@ -377,6 +377,26 @@ function_downloadAdditionalBinaries () {
     echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
 }
 
+function_prepareSidecarConfiguration () {
+    
+    local SIDECAR_TOKEN=${1}
+    local SIDECAR_YML="${GRAYLOG_PATH}/binaries/Graylog_Sidecar/sidecar.yml"
+    local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
+
+    # Configuring Graylog Sidecar for Windows Hosts
+    local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/sidecar.yml"
+    sudo cp ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar/sidecar-windows-msi-example.yml ${SIDECAR_YML}
+
+    # Replace Graylog Host URL
+    sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
+    # Add Graylog Sidecar Token
+    sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YML}
+    # Disable TLS validation enforcement
+    sudo sed -i "s\tls_skip_verify: false\#tls_skip_verify: true\g" ${SIDECAR_YML}
+    # Add Evaluation Tag
+    sudo sed -i "s\tags: [[]]\tags: [ \"evaluation\" ]\g" ${SIDECAR_YML}
+}
+
 function_checkSystemAvailability () {
     while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     do
@@ -396,47 +416,49 @@ function_createUserToken () {
 }
 
 function_configureBaseFunctionality () {
+    
+    local ADMIN_TOKEN=${1}
 
     echo "[INFO] - PERFORM BASIC CONFIGURATION STEPS "
 
     # GELF UDP Input for NXLog
-    local MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
+    local MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
 
     # Creating FieldType Profile for Docker Logs from Graylog Evaluation Stack
-    local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
+    local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
 
     # Creating Index for Docker Logs from Graylog Evaluation Stack
-    local MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"shards\": 1, \"replicas\": 0, \"rotation_strategy_class\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy\", \"rotation_strategy\": {\"type\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"retention_strategy_class\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy\", \"retention_strategy\": { \"type\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig\", \"max_number_of_indices\": 20 }, \"data_tiering\": {\"type\": \"hot_only\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"title\": \"Self Monitoring Messages (Evaluation)\", \"description\": \"Stores Evaluation System Self Monitoring Messages\", \"index_prefix\": \"gl-self-monitoring\", \"index_analyzer\": \"standard\", \"index_optimization_max_num_segments\": 1, \"index_optimization_disabled\": false, \"field_type_refresh_interval\": 5000, \"field_type_profile\": ${MONITORING_FIELD_TYPE_PROFILE}, \"use_legacy_rotation\": false, \"writable\": true}" | jq '.id')
+    local MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"shards\": 1, \"replicas\": 0, \"rotation_strategy_class\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy\", \"rotation_strategy\": {\"type\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"retention_strategy_class\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy\", \"retention_strategy\": { \"type\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig\", \"max_number_of_indices\": 20 }, \"data_tiering\": {\"type\": \"hot_only\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"title\": \"Self Monitoring Messages (Evaluation)\", \"description\": \"Stores Evaluation System Self Monitoring Messages\", \"index_prefix\": \"gl-self-monitoring\", \"index_analyzer\": \"standard\", \"index_optimization_max_num_segments\": 1, \"index_optimization_disabled\": false, \"field_type_refresh_interval\": 5000, \"field_type_profile\": ${MONITORING_FIELD_TYPE_PROFILE}, \"use_legacy_rotation\": false, \"writable\": true}" | jq '.id')
 
     # Creating Stream for Docker Logs from Graylog Evaluation Stack
-    local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
+    local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
 
     # Creating Stream Rule for Docker Logs from Graylog Evaluation Stack
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT} }" 2>/dev/null >/dev/null
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT} }" 2>/dev/null >/dev/null
 
     # Start Stream for Docker Logs from Graylog Evaluation Stack
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
 
     # Activating OTX Lists
-    curl -s http://localhost/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
 
     # Activating Tor Exit Nodes Lists
-    curl -s http://localhost/api/system/content_packs/9350a70a-8453-f516-7041-517b4df0b832/1/installations -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/content_packs/9350a70a-8453-f516-7041-517b4df0b832/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
 
     # Activating Spamhaus Drop Lists
-    curl -s http://localhost/api/system/content_packs/90be5e03-cb16-c802-6462-a244b4a342f3/1/installations -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/content_packs/90be5e03-cb16-c802-6462-a244b4a342f3/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
 
     # Activating WHOIS Adapter
-    curl -s http://localhost/api/system/content_packs/1794d39d-077f-7360-b92b-95411b05fbce/1/installations -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/content_packs/1794d39d-077f-7360-b92b-95411b05fbce/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
 
     # Activating the GeoIP Resolver Plugin
-    curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u ${GRAYLOG_ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
     # Activating the ThreatIntel Plugin
-    curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u ${GRAYLOG_ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}' 2>/dev/null >/dev/null
 
     # Disable AWS Instance Lookup and re-order processors (place GeoIP enrichment at the end to ensure custom pipelines get the appropriate value)
-    curl -s http://localhost/api/system/messageprocessors/config -u ${GRAYLOG_ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"processor_order":[{"name":"AWS Instance Name Lookup","class_name":"org.graylog.aws.processors.instancelookup.AWSInstanceNameLookupProcessor"},{"name":"Illuminate Processor","class_name":"org.graylog.plugins.illuminate.processing.IlluminateMessageProcessor"},{"name":"Message Filter Chain","class_name":"org.graylog2.messageprocessors.MessageFilterChainProcessor"},{"name":"Stream Rule Processor","class_name":"org.graylog2.messageprocessors.StreamMatcherFilterProcessor"},{"name":"Pipeline Processor","class_name":"org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter"},{"name":"GeoIP Resolver","class_name":"org.graylog.plugins.map.geoip.processor.GeoIpProcessor"}],"disabled_processors":["org.graylog.aws.processors.instancelookup.AWSInstanceNameLookupProcessor"]}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/system/messageprocessors/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"processor_order":[{"name":"AWS Instance Name Lookup","class_name":"org.graylog.aws.processors.instancelookup.AWSInstanceNameLookupProcessor"},{"name":"Illuminate Processor","class_name":"org.graylog.plugins.illuminate.processing.IlluminateMessageProcessor"},{"name":"Message Filter Chain","class_name":"org.graylog2.messageprocessors.MessageFilterChainProcessor"},{"name":"Stream Rule Processor","class_name":"org.graylog2.messageprocessors.StreamMatcherFilterProcessor"},{"name":"Pipeline Processor","class_name":"org.graylog.plugins.pipelineprocessor.processors.PipelineInterpreter"},{"name":"GeoIP Resolver","class_name":"org.graylog.plugins.map.geoip.processor.GeoIpProcessor"}],"disabled_processors":["org.graylog.aws.processors.instancelookup.AWSInstanceNameLookupProcessor"]}' 2>/dev/null >/dev/null
 
     ## Reconfigure Grafana Credentials
     curl -s http://admin:admin@localhost/grafana/api/users/1 -H 'Content-Type:application/json' -X PUT -d "{ \"name\" : \"Evaluation Admin\", \"login\" : \"${GRAYLOG_ADMIN}\" }" 2>/dev/null > /dev/null 
@@ -525,7 +547,7 @@ function_createInputs () {
     curl -s http://localhost/api/system/inputs  -u ${GRAYLOG_ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 12201, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
     # Stopping all Inputs to allow a controlled Log Source Onboarding
-    echo "[INFO] - STOPPING ALL INPUTS" 
+    echo "[INFO] - STOP ALL INPUTS" 
     for INPUT in $(curl -s http://localhost/api/cluster/inputstates  -u ${GRAYLOG_ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id'); do
         curl -s http://localhost/api/cluster/inputstates/${INPUT}  -u ${GRAYLOG_ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
     done
@@ -534,12 +556,12 @@ function_createInputs () {
 ###############################################################################
 #
 # Graylog Installation
-if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null)  == "started" ]]
+if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "started" ]]
 then
     echo "[INFO] - INSTALLATION WAS INTERRUPTED, RESET TO SNAPSHOT" 
     read -p "press enter to continue..."
     exit 
-elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null)  == "" ]]
+elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
 
@@ -568,13 +590,15 @@ then
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
-    function_configureBaseFunctionality
+    function_configureBaseFunctionality ${GRAYLOG_ADMIN_TOKEN}
+    function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
  
     function_restartGraylogContainer graylog1
 
     function_displayClusterId
     
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null
 
     exit
 fi
@@ -584,7 +608,7 @@ fi
 #
 # Post-Installation Tasks
 
-if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null)  == "completed" ]]
+if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
@@ -593,6 +617,7 @@ then
     function_startGraylogStack
     function_checkSystemAvailability
     function_createInputs
+
 fi
 
 #sudo rm $0
