@@ -27,7 +27,8 @@ GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(cat /etc/environment | grep -w http_proxy | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(cat /etc/environment | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
+
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
@@ -145,6 +146,13 @@ function_checkSystemRequirements () {
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
     local TOTAL_DISK_SPACE=$(df -BG --total | grep -w total | awk '{print $2}' | grep -oE [0-9]*)
 
+    if [ ${SYSTEM_PROXY} == "" ]
+    then
+        local INTERNET_CONNECTIVITY_TYPE="direct"
+    else
+        local INTERNET_CONNECTIVITY_TYPE="proxied: "
+    fi 
+
     if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ] && [ ${TOTAL_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_DISK} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
@@ -154,7 +162,7 @@ function_checkSystemRequirements () {
                 Memory          : ${RANDOM_ACCESS_MEMORY} GB
                 CPU Cores       : ${CPU_CORES_NUMBER} vCPU
                 CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available
-                Internet        : Available
+                Internet        : ${INTERNET_CONNECTIVITY_TYPE}${SYSTEM_PROXY}
                 "
     else
         if [ ${INTERNET_CONNECTIVITY} -ne 200 ]
