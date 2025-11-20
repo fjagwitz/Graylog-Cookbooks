@@ -523,7 +523,7 @@ function_checkEnterpriseLicense () {
         sleep 1m
     done
 
-    echo ${LICENSE_ENTERPRISE}
+    echo "${LICENSE_ENTERPRISE}"
 }
 
 function_checkSecurityLicense () {
@@ -537,7 +537,7 @@ function_checkSecurityLicense () {
         sleep 1m
     done
 
-    echo ${LICENSE_SECURITY}
+    echo "${LICENSE_SECURITY}"
 }
 
 function_restartGraylogContainer () {
@@ -749,7 +749,7 @@ then
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
-
+    echo "Enterprise License detected (${GRAYLOG_LICENSE_ENTERPRISE})" >> ${GRAYLOG_PATH}/postinstall.log
     function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
