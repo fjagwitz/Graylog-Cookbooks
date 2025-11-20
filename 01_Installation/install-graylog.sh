@@ -384,7 +384,7 @@ function_prepareSidecarConfiguration () {
     local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
 
     # Configuring Graylog Sidecar for Windows Hosts
-    sudo cp ${GL_GRAYLOG_SOURCES}/binaries/Graylog_Sidecar/sidecar-windows-msi-example.yml ${SIDECAR_YML}
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/sidecar-windows-msi-example.yml ${SIDECAR_YML}
 
     # Replace Graylog Host URL
     sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
@@ -418,7 +418,7 @@ function_configureBaseFunctionality () {
     
     local ADMIN_TOKEN=${1}
 
-    echo "[INFO] - PERFORM BASIC CONFIGURATION STEPS "
+    echo "[INFO] - EXECUTE BASIC CONFIGURATION STEPS "
 
     # GELF UDP Input for NXLog
     local MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "recv_buffer_size": 262144, "port": 9900, "number_worker_threads": 2, "charset_name": "UTF-8", "bind_address": "0.0.0.0" }}'| jq '.id') 
