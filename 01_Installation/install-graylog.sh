@@ -551,7 +551,7 @@ function_restartGraylogContainer () {
     # Restart Graylog Stack
     echo "[INFO] - RESTART GRAYLOG CONTAINERS FOR MAINTENANCE PURPOSES "
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} --quiet 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} 2>/dev/null >/dev/null
 }
 
 function_startGraylogStack () {
