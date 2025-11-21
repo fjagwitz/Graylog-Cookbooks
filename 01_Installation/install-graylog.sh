@@ -549,15 +549,13 @@ function_restartGraylogContainer () {
 }
 
 function_startGraylogStack () {
-
     # Start Graylog Stack
     echo "[INFO] - START GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull 2>/dev/null >/dev/null
 }
 
 function_stopGraylogStack () {
-
-    # Start Graylog Stack
+    # Stop Graylog Stack
     echo "[INFO] - STOP GRAYLOG STACK - HANG ON, CAN TAKE A WHILE "
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
 }
@@ -733,7 +731,7 @@ then
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null
 
     sudo cp $0 $(pwd)/postinstall-graylog.sh
-    exec sudo $(pwd)/postinstall-graylog.sh &
+    exec sudo "$(pwd)/postinstall-graylog.sh" &
     sudo rm -- $0
     exit
 fi
@@ -750,9 +748,16 @@ then
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
     echo "Enterprise License detected (${GRAYLOG_LICENSE_ENTERPRISE})" >> ${GRAYLOG_PATH}/postinstall.log
+
     function_stopGraylogStack
+    echo "Missed to stop the stack" >> ${GRAYLOG_PATH}/postinstall.log
+
     function_startGraylogStack
+    echo "Missed to start the stack" >> ${GRAYLOG_PATH}/postinstall.log
+    
     function_checkSystemAvailability
+    echo "Missed to check the System Availability" >> ${GRAYLOG_PATH}/postinstall.log
+
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}    
@@ -761,7 +766,7 @@ then
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 
-    sudo rm ${GRAYLOG_PATH}/postinstall.log
+    #sudo rm ${GRAYLOG_PATH}/postinstall.log
     sudo rm -- ${0}
 fi
 
