@@ -550,12 +550,14 @@ function_restartGraylogContainer () {
 
 function_startGraylogStack () {
     # Start Graylog Stack
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans graylog1 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans graylog2 2>/dev/null >/dev/null
 }
 
 function_stopGraylogStack () {
     # Stop Graylog Stack
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans graylog1 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans graylog2 2>/dev/null >/dev/null
 }
 
 function_createInputs () {
@@ -682,10 +684,7 @@ function_configureSecurityFeatures () {
         do 
             echo "[INFO] - DISABLE INVESTIGATION AI REPORTS "
             curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
-            sleep 5
             ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
-            echo "$(date): Active AI Report: ${ACTIVE_AI_REPORT}" | sudo tee -a /opt/graylog/postinstall.log
-            sleep 5
         done
     fi 
 }
@@ -738,10 +737,9 @@ then
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null
 
-    #sudo cp $0 $(pwd)/postinstall-graylog.sh
-    #exec sudo "$(pwd)/postinstall-graylog.sh" &
-    #sudo rm -- $0
-    #exit
+    sudo cp $0 /etc/cron.d/hourly
+    sudo rm -- $0
+    exit
 fi
 
 
@@ -752,13 +750,13 @@ fi
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    #sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
+    sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
 
-    echo "[INFO] - GRAYLOG STACK SHUTTING DOWN FOR MAINTENANCE PURPOSES"
+    echo "[INFO] - RESTARTING GRAYLOG STACK FOR MAINTENANCE PURPOSES"
+    
     function_stopGraylogStack
-    echo "[INFO] - GRAYLOG STACK STARTING UP FOR MAINTENANCE PURPOSES"
     function_startGraylogStack
     function_checkSystemAvailability
 
@@ -770,8 +768,7 @@ then
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 
-    #sudo rm ${GRAYLOG_PATH}/postinstall.log
-    #sudo rm -- ${0}
+    sudo rm -- ${0}
 fi
 
 exit
