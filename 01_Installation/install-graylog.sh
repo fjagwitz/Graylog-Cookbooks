@@ -703,6 +703,9 @@ then
     function_defineAdminName
     function_defineAdminPassword
     function_getSystemFqdn
+    
+    clear
+
     function_checkSystemRequirements
 
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
