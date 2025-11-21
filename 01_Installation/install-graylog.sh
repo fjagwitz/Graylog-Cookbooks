@@ -344,8 +344,8 @@ function_installGraylogStack () {
 
     if [ "${SYSTEM_PROXY}" != "" ]
     then
-        sudo sed -i "s\# GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"${SYSTEM_PROXY}\"\g"
-        sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g"
+        sudo sed -i "s\# GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"${SYSTEM_PROXY}\"\g" ${GRAYLOG_ENV}
+        sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g" ${GRAYLOG_ENV}
     fi
 
     sudo sed -i "s\server_name my.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
@@ -757,7 +757,7 @@ fi
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    
+
     sudo rm -- ${0}
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
