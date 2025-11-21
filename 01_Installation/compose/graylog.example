@@ -11,7 +11,7 @@ GRAYLOG_ROOT_TIMEZONE = "UTC"
 
 ## Settings to allow leading wildcard Searches
 #
-GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "false"
+GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "true"
 
 ## Set Graylog Java Heap Size
 #
