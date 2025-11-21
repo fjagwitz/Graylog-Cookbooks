@@ -555,7 +555,7 @@ function_startGraylogStack () {
 
 function_stopGraylogStack () {
     # Stop Graylog Stack
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
 }
 
 function_createInputs () {
@@ -670,7 +670,7 @@ function_enableGraylogSidecar () {
 }
 
 function_configureSecurityFeatures () {
-    
+
     local ADMIN_TOKEN=${1}
     
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
