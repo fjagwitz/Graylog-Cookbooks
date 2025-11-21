@@ -562,6 +562,7 @@ function_startGraylogStack () {
 function_stopGraylogStack () {
     # Stop Graylog Stack
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
+    sleep 1m
 }
 
 function_createInputs () {
