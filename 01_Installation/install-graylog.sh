@@ -670,6 +670,9 @@ function_enableGraylogSidecar () {
 }
 
 function_configureSecurityFeatures () {
+    
+    local ADMIN_TOKEN=${1}
+    
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
         # Disabling Investigation AI Reports
