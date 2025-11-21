@@ -673,12 +673,12 @@ function_configureSecurityFeatures () {
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
         # Disabling Investigation AI Reports
-        local ACTIVE_AI_REPORT="true"
+        local ACTIVE_AI_REPORT=""
         
         while [[ ${ACTIVE_AI_REPORT} == "true" ]] || [[ ${ACTIVE_AI_REPORT} == "" ]]
         do 
             echo "[INFO] - DISABLE INVESTIGATION AI REPORTS "
-            curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost)" 2>/dev/null >/dev/null
+            curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
             sleep 5
             ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
             echo "$(date): Active AI Report: ${ACTIVE_AI_REPORT}" | sudo tee -a /opt/graylog/postinstall.log
