@@ -683,7 +683,7 @@ function_configureSecurityFeatures () {
             ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
             echo "$(date): Active AI Report: ${ACTIVE_AI_REPORT}" | sudo tee -a /opt/graylog/postinstall.log
             sleep 5
-        fi
+        done
     fi 
 }
 
