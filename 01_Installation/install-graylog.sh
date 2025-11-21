@@ -421,7 +421,7 @@ function_prepareSidecarConfiguration () {
     # Add Graylog Sidecar Token
     sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YML}
     # Disable TLS validation enforcement
-    sudo sed -i "s\tls_skip_verify: false\#tls_skip_verify: true\g" ${SIDECAR_YML}
+    sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tag
     sudo sed -i "s\tags: [[]]\tags: [ \"evaluation\" ]\g" ${SIDECAR_YML}
 }
