@@ -5,19 +5,34 @@ services:
     depends_on:
       - "graylog1"
       - "graylog2"
-    ports: 
-      # Graylog WebUI for User/Admin Access
+    ports:       
+      # WebUI
       - 443:443
       - 80:80
-      # Graylog API for System Access
+      # API
       - 3443:3443
       - 380:380
-      # Graylog Inputs for Log Ingestion
       # Syslog Input
       - 514:514
       - 514:514/udp
-      # Self Monitoring Input
-      - 9900:9900/udp
+      # Beats Input 5044
+      - 5044:5044
+      - 5044:5044/udp
+      # RAW Input 
+      - 5555:5555
+      - 5555:5555/udp
+      # Fortinet Input 
+      - 5556:5556
+      - 5556:5556/udp
+      # Graylog Gelf Input (Self-Monitoring)
+      - 9900:9900
+      - 9900:9900/udp 
+      # Gelf Input
+      - 12201:12201
+      - 12201:12201/udp 
+      # Graylog Enterprise Forwarder Input
+      - 13301:13301
+      - 13302:13302
     volumes:
       - "./nginx1/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "./nginx1/http.conf:/etc/nginx/conf.d/http.conf:ro"
