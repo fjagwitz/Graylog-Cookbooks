@@ -342,6 +342,12 @@ function_installGraylogStack () {
     sudo sed -i "s\GRAYLOG_REPORT_RENDER_URI = \"\"\GRAYLOG_REPORT_RENDER_URI = \"http://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
 
+    if [ "${SYSTEM_PROXY}" != "" ]
+    then
+        sudo sed -i "s\# GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"${SYSTEM_PROXY}"
+        sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g"
+    fi
+
     sudo sed -i "s\server_name my.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
 
     sudo sed -i "s\hostname: \"samba1\"\hostname: \"${GRAYLOG_FQDN}\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
@@ -550,14 +556,12 @@ function_restartGraylogContainer () {
 
 function_startGraylogStack () {
     # Start Graylog Stack
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans graylog1 2>/dev/null >/dev/null
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans graylog2 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
 }
 
 function_stopGraylogStack () {
     # Stop Graylog Stack
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans graylog1 2>/dev/null >/dev/null
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans graylog2 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
 }
 
 function_createInputs () {
