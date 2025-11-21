@@ -757,6 +757,8 @@ fi
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+    
+    sudo rm -- ${0}
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
@@ -774,8 +776,6 @@ then
 
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
-
-    sudo rm -- ${0}
 fi
 
 exit
