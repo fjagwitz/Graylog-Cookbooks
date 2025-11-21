@@ -15,7 +15,7 @@ GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "false"
 
 ## Set Graylog Java Heap Size
 #
-GRAYLOG_SERVER_JAVA_OPTS="-Xms2g -Xmx8g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
+GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx4g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
 
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
