@@ -743,6 +743,9 @@ fi
 
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
+    echo "Starting Postinstall Script, waiting for 90 Seconds" >> ${GRAYLOG_PATH}/postinstall.log
+    sleep 90s
+
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
