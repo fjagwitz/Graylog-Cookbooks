@@ -344,7 +344,7 @@ function_installGraylogStack () {
 
     if [ "${SYSTEM_PROXY}" != "" ]
     then
-        sudo sed -i "s\# GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"${SYSTEM_PROXY}\""
+        sudo sed -i "s\# GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"${SYSTEM_PROXY}\"\g"
         sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g"
     fi
 
