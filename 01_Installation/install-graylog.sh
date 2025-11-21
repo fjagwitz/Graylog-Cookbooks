@@ -753,7 +753,9 @@ then
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
 
+    echo "[INFO] - GRAYLOG STACK SHUTTING DOWN FOR MAINTENANCE PURPOSES"
     function_stopGraylogStack
+    echo "[INFO] - GRAYLOG STACK STARTING UP FOR MAINTENANCE PURPOSES"
     function_startGraylogStack
     function_checkSystemAvailability
 
