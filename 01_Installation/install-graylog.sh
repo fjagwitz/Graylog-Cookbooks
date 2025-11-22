@@ -181,7 +181,7 @@ function_checkSystemRequirements () {
         then
             echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST ${SYSTEM_REQUIREMENTS_CPU} VCPU CORES, BUT HAS ONLY ${CPU_CORES_NUMBER}" 
         fi
-        if [ ${CPU_REQUIRED_FLAGS^^} != ${SYSTEM_REQUIREMENTS_CPU_FLAGS} ]
+        if [ ${CPU_REQUIRED_FLAGS,,} != ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]
         then
             echo "[ERROR] - THE CPU MUST SUPPORT THE ${SYSTEM_REQUIREMENTS_CPU_FLAGS^^} FLAG(S), BUT DOES NOT" 
         fi
