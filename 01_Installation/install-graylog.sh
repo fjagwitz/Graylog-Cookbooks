@@ -183,7 +183,7 @@ function_checkSystemRequirements () {
         fi
         if [ ${CPU_REQUIRED_FLAGS^^} != ${SYSTEM_REQUIREMENTS_CPU_FLAGS} ]
         then
-            echo "[ERROR] - THE CPU MUST SUPPORT THE ${SYSTEM_REQUIREMENTS_CPU_FLAGS} FLAG(S), BUT DOES NOT" 
+            echo "[ERROR] - THE CPU MUST SUPPORT THE ${SYSTEM_REQUIREMENTS_CPU_FLAGS^^} FLAG(S), BUT DOES NOT" 
         fi
         if [ ${TOTAL_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_DISK} ]
         then
