@@ -68,6 +68,10 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/input_tls
                 |
+                |--/journal1
+                |
+                |--/journal2
+                |
                 |--/logsamples
                 |
                 |--/lookuptables
