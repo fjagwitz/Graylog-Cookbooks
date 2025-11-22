@@ -35,7 +35,7 @@ SYSTEM_REQUIREMENTS_MEMORY="32"
 SYSTEM_REQUIREMENTS_DISK="600"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
-SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
+SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils git htop jq net-tools pwgen tcpdump unzip vim" 
 
 
 ###############################################################################
