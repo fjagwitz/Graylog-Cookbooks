@@ -706,6 +706,7 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
+    function_installScriptDependencies
 
     clear
 
@@ -720,7 +721,6 @@ then
 
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
 
-    function_installScriptDependencies
     function_installDocker
 
     function_installGraylogStack
