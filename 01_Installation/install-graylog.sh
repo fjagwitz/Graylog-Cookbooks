@@ -216,9 +216,10 @@ function_installDocker () {
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
     local DOCKER_URL="https://download.docker.com/linux/ubuntu"
     local DOCKER_KEY="/etc/apt/keyrings/docker.asc"
-    local DOCKER_INSTALLED=$(dpkg -l | grep -E "(^| )docker-ce($| )" | cut -d" " -f3)
+
+    local DOCKER_INSTALLED=$(command -v docker)
    
-    if [[ $(dpkg -l | grep -E "(^| )docker-ce($| )" | cut -d" " -f3) != "docker-ce" ]]
+    if [[ ${DOCKER_INSTALLED} == "" ]]
     then
         echo "[INFO] - REMOVE PREINSTALLED PACKAGES - DOCKER CLEANUP "
         for PKG in ${DOCKER_PACKAGES} 
