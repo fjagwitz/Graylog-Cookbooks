@@ -706,10 +706,9 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
-    function_installScriptDependencies
 
     clear
-
+    function_installScriptDependencies
     function_checkSnapshot
     function_defineAdminName
     function_defineAdminPassword
