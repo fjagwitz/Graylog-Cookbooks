@@ -169,25 +169,25 @@ function_checkSystemRequirements () {
         then
             echo "[ERROR] - INTERNET IS NOT AVAILABLE FROM THIS MACHINE "
         fi
-        if [ ${OPERATING_SYSTEM,,} != "ubuntu" ]
+        if [ ${OPERATING_SYSTEM,,} != ${SYSTEM_REQUIREMENTS_OS,,} ]
         then
             echo "[ERROR] - OPERATING SYSTEM MUST BE UBUNTU, BUT IS ${OPERATING_SYSTEM}" 
         fi
-        if [ ${RANDOM_ACCESS_MEMORY} -lt 32 ]
+        if [ ${RANDOM_ACCESS_MEMORY} -lt ${SYSTEM_REQUIREMENTS_MEMORY} ]
         then
-            echo "[ERROR] - MEMORY MUST BE AT LEAST 32 GB, BUT IS ONLY ${RANDOM_ACCESS_MEMORY} GB" 
+            echo "[ERROR] - MEMORY MUST BE AT LEAST ${SYSTEM_REQUIREMENTS_MEMORY} GB, BUT IS ONLY ${RANDOM_ACCESS_MEMORY} GB" 
         fi
-        if [ ${CPU_CORES_NUMBER} -lt 8 ]
+        if [ ${CPU_CORES_NUMBER} -lt ${SYSTEM_REQUIREMENTS_CPU} ]
         then
-            echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST 8 VCPU CORES, BUT HAS ONLY ${CPU_CORES_NUMBER}" 
+            echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST ${SYSTEM_REQUIREMENTS_CPU} VCPU CORES, BUT HAS ONLY ${CPU_CORES_NUMBER}" 
         fi
-        if [ ${CPU_REQUIRED_FLAGS^^} != "AVX" ]
+        if [ ${CPU_REQUIRED_FLAGS^^} != ${SYSTEM_REQUIREMENTS_CPU_FLAGS} ]
         then
-            echo "[ERROR] - THE CPU MUST SUPPORT THE AVX FLAG FOR RUNNING MONGODB, BUT DOES NOT" 
+            echo "[ERROR] - THE CPU MUST SUPPORT THE ${SYSTEM_REQUIREMENTS_CPU_FLAGS} FLAG(S), BUT DOES NOT" 
         fi
-        if [ ${TOTAL_DISK_SPACE} -lt 600 ]
+        if [ ${TOTAL_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_DISK} ]
         then
-            echo "[ERROR] - THE /OPT FOLDER MUST PROVIDE AT LEAST 600GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
+            echo "[ERROR] - THE /OPT FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
         fi
         exit
     fi
