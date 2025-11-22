@@ -187,7 +187,7 @@ function_checkSystemRequirements () {
         fi
         if [ ${TOTAL_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_DISK} ]
         then
-            echo "[ERROR] - THE /OPT FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
+            echo "[ERROR] - THE /opt FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
         fi
         exit
     fi
