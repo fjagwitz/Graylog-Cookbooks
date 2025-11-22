@@ -205,7 +205,7 @@ services:
       - "GRAYLOG_IS_LEADER=true"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
     volumes:
-      - "./journal01:/usr/share/graylog/data/journal"
+      - "./journal1:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
@@ -245,7 +245,7 @@ services:
       - "GRAYLOG_IS_LEADER=false"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
     volumes:
-      - "./journal02:/usr/share/graylog/data/journal"
+      - "./journal2:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
