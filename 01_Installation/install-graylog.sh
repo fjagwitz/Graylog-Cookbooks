@@ -144,7 +144,7 @@ function_checkSystemRequirements () {
     local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
-    local TOTAL_DISK_SPACE=$(df -BG --total | grep -w total | awk '{print $2}' | grep -oE [0-9]*)
+    local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $2}' | tail -n1 | grep -oE [0-9]*)
 
     if [ ${SYSTEM_PROXY} == "" ]
     then
@@ -187,7 +187,7 @@ function_checkSystemRequirements () {
         fi
         if [ ${TOTAL_DISK_SPACE} -lt 600 ]
         then
-            echo "[ERROR] - THE SYSTEM MUST HAVE AT LEAST 600GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
+            echo "[ERROR] - THE /OPT FOLDER MUST PROVIDE AT LEAST 600GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
         fi
         exit
     fi
@@ -738,7 +738,7 @@ then
     function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
 
-    function_restartGraylogContainer graylog2
+    function_restartGraylogContainer graylog1
 
     function_displayClusterId
     
