@@ -65,6 +65,7 @@
         -Uri "http://$targetSystem/api/plugins/org.graylog.plugins.securityapp.asset/assets" `
         -Credential $cred `
         -Method Post `
-        -ContentType application/json `        -Headers @{ 'X-Requested-By' = "$hostname" } `
+        -ContentType application/json `
+        -Headers @{ 'X-Requested-By' = "$hostname" } `
         -Body $Body
 }
