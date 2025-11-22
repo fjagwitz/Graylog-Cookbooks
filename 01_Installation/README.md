@@ -30,7 +30,7 @@ The system is accessible via
 
 ## Get a license
 
-- Graylog Open: This system can be tested without a license but limited functionality (Graylog Open Features). Be aware of the legal constraints when it comes to processing PII data such as authentication logs and others. 
+- Graylog Open: This system can be tested without a license but limited functionality (Graylog Open Features). Be aware of the legal constraints when it comes to processing PII data such as authentication logs and others, as Graylog Open does not provide an Audit Trail for administrator activities. 
 - Graylog Enterprise and Graylog Security: You need a trial license (xGB/day, up to 14 days). Please get in touch with your local [Graylog Partner](https://cybercompare.com/de/providers/graylog-germany-gmbh/#provider-contact) to align on the Evaluation Process and keep your Cluster-ID (displayed after Installation has finished) at hand.  
 
 ## Folder Structure
@@ -42,11 +42,15 @@ The installation script will create a few folders and populate these with helpfu
         |--/graylog
                 |
                 |--docker-compose.yaml
-                |--.env
+                |--graylog.env
+                |--opensearch.env
+                |--your_graylog_credentials.txt
                 |
                 |--/archives
                 |
                 |--/assetdata
+                |
+                |--/configuration
                 |
                 |--/contentpacks
                 |
@@ -62,7 +66,7 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/datalake
                 |
-                |--/journal
+                |--/input_tls
                 |
                 |--/logsamples
                 |
@@ -88,6 +92,10 @@ The installation script will create a few folders and populate these with helpfu
                 |--/notifications
                 |
                 |--/prometheus
+                |
+                |--/rootcerts
+                |
+                |--/samba
                 |
                 |--/sources
     
