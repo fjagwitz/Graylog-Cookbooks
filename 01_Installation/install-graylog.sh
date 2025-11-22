@@ -32,7 +32,7 @@ SYSTEM_PROXY=$(cat /etc/environment | grep -iw http_proxy | cut -d "=" -f 2 | tr
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK="200"
+SYSTEM_REQUIREMENTS_DISK="600"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 SCRIPT_DEPENDENCIES="dnsutils net-tools vim git jq tcpdump pwgen htop unzip curl ca-certificates" 
