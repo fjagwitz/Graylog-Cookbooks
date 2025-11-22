@@ -204,8 +204,6 @@ function_installScriptDependencies () {
         then
             echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
-        else
-            echo "[INFO] - PACKAGE: ${DEP^^} ALREADY AVAILABLE"
         fi
     done
 }
