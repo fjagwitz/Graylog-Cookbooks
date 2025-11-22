@@ -146,7 +146,7 @@ function_checkSystemRequirements () {
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
     local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $2}' | tail -n1 | grep -oE [0-9]*)
 
-    if [ ${SYSTEM_PROXY} == "" ]
+    if [[ "${SYSTEM_PROXY}" == "" ]]
     then
         local INTERNET_CONNECTIVITY_TYPE="direct"
     else
