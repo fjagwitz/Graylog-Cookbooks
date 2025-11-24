@@ -314,7 +314,6 @@ function_installGraylogStack () {
         sudo cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
     done
     
-
     # Start pulling Containers
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml pull --quiet 2>/dev/null >/dev/null
 
@@ -397,9 +396,9 @@ function_downloadAdditionalBinaries () {
 
     # Download Graylog Sidecar for Windows
     echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS "
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar -LOs ${SIDECAR_MSI}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar -LOs ${SIDECAR_YML}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar -LOs ${SIDECAR_EXE}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_YML}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE -LOs ${SIDECAR_EXE}
 
     # Download Elastic Filebeat StandaloneSidecar
     echo "[INFO] - DOWNLOAD ELASTIC FILEBEAT STANDALONE FOR WINDOWS "
@@ -420,11 +419,12 @@ function_downloadAdditionalBinaries () {
 function_prepareSidecarConfiguration () {
     
     local SIDECAR_TOKEN=${1}
-    local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/sidecar.yml"
+    local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar.yml"
     local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
+    local SIDECAR_INSTALLER_CMD="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/installer.cmd"
 
-    # Configuring Graylog Sidecar for Windows Hosts
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/sidecar-windows-msi-example.yml ${SIDECAR_YML}
+    # Configuring Graylog Sidecar for Windows Hosts (MSI-Installation)
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml ${SIDECAR_YML}
 
     # Replace Graylog Host URL
     sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
@@ -434,6 +434,10 @@ function_prepareSidecarConfiguration () {
     sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tag
     sudo sed -i "s\tags: [[]]\tags: [ \"evaluation\" ]\g" ${SIDECAR_YML}
+
+    # Populating Install Script for Graylog Sidecar (EXE-Installation)
+    sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api\"\g" ${SIDECAR_INSTALLER_CMD}
+    sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${SIDECAR_INSTALLER_CMD}
 }
 
 function_checkSystemAvailability () {
