@@ -437,7 +437,7 @@ function_prepareSidecarConfiguration () {
     sudo sed -i "s\tags: [[]]\tags: [ \"evaluation\" ]\g" ${SIDECAR_YML}
 
     # Populating Install Script for Graylog Sidecar (EXE-Installation)
-    sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api\"\g" ${SIDECAR_INSTALLER_CMD}
+    sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_INSTALLER_CMD}
     sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${SIDECAR_INSTALLER_CMD}
 }
 
