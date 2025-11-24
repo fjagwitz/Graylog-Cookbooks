@@ -148,7 +148,7 @@ function_checkSystemRequirements () {
 
     if [[ "${SYSTEM_PROXY}" == "" ]]
     then
-        local INTERNET_CONNECTIVITY_TYPE="direct"
+        local INTERNET_CONNECTIVITY_TYPE="direct (without Proxy)"
     else
         local INTERNET_CONNECTIVITY_TYPE="proxied: "
     fi 
