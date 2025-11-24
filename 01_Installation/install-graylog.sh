@@ -434,7 +434,7 @@ function_prepareSidecarConfiguration () {
     # Disable TLS validation enforcement
     sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tag
-    sudo sed -i "s\tags: [[]]\tags: [ \"evaluation\" ]\g" ${SIDECAR_YML}
+    sudo sed -i "s\tags: [[]]\tags:\n  - \"Evaluation\"\n  - \"Windows\"\n  - \"ADDS\"\n  - \"DNS\" ]\g" ${SIDECAR_YML}
 
     # Populating Install Script for Graylog Sidecar (EXE-Installation)
     for SIDECAR_INSTALLER in ${SIDECAR_INSTALLER_CMD}
