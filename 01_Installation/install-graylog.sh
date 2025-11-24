@@ -732,8 +732,6 @@ then
     function_defineAdminName
     function_defineAdminPassword
     function_getSystemFqdn
-    
-    clear
 
     function_checkSystemRequirements
 
