@@ -195,14 +195,14 @@ function_checkSystemRequirements () {
 
 function_installScriptDependencies () {
 
-    echo "[INFO] - PERFORM SYSTEM CLEANUP "  
+    echo "[INFO] - PERFORM SYSTEM CLEANUP, HANG ON "  
     sudo apt -qq update -y 2>/dev/null >/dev/null 
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
     for DEP in ${SCRIPT_DEPENDENCIES}
     do 
         if [[ ${DEP} != $(dpkg -l | grep -E "(^| )${DEP}($| )" | cut -d" " -f3) ]]
         then
-            echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
+            # echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null            
         fi
         
@@ -239,10 +239,11 @@ function_installDocker () {
         echo   "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         sudo apt-get -qq update 2>/dev/null >/dev/null
 
+        echo "[INFO] - INSTALL DOCKER-CE"
         # INSTALL Docker on Ubuntu
         for PKG in ${DOCKER_CE_PACKAGES}
         do 
-            echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${PKG^^}"
+            # echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${PKG^^}"
             sudo apt -qq install -y ${PKG} 2>/dev/null >/dev/null
         done
 
@@ -428,19 +429,19 @@ function_prepareSidecarConfiguration () {
     sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml ${SIDECAR_YML}
 
     # Replace Graylog Host URL
-    sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
+    sudo sed -i "s/server_url: \"http://127.0.0.1:9000/api/\"/server_url: \"https://${GRAYLOG_FQDN}/api/\"/g" ${SIDECAR_YML}
     # Add Graylog Sidecar Token
-    sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YML}
+    sudo sed -i "s/server_api_token: \"\"/server_api_token: \"${SIDECAR_TOKEN}\"/g" ${SIDECAR_YML}
     # Disable TLS validation enforcement
-    sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
+    sudo sed -i "s/tls_skip_verify: false/tls_skip_verify: true/g" ${SIDECAR_YML}
     # Add Evaluation Tag
-    sudo sed -i "s\tags: [[]]\tags:\n  - \"Evaluation\"\n  - \"Windows\"\n  - \"ADDS\"\n  - \"DNS\" ]\g" ${SIDECAR_YML}
+    sudo sed -i 's/tags: [[]]/tags:\n  - \"Evaluation\"\n  - \"Windows\"\n  - \"ADDS\"\n  - \"DNS\"\n/g' ${SIDECAR_YML}
 
     # Populating Install Script for Graylog Sidecar (EXE-Installation)
     for SIDECAR_INSTALLER in ${SIDECAR_INSTALLER_CMD}
     do
-        sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
-        sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
+        sudo sed -i "s/SET serverurl=\"\"/SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"/g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
+        sudo sed -i "s/SET apitoken=\"\"/SET apitoken=\"${SIDECAR_TOKEN}\"/g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
     done
 }
 
