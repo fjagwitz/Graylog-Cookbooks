@@ -204,9 +204,9 @@ function_installScriptDependencies () {
         then
             echo "[INFO] - INSTALL ADDITIONAL PACKAGE: ${DEP^^}"
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
-            if [[ "{$DEP}" == "tcpdump" ]]
+            if [[ {$DEP} == "tcpdump" ]]
             then
-                sudo usermod -aG tcpdump $USER
+                sudo usermod -aG tcpdump ${USER}
             fi
         fi
     done
