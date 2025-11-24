@@ -35,7 +35,7 @@ SYSTEM_REQUIREMENTS_MEMORY="32"
 SYSTEM_REQUIREMENTS_DISK="600"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
-SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils git htop jq net-tools pwgen tcpdump unzip vim" 
+SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop jq net-tools pwgen tcpdump unzip vim" 
 
 
 ###############################################################################
@@ -423,19 +423,20 @@ function_prepareSidecarConfiguration () {
     local SIDECAR_TOKEN=${1}
     local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar.yml"
     local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
-    local SIDECAR_INSTALLER_CMD=$(ls "${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE")
+    local SIDECAR_INSTALLER_CMD=$(ls "${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE" | grep cmd)
 
     # Configuring Graylog Sidecar for Windows Hosts (MSI-Installation)
     sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml ${SIDECAR_YML}
 
     # Replace Graylog Host URL
-    sudo sed -i "s/server_url: \"http://127.0.0.1:9000/api/\"/server_url: \"https://${GRAYLOG_FQDN}/api/\"/g" ${SIDECAR_YML}
+    sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
     # Add Graylog Sidecar Token
     sudo sed -i "s/server_api_token: \"\"/server_api_token: \"${SIDECAR_TOKEN}\"/g" ${SIDECAR_YML}
     # Disable TLS validation enforcement
     sudo sed -i "s/tls_skip_verify: false/tls_skip_verify: true/g" ${SIDECAR_YML}
     # Add Evaluation Tag
-    sudo sed -i 's/tags: [[]]/tags:\n  - \"Evaluation\"\n  - \"Windows\"\n  - \"ADDS\"\n  - \"DNS\"\n/g' ${SIDECAR_YML}
+    sudo sed -i 's/tags: [[]]/tags:\n  - Evaluation\n  - Windows\n  - ADDS\n  - DNS/g' ${SIDECAR_YML}
+    sudo unix2dos ${SIDECAR_YML} 2>/dev/null >/dev/null
 
     # Populating Install Script for Graylog Sidecar (EXE-Installation)
     for SIDECAR_INSTALLER in ${SIDECAR_INSTALLER_CMD}
