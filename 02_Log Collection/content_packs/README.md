@@ -1,1 +1,0 @@
-Content Packs are provided without warranty. 
