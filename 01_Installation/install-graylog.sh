@@ -422,7 +422,7 @@ function_prepareSidecarConfiguration () {
     local SIDECAR_TOKEN=${1}
     local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar.yml"
     local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
-    local SIDECAR_INSTALLER_CMD=$(ls "${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE)")
+    local SIDECAR_INSTALLER_CMD=$(ls "${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE")
 
     # Configuring Graylog Sidecar for Windows Hosts (MSI-Installation)
     sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml ${SIDECAR_YML}
@@ -439,6 +439,7 @@ function_prepareSidecarConfiguration () {
     # Populating Install Script for Graylog Sidecar (EXE-Installation)
     for SIDECAR_INSTALLER in ${SIDECAR_INSTALLER_CMD}
     do
+        echo "Sidecar Installer: ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}"
         sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
         sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
     done
