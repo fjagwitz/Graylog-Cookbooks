@@ -762,7 +762,7 @@ then
     function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
 
-    function_restartGraylogContainer graylog2
+    function_restartGraylogContainer graylog1
 
     function_displayClusterId
 
