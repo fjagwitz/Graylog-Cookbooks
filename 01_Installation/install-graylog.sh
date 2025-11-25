@@ -202,8 +202,6 @@ function_checkSystemRequirements () {
 
 function_installScriptDependencies () {
 
-    local TCPDUMP_GROUP="tcpdump"
-
     echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq update -y 2>/dev/null >/dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
@@ -251,6 +249,9 @@ function_installDocker () {
             wait
         done
     fi
+
+    echo "[INFO] - RESTART DOCKER SERVICE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo systemctl docker.service restart 2>/dev/null >/dev/null
 
 }
 
