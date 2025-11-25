@@ -256,8 +256,6 @@ function_installGraylogSidecar () {
 
     if [[ ${SIDECAR_INSTALLED} != "graylog-sidecar" ]]
     then
-        echo "[INFO] - INSTALL GRAYLOG SIDECAR "
-        
         sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null | logger --tag install-graylog.sh
         sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null | logger --tag install-graylog.sh
         sudo apt-get update 2>/dev/null | logger --tag install-graylog.sh
@@ -711,15 +709,15 @@ then
 
     function_checkSystemRequirements
 
-    echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null 
+    echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "[INFO] - INSTALL DOCKER-CE"
     function_installDocker
 
-    echo "[INFO] - INSTALL GRAYLOG"
+    echo "[INFO] - INSTALL GRAYLOG STACK"
     function_installGraylogStack
     function_startGraylogStack
 
-    echo "[INFO] - PROVIDE ADDITIONAL BINARIES"
+    echo "[INFO] - PREPARE ADDITIONAL CONTENT"
     function_downloadAdditionalBinaries
     function_checkSystemAvailability
 
@@ -737,8 +735,8 @@ then
 
     function_displayClusterId
     
-    echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null 
-    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null 
+    echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null 
 
     sudo cp $0 /etc/cron.hourly/install-graylog
     sudo rm -- $0
