@@ -491,7 +491,7 @@ function_createBaseConfiguration () {
 
 function_displayClusterId () {
 
-    echo "[INFO] - GRAYLOG IS NOW READY FOR TESTING 
+    echo "[INFO] - GRAYLOG IS NOW READY FOR TESTING"
     echo "[INFO] - SYSTEM URL: \"http(s)://${GRAYLOG_FQDN}\" "
     echo "[INFO] - WINDOWS ACCESS: \"\\\\${GRAYLOG_FQDN}\Graylog Useful Sources\""
     echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"" | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
@@ -503,7 +503,8 @@ function_displayClusterId () {
     echo "* CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z ) *"
     echo "*                                                    *"
     echo "******************************************************"
-
+    echo ""
+    echo "[INFO] - GRAYLOG STACK WILL RESTART AFTER ADDING THE LICENSE"
 }
 
 function_checkEnterpriseLicense () {
