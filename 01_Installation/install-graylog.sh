@@ -719,9 +719,9 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
+    
     clear
-    # ensuring nslookup is available for the FQDN check
-    #sudo apt -qq update -y 2>/dev/null >/dev/null && sudo apt -qq install -y ${SCRIPT_CHECK_DEPENDENCIES} 2>/dev/null >/dev/null &
+
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION"
     function_installScriptDependencies &
        
@@ -731,7 +731,8 @@ then
     function_getSystemFqdn
 
     function_checkSystemRequirements
-
+    function_installScriptDependencies
+    
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "[INFO] - INSTALL DOCKER-CE"
     function_installDocker
