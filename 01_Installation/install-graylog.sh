@@ -443,7 +443,7 @@ function_checkSystemAvailability () {
     while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     do
     echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
-    sleep 5s
+    sleep 10s
     done
 }
 
