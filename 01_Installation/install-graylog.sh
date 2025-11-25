@@ -202,6 +202,8 @@ function_checkSystemRequirements () {
 
 function_installScriptDependencies () {
 
+    local TCPDUMP_GROUP="tcpdump"
+
     echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq update -y 2>/dev/null >/dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
@@ -216,8 +218,10 @@ function_installScriptDependencies () {
         
         if [[ {$DEP} == "tcpdump" ]]
         then
-            echo "[INFO] - ADD USER ${USER^^} TO GROUP 'tpcpdump' ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
+            echo "[INFO] - ADD USER ${USER^^} TO GROUP '${TCPDUMP_GROUP^^}' ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
             usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
+            local RESULT=$(cat /etc/group | grep ${TCPDUMP_GROUP})
+            echo "[INFO] - RESULT FORM GROUPADD: ${RESULT^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
         fi
     done
 
@@ -229,7 +233,7 @@ function_installDocker () {
     local DOCKER_CE_PACKAGES="docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"
     local DOCKER_URL="https://download.docker.com/linux/ubuntu"
     local DOCKER_KEY="/etc/apt/keyrings/docker.asc"
-
+    local DOCKER_GROUP="docker"
     local DOCKER_INSTALLED=$(command -v docker)
 
     if [[ ${DOCKER_INSTALLED} == "" ]]
@@ -247,13 +251,16 @@ function_installDocker () {
         echo "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list>/dev/null | logger --tag GRAYLOG-INSTALLER
         sudo apt-get -qq update 2>/dev/null >/dev/null
 
-        echo "[INFO] - INSTALL DOCKER CE PACKAGES: ${DOCKER_CE_PACKAGES^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        for PKG in ${DOCKER_CE_PACKAGES}
+        do 
+            echo "[INFO] - INSTALL DOCKER PACKAGE: ${PKG^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+            sudo apt -qq install -y ${PKG} 2>/dev/null >/dev/null
+        done
 
-        sudo apt -qq install -y ${DOCKER_CE_PACKAGES} 2>/dev/null >/dev/null
-
-        echo "[INFO] - ADD USER ${USER} TO GROUP 'docker' ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
-
-        sudo usermod -aG docker $USER
+        echo "[INFO] - ADD USER ${USER^^} TO GROUP '${DOCKER_GROUP^^}' ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        usermod -aG docker $USER
+        local RESULT=$(cat /etc/group | grep ${DOCKER_GROUP})
+        echo "[INFO] - RESULT FORM GROUPADD: ${RESULT^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
 
 }
@@ -369,7 +376,7 @@ function_installGraylogStack () {
 
     echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null | logger --tag GRAYLOG-INSTALLER
 
-    echo "[INFO] - REMOVE INSTALLATION FOLDER '${INSTALLPATH^^}'" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - REMOVE INSTALLATION FOLDER ${INSTALLPATH^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo rm -rf ${INSTALLPATH}
 }
 
@@ -431,7 +438,7 @@ function_prepareSidecarConfiguration () {
     sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tag
     sudo sed -i 's/tags: [[]]/tags:\n  - Evaluation\n  - Windows\n  - ADDS\n  - DNS/g' ${SIDECAR_YML}
-    # Change LF to CRLF
+    # Change LF to CRLF as this is a Windows Batch File
     sudo unix2dos ${SIDECAR_YML} 2>/dev/null >/dev/null
 
     echo "[INFO] - CONFIGURE GRAYLOG SIDECAR FOR WINDOWS (EXE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
