@@ -161,7 +161,7 @@ function_checkSystemRequirements () {
 
     if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ] && [ ${TOTAL_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_DISK} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
-        echo " [INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
+        echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
         
          Operating System: ${OPERATING_SYSTEM} 
          Storage         : ${TOTAL_DISK_SPACE} GB 
@@ -247,7 +247,7 @@ function_installDocker () {
         echo "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list>/dev/null | logger --tag install-graylog.sh
         sudo apt-get -qq update 2>/dev/null >/dev/null
 
-        echo "[INFO] - INSTALL DOCKER CE PACKAGES: ${DOCKER_CE_PACKAGES}" | logger -p user.info -e -t install-graylog.sh
+        echo "[INFO] - INSTALL DOCKER CE PACKAGES: ${DOCKER_CE_PACKAGES^^}" | logger -p user.info -e -t install-graylog.sh
 
         sudo apt -qq install -y ${DOCKER_CE_PACKAGES} 2>/dev/null >/dev/null
 
