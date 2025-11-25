@@ -158,6 +158,7 @@ function_checkSystemRequirements () {
 
     if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ] && [ ${TOTAL_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_DISK} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
+        echo ""
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
 
                 Operating System: ${OPERATING_SYSTEM}
@@ -165,8 +166,8 @@ function_checkSystemRequirements () {
                 Memory          : ${RANDOM_ACCESS_MEMORY} GB
                 CPU Cores       : ${CPU_CORES_NUMBER} vCPU
                 CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available
-                Internet        : ${INTERNET_CONNECTIVITY_TYPE^}${SYSTEM_PROXY}
-                "
+                Internet        : ${INTERNET_CONNECTIVITY_TYPE^}${SYSTEM_PROXY}"
+        echo ""
     else
         if [ ${INTERNET_CONNECTIVITY} -ne 200 ]
         then
