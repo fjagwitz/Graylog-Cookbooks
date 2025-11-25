@@ -203,7 +203,7 @@ function_checkSystemRequirements () {
 
 function_installScriptDependencies () {
 
-    echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES: ${SCRIPT_DEPENDENCIES}" | logger -p user.info -e -t install-graylog.sh
+    echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t install-graylog.sh
     sudo apt -qq update -y 2>/dev/null >/dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
 
@@ -568,9 +568,9 @@ function_restartGraylogContainer () {
 
     local GRAYLOG_CONTAINER=${1}
 
-    echo "[INFO] - STOP CONTAINER ${1} " | logger -p user.info -e -t install-graylog.sh
+    echo "[INFO] - stop container ${1^^} " | logger -p user.info -e -t install-graylog.sh
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
-    echo "[INFO] - START CONTAINER ${1} " | logger -p user.info -e -t install-graylog.sh
+    echo "[INFO] - start container ${1^^} " | logger -p user.info -e -t install-graylog.sh
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} 2>/dev/null >/dev/null
 }
 
