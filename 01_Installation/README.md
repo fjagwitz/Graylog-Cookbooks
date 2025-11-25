@@ -20,7 +20,7 @@ Depending on your setup, you might want to add hypervisor-specific guest tools a
 
 Get it from here:
 
-    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/Graylog-7.0.1/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
+    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/Graylog-7.0/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && sudo ./install-graylog.sh
 
 The system is accessible via
 
