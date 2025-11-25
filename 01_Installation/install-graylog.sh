@@ -38,7 +38,7 @@ SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
 SCRIPT_CHECK_DEPENDENCIES="dnsutils"
-SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop jq net-tools pwgen tcpdump unzip vim" 
+SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop jq net-tools pwgen rsyslog tcpdump unzip vim" 
 
 
 ###############################################################################
@@ -204,14 +204,23 @@ function_checkSystemRequirements () {
 function_installScriptDependencies () {
 
     echo "[INFO] - INSTALL SCRIPT DEPENDENCIES: ${SCRIPT_DEPENDENCIES}" | logger -p user.info -e -t install-graylog.sh --rfc5424
-
     sudo apt -qq update -y 2>/dev/null >/dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
-    sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
 
-    echo "[INFO] - ADD USER ${USER} TO GROUP 'tpcpdump' ON HOST" | logger -p user.info -e -t install-graylog.sh --rfc5424
-
-    sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
+    for DEP in ${SCRIPT_DEPENDENCIES}
+    do 
+        if [[ ${DEP} != $(dpkg -l | grep -E "(^| )${DEP}($| )" | cut -d" " -f3) ]]
+        then
+            echo "[INFO] - INSTALL SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t install-graylog.sh --rfc5424
+            sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null            
+        fi
+        
+        if [[ {$DEP} == "tcpdump" ]]
+        then
+            echo "[INFO] - ADD USER ${USER} TO GROUP 'tpcpdump' ON HOST" | logger -p user.info -e -t install-graylog.sh --rfc5424
+            sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
+        fi
+    done
 
 }
 
