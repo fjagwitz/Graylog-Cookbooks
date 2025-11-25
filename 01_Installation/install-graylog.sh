@@ -538,7 +538,7 @@ function_checkEnterpriseLicense () {
     do 
         LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
         echo "[INFO] - WAIT FOR ENTERPRISE LICENSE TO BE AVAILABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sleep 1m
+        sleep 10m
     done
 
     echo "${LICENSE_ENTERPRISE}"
@@ -553,7 +553,7 @@ function_checkSecurityLicense () {
     do 
         LICENSE_SECURITY=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/security")' | jq -r .active )
         echo "[INFO] - WAIT FOR SECURITY LICENSE TO BE AVAILABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sleep 1m
+        sleep 10m
     done
 
     echo "${LICENSE_SECURITY}"
@@ -644,7 +644,7 @@ function_createEvaluationConfiguration () {
         echo "[INFO] - ENABLE EVALUATION NOTIFICATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Evaluation System","shortMessage":"DO NOT USE IN PRODUCTION","longMessage":"This System was set up for a Graylog Product Evaluation and MUST NOT be used in production. For a secure and production-ready setup please get in touch with your Graylog Customer Success Manager who will help you to deploy your Graylog Stack following best practices.","isActive":true,"isDismissible":true,"atLogin":true,"isGlobal":false,"variant":"warning","hiddenTitle":false}' 2>/dev/null >/dev/null
         
-        echo "[INFO] - ENABLE GRAYLOG 5 COLOUR SCHEME " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ENABLE GRAYLOG v5 COLOUR SCHEME " | logger -p user.info -e -t GRAYLOG-INSTALLER
         # curl -s http://localhost/api/plugins/org.graylog.plugins.customization/theme -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"light":{"global":{"background":"#eeeff2","link":"#578dcc"},"brand":{"tertiary":"#3e434c"},"variant":{"default":"#9aa8bd","danger":"#eb5454","info":"#578dcc","primary":"#697586","success":"#7eb356","warning":"#eedf64"}},"dark":{"global":{"background":"#222222","contentBackground":"#303030","link":"#629de2"},"brand":{"tertiary":"#ffffff"},"variant":{"default":"#595959","danger":"#e74c3c","info":"#578dcc","primary":"#697586","success":"#709e4c","warning":"#e3d45f"}}}' 2>/dev/null >/dev/null
   
         echo "[INFO] - CONFIGURE ARCHIVE " | logger -p user.info -e -t GRAYLOG-INSTALLER
