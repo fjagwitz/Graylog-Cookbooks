@@ -319,11 +319,11 @@ function_installGraylogStack () {
     echo "[INFO] - PULL CONTAINERS FOR GRAYLOG STACK " | logger -p user.info -e -t install-graylog.sh --rfc5424
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml pull --quiet 2>/dev/null >/dev/null &
 
-    echo "[INFO] - SET PERMISSIONS FOR USER ID/GID 1000 " | logger -p user.info -e -t install-graylog.sh --rfc5424
+    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1000 (OPENSEARCH)" | logger -p user.info -e -t install-graylog.sh --rfc5424
     # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
     sudo chown -R 1000:1000 ${GRAYLOG_PATH}/database
 
-    echo "[INFO] - SET PERMISSIONS FOR USER ID/GID 1000 " | logger -p user.info -e -t install-graylog.sh --rfc5424
+    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1100 (GRAYLOG) " | logger -p user.info -e -t install-graylog.sh --rfc5424
     # Adapting Permissions for proper access by the Graylog Containers (1100:1100)
     for FOLDER in ${FOLDERS_WITH_GRAYLOG_PERMISSIONS}
     do
