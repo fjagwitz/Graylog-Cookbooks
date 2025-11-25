@@ -6,7 +6,7 @@
 # email:             fvj@graylog.com
 # date:              2025-11-11
 # version:           1.0
-# usage:             bash GRAYLOG-INSTALLER
+# usage:             bash install-graylog.sh
 # notes:             
 #==============================================================================
 
