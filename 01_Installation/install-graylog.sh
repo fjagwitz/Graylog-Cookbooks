@@ -207,11 +207,11 @@ function_installScriptDependencies () {
 
     sudo apt -qq update -y 2>/dev/null >/dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
-    sudo apt -qq install ${SCRIPT_DEPENDENCIES}
+    sudo apt -qq install -y ${SCRIPT_DEPENDENCIES} 2>/dev/null >/dev/null
 
     echo "[INFO] - ADD USER ${USER} TO GROUP 'tpcpdump' ON HOST" | logger -p user.info -e -t install-graylog.sh --rfc5424
 
-    sudo usermod -aG tcpdump ${USER}
+    sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
 
 }
 
@@ -732,7 +732,7 @@ then
 
     function_checkSystemRequirements
     function_installScriptDependencies
-    
+
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "[INFO] - INSTALL DOCKER-CE"
     function_installDocker
