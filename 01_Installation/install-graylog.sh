@@ -496,11 +496,11 @@ function_displayClusterId () {
     echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"" | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
     echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "    
     echo ""
-    echo "*******************************************************************************"
-    echo "*                                                                             *"
-    echo "* CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )       *"
-    echo "*                                                                             *"
-    echo "*******************************************************************************"
+    echo "******************************************************"
+    echo "*                                                    *"
+    echo "* CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z ) *"
+    echo "*                                                    *"
+    echo "******************************************************"
 
 }
 
