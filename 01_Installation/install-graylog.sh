@@ -235,10 +235,10 @@ function_installDocker () {
         
         echo "[INFO] - ADD DOCKER REPOSITORY" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
-        sudo install -m 0755 -d /etc/apt/keyrings>/dev/null | logger --tag GRAYLOG-INSTALLER
-        sudo curl -fsSL ${DOCKER_URL}/gpg -o ${DOCKER_KEY}>/dev/null | logger --tag GRAYLOG-INSTALLER
-        sudo chmod a+r ${DOCKER_KEY} | logger --tag GRAYLOG-INSTALLER
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list>/dev/null | logger --tag GRAYLOG-INSTALLER
+        sudo install -m 0755 -d /etc/apt/keyrings 2>/dev/null >/dev/null 
+        sudo curl -fsSL ${DOCKER_URL}/gpg -o ${DOCKER_KEY} 2>/dev/null >/dev/null 
+        sudo chmod a+r ${DOCKER_KEY} 2>/dev/null >/dev/null 
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list 2>/dev/null >/dev/null 
         sudo apt-get -qq update 2>/dev/null >/dev/null
 
         for PKG in ${DOCKER_CE_PACKAGES}
