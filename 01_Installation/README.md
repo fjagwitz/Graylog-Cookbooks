@@ -7,6 +7,7 @@ Create a virtual machine:
 - Storage: at least 600 GB in **/opt** (depending on the amount of data you plan to Ingest over a defined timeframe)
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
+- Have an SSL certificate handy for the Web UI
 
 _Heads-up_: If you are using the Proxmox Hypervisor, make sure you configure the CPU type [with AVX support](https://www.techtutorials.tv/sections/promox/proxmox-custom-cpus), otherwise you will observe MongoDB Containers being caught in a restart loop (see https://github.com/docker-library/mongo/issues/619). 
 
