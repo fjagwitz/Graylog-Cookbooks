@@ -448,7 +448,7 @@ function_checkSystemAvailability () {
 
 function_createUserToken () {
 
-    echo "[INFO] - CREATE GRAYLOG API TOKEN" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - CREATE GRAYLOG API TOKEN FOR ACCOUNT ${1^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)
         
     USER_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"token_ttl\":\"P${2}D\"}" | jq -r .token)
