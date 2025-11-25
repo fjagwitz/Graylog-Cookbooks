@@ -441,6 +441,7 @@ function_prepareSidecarConfiguration () {
     sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tag
     sudo sed -i 's/tags: [[]]/tags:\n  - Evaluation\n  - Windows\n  - ADDS\n  - DNS/g' ${SIDECAR_YML}
+    # Change LF to CRLF
     sudo unix2dos ${SIDECAR_YML} 2>/dev/null >/dev/null
 
     # Populating Install Script for Graylog Sidecar (EXE-Installation)
