@@ -35,6 +35,7 @@ SYSTEM_REQUIREMENTS_MEMORY="32"
 SYSTEM_REQUIREMENTS_DISK="600"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
+SCRIPT_CHECK_DEPENDENCIES="dnsutils"
 SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop jq net-tools pwgen tcpdump unzip vim" 
 
 
@@ -105,6 +106,10 @@ function_getSystemFqdn () {
 
     local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ')    
     local VALID_FQDN="false"
+
+    # ensuring nslookup is available for the FQDN check
+    sudo apt -qq update -y 2>/dev/null >/dev/null 
+    sudo apt -qq install -y 2>/dev/null >/dev/null
 
     while [[ ${VALID_FQDN} != "true" ]]
     do
@@ -441,8 +446,8 @@ function_prepareSidecarConfiguration () {
     # Populating Install Script for Graylog Sidecar (EXE-Installation)
     for SIDECAR_INSTALLER in ${SIDECAR_INSTALLER_CMD}
     do
-        sudo sed -i "s/SET serverurl=\"\"/SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"/g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
-        sudo sed -i "s/SET apitoken=\"\"/SET apitoken=\"${SIDECAR_TOKEN}\"/g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
+        sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
+        sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
     done
 }
 
