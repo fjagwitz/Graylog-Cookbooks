@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "39eb4abc-b0af-4851-b461-be66536f2780",
-  "rev": 4,
+  "rev": 5,
   "name": "Graylog Evaluation Content Pack",
   "summary": "Graylog Evaluation Content Pack",
   "description": "",
@@ -15,7 +15,7 @@
         "name": "dashboard",
         "version": "2"
       },
-      "id": "df1528f0-2440-4e02-a096-395f727435a7",
+      "id": "0473cb75-a809-4f63-83d0-9d8790f43b4b",
       "data": {
         "summary": {
           "@type": "string",
@@ -571,23 +571,23 @@
               ]
             },
             "positions": {
-              "42d2ef01-00ab-45c3-b990-d4b49d56a49f": {
-                "col": 1,
-                "row": 1,
-                "height": 4,
-                "width": 5
-              },
               "cf7f7392-d81f-4f6d-b68f-2b8028fcd0d1": {
                 "col": 1,
                 "row": 5,
                 "height": 3,
-                "width": 9
+                "width": "Infinity"
               },
-              "45db354b-2c79-4778-8acb-b6ecddfedd62": {
-                "col": 6,
+              "42d2ef01-00ab-45c3-b990-d4b49d56a49f": {
+                "col": 1,
                 "row": 1,
                 "height": 4,
-                "width": 4
+                "width": 7
+              },
+              "45db354b-2c79-4778-8acb-b6ecddfedd62": {
+                "col": 8,
+                "row": 1,
+                "height": 4,
+                "width": 5
               }
             },
             "formatting": {
@@ -819,43 +819,6 @@
             "widgets": [
               {
                 "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component"
-                  ],
-                  "units": {},
-                  "show_message_row": false,
-                  "show_summary": false,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:mongo\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 300,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
-                "filters": [],
-                "description": null
-              },
-              {
-                "config": {
                   "visualization": "pie",
                   "units": {},
                   "column_limit": null,
@@ -967,6 +930,43 @@
                 "id": "0fc68e2d-2258-42b9-951f-74b918377684",
                 "filters": [],
                 "description": null
+              },
+              {
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:mongo\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
+                "filters": [],
+                "description": null
               }
             ],
             "widget_mapping": {
@@ -1023,7 +1023,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.0+a788678"
+          "version": ">=7.0.1+29f3984"
         }
       ]
     },
@@ -1033,7 +1033,7 @@
         "name": "pipeline",
         "version": "1"
       },
-      "id": "d1ae8bd9-d854-4769-aead-848a44811835",
+      "id": "23d060a8-d2d1-4b0b-a493-fe14c3c43e02",
       "data": {
         "title": {
           "@type": "string",
@@ -1045,19 +1045,19 @@
         },
         "source": {
           "@type": "string",
-          "@value": "pipeline \"Evaluation - Self-Monitoring Pipeline\"\nstage 0 match either\nrule \"Evaluation - Self-Monitoring Parser Graylog 1\"\nrule \"Evaluation - Self-Monitoring Parser MongoDB 1\"\nrule \"Evaluation - Self-Monitoring Parser Opensearch 1\"\nstage 10 match either\nrule \"Evaluation - Self-Monitoring Cleanup\"\nend"
+          "@value": "pipeline \"Evaluation - Self-Monitoring Pipeline\"\nstage 10 match either\nrule \"Evaluation - Self-Monitoring Cleanup\"\nstage 0 match either\nrule \"Evaluation - Self-Monitoring Parser Graylog 1\"\nrule \"Evaluation - Self-Monitoring Parser MongoDB 1\"\nrule \"Evaluation - Self-Monitoring Parser Opensearch 1\"\nrule \"Evaluation - Self-Monitoring Parser Graylog Installer\"\nend"
         },
         "connected_streams": [
           {
             "@type": "string",
-            "@value": "77af2294-7d82-4406-9055-95ce5c4f4052"
+            "@value": "ecf981ca-13a2-4c95-b8f0-7e63b6f79139"
           }
         ]
       },
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.0+a788678"
+          "version": ">=7.0.1+29f3984"
         }
       ]
     },
@@ -1167,10 +1167,138 @@
     {
       "v": "1",
       "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "0a8a3545-4618-485c-ba22-f020c179fdcb",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Parser Graylog Installer"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog Installer\"\n\nwhen\n    contains(to_string($message.message),\"GRAYLOG-INSTALLER\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{HOSTNAME:event_source}%{SPACE}%{DATA:application_component}:%{SPACE}\\\\[%{WORD:event_severity}\\\\]%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "7272eacc-37e1-45e4-b2ae-eb22228aee57",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Cleanup"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Cleanup\"\n\nwhen\n    NOT has_field(\"event_severity\")\n    \nthen\n    drop_message();\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "01170417-2806-4c1d-9b03-7324015aef7c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Parser Opensearch 1"
+        },
+        "description": {
+          "@type": "string",
+          "@value": ""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Parser Opensearch 1\"\n\nwhen\n    contains(to_string($message.image_name),\"opensearch\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "6d5f198c-3bbb-4f0e-aa05-e028f508fd24",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Parser Graylog 1"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog 1\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "ceb93a4c-03f8-44f7-be9c-a60102534f49",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Parser MongoDB 1"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Parser MongoDB 1\"\n\nwhen\n    contains(to_string($message.image_name),\"mongo\")\n    //true\n    \nthen\n    let mylog = to_map(parse_json(to_string(flatten_json(to_string($message.message),\"flatten\"))));\n    \n    set_fields(mylog);\n    \n    rename_field(\"attr_message_msg\",\"message\");\n    rename_field(\"attr_message_verbose_level\",\"event_severity\");\n    rename_field(\"attr_message_session_name\",\"application_component\");\n    //set_field(\"touched\",true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "stream_title",
         "version": "1"
       },
-      "id": "77af2294-7d82-4406-9055-95ce5c4f4052",
+      "id": "ecf981ca-13a2-4c95-b8f0-7e63b6f79139",
       "data": {
         "title": {
           "@type": "string",
@@ -1180,7 +1308,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.0+a788678"
+          "version": ">=7.0.1+29f3984"
         }
       ]
     },
