@@ -38,7 +38,7 @@ SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
 SCRIPT_CHECK_DEPENDENCIES="dnsutils"
-SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop jq net-tools pwgen rsyslog tcpdump unzip vim" 
+SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
 
 
 ###############################################################################
