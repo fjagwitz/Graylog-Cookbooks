@@ -4,7 +4,7 @@ Create a virtual machine:
 
 - CPU Cores: at least 8
 - Memory: at least 32 GB
-- Storage: at least 600 GB (depending on the amount of data you plan to Ingest over a defined timeframe)
+- Storage: at least 600 GB in **/opt** (depending on the amount of data you plan to Ingest over a defined timeframe)
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 
