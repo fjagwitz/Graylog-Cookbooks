@@ -214,7 +214,7 @@ function_installScriptDependencies () {
         then
             echo "[INFO] - INSTALL SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
-            sleep 1s   
+            wait
         fi
     done
 
@@ -248,7 +248,7 @@ function_installDocker () {
         do 
             echo "[INFO] - INSTALL DOCKER PACKAGE: ${PKG^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
             sudo apt -qq install -y ${PKG} 2>/dev/null >/dev/null
-            sleep 1s
+            wait
         done
     fi
 
