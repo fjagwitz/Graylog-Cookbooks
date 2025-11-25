@@ -370,7 +370,7 @@ function_installGraylogStack () {
 
     echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null | logger --tag install-graylog.sh
 
-    echo "[INFO] - REMOVE INSTALLATION FOLDER \'${INSTALLPATH}\'}" | logger -p user.info -e -t install-graylog.sh --rfc5424
+    echo "[INFO] - REMOVE INSTALLATION FOLDER '${INSTALLPATH}'}" | logger -p user.info -e -t install-graylog.sh --rfc5424
     sudo rm -rf ${INSTALLPATH}
 }
 
