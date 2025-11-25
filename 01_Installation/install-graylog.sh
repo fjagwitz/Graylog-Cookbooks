@@ -370,7 +370,7 @@ function_installGraylogStack () {
 
     echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null | logger --tag install-graylog.sh
 
-    echo "[INFO] - REMOVE INSTALLATION FOLDER '${INSTALLPATH}'}" | logger -p user.info -e -t install-graylog.sh
+    echo "[INFO] - REMOVE INSTALLATION FOLDER '${INSTALLPATH}'" | logger -p user.info -e -t install-graylog.sh
     sudo rm -rf ${INSTALLPATH}
 }
 
@@ -568,9 +568,9 @@ function_restartGraylogContainer () {
 
     local GRAYLOG_CONTAINER=${1}
 
-    echo "[INFO] - stop container ${1^^} " | logger -p user.info -e -t install-graylog.sh
+    echo "[INFO] - STOP CONTAINER ${1^^} " | logger -p user.info -e -t install-graylog.sh
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
-    echo "[INFO] - start container ${1^^} " | logger -p user.info -e -t install-graylog.sh
+    echo "[INFO] - START CONTAINER ${1^^} " | logger -p user.info -e -t install-graylog.sh
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} 2>/dev/null >/dev/null
 }
 
