@@ -734,8 +734,8 @@ then
     
     clear
 
-    echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION"
-    function_installScriptDependencies &
+    echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
+    function_installScriptDependencies
        
     function_checkSnapshot
     function_defineAdminName
@@ -743,7 +743,6 @@ then
     function_getSystemFqdn
 
     function_checkSystemRequirements
-    function_installScriptDependencies
 
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "[INFO] - INSTALL DOCKER-CE"
