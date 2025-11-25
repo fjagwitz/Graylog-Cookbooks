@@ -215,14 +215,6 @@ function_installScriptDependencies () {
             echo "[INFO] - INSTALL SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null            
         fi
-        
-        if [[ {$DEP} == "tcpdump" ]]
-        then
-            echo "[INFO] - ADD USER ${USER^^} TO GROUP '${TCPDUMP_GROUP^^}' ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
-            usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
-            local RESULT=$(cat /etc/group | grep ${TCPDUMP_GROUP})
-            echo "[INFO] - RESULT FORM GROUPADD: ${RESULT^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-        fi
     done
 
 }
@@ -255,12 +247,8 @@ function_installDocker () {
         do 
             echo "[INFO] - INSTALL DOCKER PACKAGE: ${PKG^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
             sudo apt -qq install -y ${PKG} 2>/dev/null >/dev/null
+            sleep 1s
         done
-
-        echo "[INFO] - ADD USER ${USER^^} TO GROUP '${DOCKER_GROUP^^}' ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
-        usermod -aG docker $USER
-        local RESULT=$(cat /etc/group | grep ${DOCKER_GROUP})
-        echo "[INFO] - RESULT FORM GROUPADD: ${RESULT^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
 
 }
