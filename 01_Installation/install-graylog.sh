@@ -738,7 +738,7 @@ then
     sudo mkdir -p ${GRAYLOG_PATH}
 
     clear
-    function_installScriptDependencies
+    
     function_checkSnapshot
     function_defineAdminName
     function_defineAdminPassword
@@ -747,7 +747,8 @@ then
     function_checkSystemRequirements
 
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-
+    
+    function_installScriptDependencies
     function_installDocker
 
     function_installGraylogStack
