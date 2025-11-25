@@ -514,16 +514,16 @@ function_displayClusterId () {
             PASSWORD: \"${GRAYLOG_PASSWORD}\"
         " | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 2>/dev/null >/dev/null
 
-
+1;30
     echo "[INFO] - GRAYLOG IS NOW READY FOR TESTING"
-    echo "[INFO] - SYSTEM URL: \"http(s)://${GRAYLOG_FQDN}\" "
-    echo "[INFO] - WINDOWS ACCESS: \"\\\\${GRAYLOG_FQDN}\Graylog Useful Sources\""
-    echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "    
-    echo "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GRAYLOG_PATH}/graylog.env "
+    echo -e "[INFO] - SYSTEM URL: \e[4;33mhttp(s)://${GRAYLOG_FQDN}\e[0m"
+    echo -e "[INFO] - WINDOWS ACCESS: \e[0;32m\\\\${GRAYLOG_FQDN}\Graylog Useful Sources\e[0m"
+    echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;30m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
+    echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;30m${GRAYLOG_PATH}/graylog.\e[0m"
     echo ""
     echo "******************************************************"
     echo "*                                                    *"
-    echo "* CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z ) *"
+    echo -e "* CLUSTER-ID: \e[1;31m$(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
     echo "*                                                    *"
     echo "******************************************************"
     echo ""
