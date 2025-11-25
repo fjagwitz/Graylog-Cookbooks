@@ -710,8 +710,7 @@ then
 
     function_checkSystemRequirements
 
-    echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null | logger --tag install-graylog.sh
-
+    echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null 
     echo "[INFO] - INSTALL DOCKER-CE"
     function_installDocker
 
@@ -752,15 +751,14 @@ fi
 
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
-    echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null | logger --tag install-graylog.sh
-
+    echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null 
+    
     sudo rm -- ${0}
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
 
-    echo "[INFO] - RESTARTING GRAYLOG STACK FOR MAINTENANCE PURPOSES"
-    
+    echo "[INFO] - RESTARTING GRAYLOG STACK FOR MAINTENANCE PURPOSES"    
     function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
