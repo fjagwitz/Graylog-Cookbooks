@@ -514,10 +514,14 @@ function_createBaseConfiguration () {
 
 function_displayClusterId () {
 
+    echo "  USER: \"${GRAYLOG_ADMIN}\" 
+            PASSWORD: \"${GRAYLOG_PASSWORD}\"
+        " | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 2>/dev/null >/dev/null
+
+
     echo "[INFO] - GRAYLOG IS NOW READY FOR TESTING"
     echo "[INFO] - SYSTEM URL: \"http(s)://${GRAYLOG_FQDN}\" "
     echo "[INFO] - WINDOWS ACCESS: \"\\\\${GRAYLOG_FQDN}\Graylog Useful Sources\""
-    echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"" | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
     echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "    
     echo "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GRAYLOG_PATH}/graylog.env "
     echo ""
