@@ -298,7 +298,7 @@ function_installGraylogStack () {
     done
     
     # Start pulling Containers
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml pull --quiet 2>/dev/null | logger --tag install-graylog.sh
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml pull --quiet 2>/dev/null | logger --tag install-graylog.sh &
 
     # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
     sudo chown -R 1000:1000 ${GRAYLOG_PATH}/database
@@ -752,7 +752,7 @@ fi
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "completed" ]]
 then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null 
-    
+
     sudo rm -- ${0}
     sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
 
