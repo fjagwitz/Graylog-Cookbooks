@@ -9,9 +9,13 @@ GRAYLOG_ROOT_EMAIL = ""
 #
 GRAYLOG_ROOT_TIMEZONE = "UTC" 
 
+## Settings to allow leading wildcard Searches
+#
+GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "true"
+
 ## Set Graylog Java Heap Size
 #
-GRAYLOG_SERVER_JAVA_OPTS = "-Xms4096m -Xmx4096m"
+GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx4g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
 
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
@@ -41,7 +45,7 @@ GRAYLOG_REPORT_DISABLE_SANDBOX = "true"
 #
 GRAYLOG_CONTENT_PACKS_LOADER_ENABLED = "true"
 GRAYLOG_CONTENT_PACKS_DIR = "/etc/graylog/server/contentpacks"
-GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Evaluation - Initial Whitelist Collection v1.json"
+GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Graylog Evaluation Content Pack.json"
 
 ## Email Configurations
 #
@@ -57,13 +61,16 @@ GRAYLOG_TRANSPORT_EMAIL_SUBJECT_PREFIX = ""
 GRAYLOG_TRANSPORT_EMAIL_FROM_EMAIL = ""
 GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = ""
 
+## Journal Configurations - System is intended to process 10GB logs per day
+GRAYLOG_MESSAGE_JOURNAL_MAX_AGE = 24h
+GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 10gb
+
 ## Grafana Metrics Monitoring
 #
 GRAYLOG_PROMETHEUS_EXPORTER_ENABLED = "true"
 GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
 
-## Indices naming proving this is a non-production environment
+## Indices naming
 #
-GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-evaluation-events"
-GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-evaluation-system-events"
-
+# GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-events"
+# GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-system-events"

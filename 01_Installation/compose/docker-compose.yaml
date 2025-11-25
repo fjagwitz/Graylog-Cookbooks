@@ -4,7 +4,8 @@ services:
     hostname: "nginx1"
     depends_on:
       - "graylog1"
-    ports: 
+      - "graylog2"
+    ports:       
       # WebUI
       - 443:443
       - 80:80
@@ -32,21 +33,20 @@ services:
       # Graylog Enterprise Forwarder Input
       - 13301:13301
       - 13302:13302
-
     volumes:
-      - "${GL_GRAYLOG_NGINX1}/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "${GL_GRAYLOG_NGINX1}/http.conf:/etc/nginx/conf.d/http.conf:ro"
-      - "${GL_GRAYLOG_NGINX1}/stream.conf:/etc/nginx/conf.d/stream.conf:ro"
-      - "${GL_GRAYLOG_NGINX1}/ssl:/etc/nginx/ssl:ro"
+      - "./nginx1/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "./nginx1/http.conf:/etc/nginx/conf.d/http.conf:ro"
+      - "./nginx1/stream.conf:/etc/nginx/conf.d/stream.conf:ro"
+      - "./nginx1/ssl:/etc/nginx/ssl:ro"
     restart: "always"
 
   nginx2: 
     image: "nginx:latest"
     hostname: "lookuptables"
     volumes: 
-      - "${GL_GRAYLOG_NGINX2}/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "${GL_GRAYLOG_NGINX2}/http.conf:/etc/nginx/conf.d/http.conf:ro"
-      - "${GL_GRAYLOG_LOOKUPTABLES}:/lookuptables:ro"
+      - "./nginx2/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "./nginx2/http.conf:/etc/nginx/conf.d/http.conf:ro"
+      - "./lookuptables:/lookuptables:ro"
     restart: "always"
 
   mongodb1:
@@ -55,9 +55,9 @@ services:
     logging: 
       driver: "gelf"
       options: 
-        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+        gelf-address: "udp://localhost:9900"
     volumes:
-      - "mongodb-data-01:/data/db"
+      - "./configuration:/data/db"
     restart: "always"
 
   datanode1:
@@ -66,14 +66,13 @@ services:
     logging: 
       driver: "gelf"
       options: 
-        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+        gelf-address: "udp://localhost:9900"
+    env_file: "opensearch.env"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode1"
       - "node.roles=cluster_manager,data"
       - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=evaluation-cluster-opensearch"
+      - "cluster.name=graylog-database"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"      
       - "discovery.seed_hosts=datanode2,datanode3"
       - "bootstrap.memory_lock=false"
@@ -88,8 +87,8 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
-      - "${GL_OPENSEARCH_DATA}/datanode1:/usr/share/opensearch/data"    
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/datanode1:/usr/share/opensearch/data"    
     restart: "on-failure"
 
   datanode2:
@@ -98,14 +97,13 @@ services:
     logging: 
       driver: "gelf"
       options: 
-        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+        gelf-address: "udp://localhost:9900"
+    env_file: "opensearch.env"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode2"
       - "node.roles=cluster_manager,data"
       - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=evaluation-cluster-opensearch"
+      - "cluster.name=graylog-database"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode3"
       - "bootstrap.memory_lock=false"
@@ -120,8 +118,8 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
-      - "${GL_OPENSEARCH_DATA}/datanode2:/usr/share/opensearch/data"
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/datanode2:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode3:
@@ -130,14 +128,13 @@ services:
     logging: 
       driver: "gelf"
       options: 
-        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+        gelf-address: "udp://localhost:9900"
+    env_file: "opensearch.env"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms4096m -Xmx4096m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode3"
       - "node.roles=cluster_manager,data"
       - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=evaluation-cluster-opensearch"
+      - "cluster.name=graylog-database"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode2"
       - "bootstrap.memory_lock=false"
@@ -152,8 +149,8 @@ services:
         soft: 262144 
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
-      - "${GL_OPENSEARCH_DATA}/datanode3:/usr/share/opensearch/data"
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/datanode3:/usr/share/opensearch/data"
     restart: "on-failure"
 
   datanode9:
@@ -162,15 +159,14 @@ services:
     logging: 
       driver: "gelf"
       options: 
-        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+        gelf-address: "udp://localhost:9900"
+    env_file: "opensearch.env"
     environment:
-      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${GL_OPENSEARCH_INITIAL_ADMIN_PASSWORD}"
       - "node.name=datanode9"
       - "node.roles=search"
       - "node.search.cache.size=10gb"
       - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=evaluation-cluster-opensearch"
+      - "cluster.name=graylog-database"
       - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
       - "discovery.seed_hosts=datanode1,datanode2,datanode3"
       - "bootstrap.memory_lock=false"
@@ -185,73 +181,87 @@ services:
         soft: 262144
         hard: 262144
     volumes:
-      - "${GL_OPENSEARCH_DATA}/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/${GL_GRAYLOG_VERSION}:6.3"
+    image: "graylog/graylog-enterprise:7.0"
     hostname: "graylog1"
     logging: 
       driver: "gelf"
       options: 
-        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
       - "datanode1"
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
+    post_start:
+      - command: update-ca-certificates
+        user: root
     env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=true"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
     volumes:
-      - "graylog-data-01:/usr/share/graylog/data/journal"
+      - "./journal1:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
-      # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/datalake"
-      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
-      - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
+      - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
-      - "${GL_GRAYLOG_CONTENTPACKS}:/etc/graylog/server/contentpacks:ro"
-      # only required if you want to work with Geolocation Data
-      - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
+      - "./contentpacks:/etc/graylog/server/contentpacks:ro"
+      # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
+      - "./datalake:/usr/share/graylog/data/datalake"
+      # only required if you want to use encrypted Syslog (stores the required certificates)
+      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
-      - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
+      - "./lookuptables:/etc/graylog/server/lookuptables:ro"
+      # only required if you want to work with Geolocation Data
+      - "./maxmind:/etc/graylog/server/mmdb:ro"
+      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
+      - "./notifications:/etc/graylog/server/notifications"
+      # only required if you want to add your own self-signed root certificate
+      - "./rootcerts:/usr/local/share/ca-certificates/"
     restart: "on-failure"
 
   graylog2:
-    image: "graylog/${GL_GRAYLOG_VERSION}:6.3"
+    image: "graylog/graylog-enterprise:7.0"
     hostname: "graylog2"
     logging: 
       driver: "gelf"
       options: 
-        gelf-address: ${GL_GRAYLOG_LOG_TARGET}
+        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
       - "datanode1"
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
+    post_start:
+      - command: update-ca-certificates
+        user: root
     env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=false"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
     volumes:
-      - "graylog-data-02:/usr/share/graylog/data/journal"
+      - "./journal2:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_ARCHIVES}:/usr/share/graylog/data/archives"
-      # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
-      - "${GL_GRAYLOG_DATALAKE}:/usr/share/graylog/data/datalake"
-      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
-      - "${GL_GRAYLOG_NOTIFICATIONS}:/etc/graylog/server/notifications"
+      - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
-      - "${GL_GRAYLOG_CONTENTPACKS}:/etc/graylog/server/contentpacks:ro"
-      # only required if you want to work with Geolocation Data
-      - "${GL_GRAYLOG_MAXMIND}:/etc/graylog/server/mmdb:ro"
+      - "./contentpacks:/etc/graylog/server/contentpacks:ro"
+      # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
+      - "./datalake:/usr/share/graylog/data/datalake"
+      # only required if you want to use encrypted Syslog (stores the required certificates)
+      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
-      - "${GL_GRAYLOG_LOOKUPTABLES}:/etc/graylog/server/lookuptables:ro"
+      - "./lookuptables:/etc/graylog/server/lookuptables:ro"
+      # only required if you want to work with Geolocation Data
+      - "./maxmind:/etc/graylog/server/mmdb:ro"
+      # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
+      - "./notifications:/etc/graylog/server/notifications"
+      # only required if you want to add your own self-signed root certificate
+      - "./rootcerts:/usr/local/share/ca-certificates/"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
@@ -261,7 +271,7 @@ services:
     depends_on:
       - "prometheus1"
     environment:
-     GF_SERVER_ROOT_URL: "https://${GL_GRAYLOG_ADDRESS}/grafana"
+     GF_SERVER_ROOT_URL: "https://eval.graylog.local/grafana"
      GF_INSTALL_PLUGINS: ""
     volumes:
      - "grafana-data-01:/var/lib/grafana"
@@ -283,12 +293,30 @@ services:
       - '--web.listen-address=0.0.0.0:9090'
     volumes:
       - "prometheus-data-01:/prometheus"
-      - "${GL_GRAYLOG_PROMETHEUS}/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
+      - "./prometheus/prometheus-gls.yml:/etc/prometheus/prometheus-gls.yml"
     restart: unless-stopped
 
+  # This container can be skipped based on your needs
+  samba1:
+    image: "dockurr/samba:4.21"
+    hostname: "samba1"
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: "udp://localhost:9900"
+    ports:
+      - "445:445"
+    volumes:
+      - ./samba/smb.conf:/etc/samba/smb.conf:ro
+      - ./samba/users.conf:/etc/samba/users.conf:ro
+      - ./assetdata:/storage/assetdata
+      - ./logsamples:/storage/logsamples
+      - ./lookuptables:/storage/lookuptables
+      - ./sources:/storage/sources
+    restart: always
+
 volumes:
-  graylog-data-01:
-  graylog-data-02:
-  mongodb-data-01:
+  graylog-journal-01:
+  graylog-journal-02:
   grafana-data-01:
   prometheus-data-01:
