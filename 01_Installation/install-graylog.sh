@@ -517,7 +517,7 @@ function_displayClusterId () {
     echo -e "[INFO] - SYSTEM URL: \e[4;33mhttp(s)://${GRAYLOG_FQDN}\e[0m"
     echo -e "[INFO] - WINDOWS ACCESS: \e[0;32m\\\\\\\\${GRAYLOG_FQDN}\Graylog Useful Sources\e[0m"
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
-    echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/graylog.\e[0m"
+    echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/graylog.env\e[0m"
     echo ""
     echo "******************************************************"
     echo "*                                                    *"
