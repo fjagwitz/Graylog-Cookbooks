@@ -491,10 +491,12 @@ function_createBaseConfiguration () {
 
 function_displayClusterId () {
 
-    echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GRAYLOG_PATH}/graylog.env "
-    echo "[INFO] - URL: \"http(s)://${GRAYLOG_FQDN}\" "
+    echo "[INFO] - GRAYLOG IS NOW READY FOR TESTING 
+    echo "[INFO] - SYSTEM URL: \"http(s)://${GRAYLOG_FQDN}\" "
+    echo "[INFO] - WINDOWS ACCESS: \"\\\\${GRAYLOG_FQDN}\Graylog Useful Sources\""
     echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"" | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
     echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "    
+    echo "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GRAYLOG_PATH}/graylog.env "
     echo ""
     echo "******************************************************"
     echo "*                                                    *"
@@ -714,7 +716,7 @@ then
     echo "[INFO] - INSTALL DOCKER-CE"
     function_installDocker
 
-    echo "[INFO] - INSTALL GRAYLOG STACK"
+    echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
     function_startGraylogStack
 
@@ -728,13 +730,15 @@ then
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
-    echo "[INFO] - CONFIGURE BASIC SETTINGS"
+    echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
 
     function_restartGraylogContainer graylog2
 
     function_displayClusterId
+
+    echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
     
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null 
