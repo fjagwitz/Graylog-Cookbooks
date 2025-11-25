@@ -127,7 +127,7 @@ function_getSystemFqdn () {
 
         if [[ ${VALID_FQDN} != "true" ]]
         then
-            read -p "[INPUT] - The FQDN you provided does not seem to be resolvable; continue anyway? [yes/no]: " CHECK_IGNORE
+            read -p "[INPUT] - The FQDN you provided does not seem to be resolvable; continue anyway? [no/yes]: " CHECK_IGNORE
             local CHECK_IGNORE=${CHECK_IGNORE: no}
             
             if [[ ${CHECK_IGNORE} == "yes" ]]
