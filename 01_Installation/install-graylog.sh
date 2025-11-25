@@ -491,17 +491,17 @@ function_createBaseConfiguration () {
 
 function_displayClusterId () {
 
-    echo ""
     echo "[INFO] - SYSTEM READY FOR TESTING - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: ${GRAYLOG_PATH}/graylog.env "
-    echo ""
-    echo "[INFO] - CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )" 
-    echo ""
     echo "[INFO] - URL: \"http(s)://${GRAYLOG_FQDN}\" "
-    echo ""
+    echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"" | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
     echo "[INFO] - CREDENTIALS STORED IN: ${GRAYLOG_PATH}/your_graylog_credentials.txt "    
     echo ""
-    echo "[INFO] - USER: \"${GRAYLOG_ADMIN}\" || PASSWORD: \"${GRAYLOG_PASSWORD}\"" | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 
-    echo ""
+    echo "*******************************************************************************"
+    echo "*                                                                             *"
+    echo "* CLUSTER-ID: $(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )       *"
+    echo "*                                                                             *"
+    echo "*******************************************************************************"
+
 }
 
 function_checkEnterpriseLicense () {
