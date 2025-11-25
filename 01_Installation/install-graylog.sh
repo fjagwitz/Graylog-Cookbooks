@@ -29,12 +29,14 @@ GRAYLOG_LICENSE_SECURITY=""
 
 SYSTEM_PROXY=$(cat /etc/environment | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
 
+# Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
 SYSTEM_REQUIREMENTS_DISK="600"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
+# Define required dependencies to run the script as well as the Graylog Stack
 SCRIPT_CHECK_DEPENDENCIES="dnsutils"
 SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop jq net-tools pwgen tcpdump unzip vim" 
 
@@ -733,7 +735,8 @@ elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
     # ensuring nslookup is available for the FQDN check
-    sudo apt -qq update -y 2>/dev/null >/dev/null && sudo apt -qq install -y ${SCRIPT_CHECK_DEPENDENCIES} 2>/dev/null >/dev/null &
+    #sudo apt -qq update -y 2>/dev/null >/dev/null && sudo apt -qq install -y ${SCRIPT_CHECK_DEPENDENCIES} 2>/dev/null >/dev/null &
+    function_installScriptDependencies &
     clear
     
     function_checkSnapshot
@@ -745,7 +748,6 @@ then
 
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     
-    function_installScriptDependencies
     function_installDocker
 
     function_installGraylogStack
