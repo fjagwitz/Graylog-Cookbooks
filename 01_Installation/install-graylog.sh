@@ -698,6 +698,7 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
+    clear
     # ensuring nslookup is available for the FQDN check
     #sudo apt -qq update -y 2>/dev/null | logger --tag install-graylog.sh && sudo apt -qq install -y ${SCRIPT_CHECK_DEPENDENCIES} 2>/dev/null | logger --tag install-graylog.sh &
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION"
