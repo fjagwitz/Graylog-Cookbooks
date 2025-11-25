@@ -37,7 +37,6 @@ SYSTEM_REQUIREMENTS_DISK="600"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
-SCRIPT_CHECK_DEPENDENCIES="dnsutils"
 SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
 
 
