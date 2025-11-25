@@ -107,10 +107,6 @@ function_getSystemFqdn () {
     local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ')    
     local VALID_FQDN="false"
 
-    # ensuring nslookup is available for the FQDN check
-    sudo apt -qq update -y 2>/dev/null >/dev/null 
-    sudo apt -qq install -y 2>/dev/null >/dev/null
-
     while [[ ${VALID_FQDN} != "true" ]]
     do
         read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " SYSTEM_FQDN
@@ -736,7 +732,8 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo mkdir -p ${GRAYLOG_PATH}
-
+    # ensuring nslookup is available for the FQDN check
+    sudo apt -qq update -y 2>/dev/null >/dev/null && sudo apt -qq install -y ${SCRIPT_CHECK_DEPENDENCIES} 2>/dev/null >/dev/null &
     clear
     
     function_checkSnapshot
