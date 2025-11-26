@@ -4,13 +4,12 @@
 # 1.) Input Name
 # 2.) Input Port
 # 
-# Usage: Add-Input MyInput 515
+# Usage: Remove 515
 
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
-INPUT_NAME=${1}
-INPUT_PORT=${2}
+INPUT_PORT=${1}
 
 while [[ ${INPUT_NAME} == "" ]]
 do
