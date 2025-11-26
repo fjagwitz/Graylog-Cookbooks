@@ -21,9 +21,10 @@ echo "[INFO] - CREATE INPUT ${INPUT_NAME^^} ON PORT ${INPUT_PORT}, HANG ON "
 echo "[INFO] - CREATE INPUT ${INPUT_NAME^^} ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
+sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
+
 sudo sed -i "s/# Additional Input Ports/# Input ${INPUT_NAME^} ${INPUT_PORT}:${INPUT_PORT} created by ${USER} on $(date) \n      - ${INPUT_PORT}:${INPUT_PORT}\n      - ${INPUT_PORT}:${INPUT_PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
 
-sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nupstream graylog-${INPUT_NAME,,}-${INPUT_PORT} {\n    zone graylog-${INPUT_NAME,,}-${INPUT_PORT} 64k;\n    least_conn;\n    server graylog1:${INPUT_PORT};\n    server graylog2:${INPUT_PORT};\n}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
 
 sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nserver {\n    listen ${INPUT_PORT};\n    listen ${INPUT_PORT} udp;\n    proxy_pass graylog-${INPUT_NAME,,}-${INPUT_PORT};\n}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
