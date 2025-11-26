@@ -18,8 +18,8 @@ sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
 grep -vwE ${INPUT_PORT}:${INPUT_PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE}
 
-sudo sed -i "s/# Upstream ${INPUT_NAME^}:${INPUT_PORT} created by [.]\+ on [.]\+ \nupstream graylog-${INPUT_NAME,,}-${INPUT_PORT} {\n    zone graylog-${INPUT_NAME,,}-${INPUT_PORT} 64k;\n    least_conn;\n    server graylog1:${INPUT_PORT};\n    server graylog2:${INPUT_PORT};\n}//g" ${STREAM_CONF}
-sudo sed -i "s/# Server ${INPUT_NAME^}:${INPUT_PORT} created by [.]\+ on [.]\+ \nserver {\n    listen ${INPUT_PORT};\n    listen ${INPUT_PORT} udp;\n    proxy_pass graylog-${INPUT_NAME,,}-${INPUT_PORT};\n}\n\n# ADDITIONAL SERVER ENTRY//g" ${STREAM_CONF}
+sed -i "/# Upstream ${INPUT_NAME^}:${INPUT_PORT}/,/server graylog2:518;\n}/d" $STREAM_CONF
+sed -i "/# Server Additional:$INPUT_PORT/,/proxy_pass graylog-additional-$INPUT_PORT;\n}/d" $STREAM_CONF
 
 echo "[INFO] - RESTARTING REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
