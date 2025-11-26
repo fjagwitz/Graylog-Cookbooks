@@ -371,6 +371,11 @@ function_installGraylogStack () {
     sudo rm -rf ${INSTALLPATH}
 }
 
+function_addScriptRepositoryToPathVariable () {
+    echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "PATH=${PATH:+${PATH}:}~${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc
+}
+
 function_downloadAdditionalBinaries () {
 
     local SIDECAR_VERSION="1.5.1"
@@ -748,6 +753,7 @@ then
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
     function_startGraylogStack
+    function_addScriptRepositoryToPathVariable
 
     echo "[INFO] - PREPARE ADDITIONAL CONTENT"
     function_downloadAdditionalBinaries
