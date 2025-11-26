@@ -326,6 +326,9 @@ function_installGraylogStack () {
     do
         sudo chown -R 1100:1100 ${GRAYLOG_PATH}/${FOLDER}
     done
+    
+    echo "[INFO] - SET PERMISSIONS FOR HELPER SCRIPTS" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo chmod +x ${GRAYLOG_PATH}/sources/scripts/*
 
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
