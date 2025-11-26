@@ -11,6 +11,11 @@ STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
 INPUT_NAME="additional"
 INPUT_PORT=${1}
 
+while [[ ${INPUT_PORT} == "" ]]
+do
+    read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER OF THE INPUT YOU WANT TO DELETE: " INPUT_PORT
+done
+
 echo "[INFO] - REMOVING INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
