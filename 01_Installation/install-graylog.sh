@@ -217,6 +217,7 @@ function_installScriptDependencies () {
 
 }
 
+# following https://docs.docker.com/engine/install/ubuntu
 function_installDocker () {
 
     local DOCKER_OS_PACKAGES="docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc"
@@ -254,6 +255,7 @@ function_installDocker () {
 
 }
 
+# following https://go2docs.graylog.org/current/getting_in_log_data/set_up_sidecar_collectors.htm
 function_installGraylogSidecar () {
     
     local SIDECAR_INSTALLED=$(dpkg -l | grep -E "(^| )graylog-sidecar($| )" | cut -d" " -f3)
@@ -300,7 +302,7 @@ function_installGraylogStack () {
     sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,rootcerts,samba,sources/{scripts,binaries/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,NXLog_CommunityEdition},other}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} | logger --tag GRAYLOG-INSTALLER
+    sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
 
     echo "[INFO] - COPY CLONED CONTENT TO FOLDERS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local ITEMS=$(ls ${INSTALLPATH}/01_Installation/compose | xargs)
@@ -324,13 +326,13 @@ function_installGraylogStack () {
     do
         sudo chown -R 1100:1100 ${GRAYLOG_PATH}/${FOLDER}
     done
-
+    
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${DATABASE_ENV}>/dev/null | logger --tag GRAYLOG-INSTALLER
-    echo "OPENSEARCH_JAVA_OPTS = \"-Xms4096m -Xmx4096m\"" | sudo tee -a ${DATABASE_ENV}>/dev/null | logger --tag GRAYLOG-INSTALLER
+    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${DATABASE_ENV} >/dev/null 
+    echo "OPENSEARCH_JAVA_OPTS = \"-Xms4096m -Xmx4096m\"" | sudo tee -a ${DATABASE_ENV} >/dev/null 
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR GRAYLOG " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
@@ -363,10 +365,19 @@ function_installGraylogStack () {
         find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644 2>/dev/null >/dev/null
     done
 
-    echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null | logger --tag GRAYLOG-INSTALLER
+    echo "[INFO] - SET PERMISSIONS FOR HELPER SCRIPTS" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo chmod +x ${GRAYLOG_PATH}/sources/scripts/*
+
+    echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf"  >/dev/null 
 
     echo "[INFO] - REMOVE INSTALLATION FOLDER ${INSTALLPATH^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo rm -rf ${INSTALLPATH}
+}
+
+function_addScriptRepositoryToPathVariable () {
+    echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+    echo "export PATH=${PATH:+${PATH}:}${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
 function_downloadAdditionalBinaries () {
@@ -746,6 +757,7 @@ then
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
     function_startGraylogStack
+    function_addScriptRepositoryToPathVariable
 
     echo "[INFO] - PREPARE ADDITIONAL CONTENT"
     function_downloadAdditionalBinaries

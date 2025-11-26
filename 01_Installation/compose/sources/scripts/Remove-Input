@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# expected Values: 
+# 1.) Input Port
+# 
+# Usage: Remove 515
+
+GRAYLOG_PATH="/opt/graylog"
+COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
+STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
+INPUT_NAME="additional"
+INPUT_PORT=${1}
+
+while [[ ${INPUT_PORT} == "" ]]
+do
+    read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER OF THE INPUT YOU WANT TO DELETE: " INPUT_PORT
+done
+
+echo "[INFO] - REMOVING INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
+
+sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
+sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
+
+grep -vwE ${INPUT_PORT}:${INPUT_PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE} 2>/dev/null >/dev/null
+
+sudo sed -i "/# Upstream ${INPUT_NAME^}:${INPUT_PORT}/,/# Upstream ${INPUT_NAME^}:${INPUT_PORT}/d" $STREAM_CONF
+wait
+sudo sed -i "/# Server ${INPUT_NAME^}:$INPUT_PORT/,/# Server ${INPUT_NAME^}:$INPUT_PORT/d" $STREAM_CONF
+
+echo "[INFO] - RESTARTING REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
+
+ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs nginx1 | tail -n10 | grep -ow emerg | tail -n1)
+
+if [[ ${ERROR_RESTART} == "emerg" ]]
+then
+    sudo cp ${COMPOSE_FILE}.bak ${COMPOSE_FILE}
+    sudo cp ${STREAM_CONF}.bak ${STREAM_CONF}
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
+
+    echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES"
+    echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES" | logger -p user.info -e -t GRAYLOG-HELPER
+else
+    echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT ${INPUT_PORT} "
+    echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
+fi
+exit
