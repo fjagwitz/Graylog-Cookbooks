@@ -39,4 +39,6 @@ then
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
 
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES"
+fi
+
 exit
