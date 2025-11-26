@@ -327,9 +327,6 @@ function_installGraylogStack () {
         sudo chown -R 1100:1100 ${GRAYLOG_PATH}/${FOLDER}
     done
     
-    echo "[INFO] - SET PERMISSIONS FOR HELPER SCRIPTS" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo chmod +x ${GRAYLOG_PATH}/sources/scripts/*
-
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
 
@@ -368,6 +365,9 @@ function_installGraylogStack () {
         find ${GRAYLOG_PATH}/${FOLDER}/ -type f -print0 | xargs -0 sudo chmod 644 2>/dev/null >/dev/null
     done
 
+    echo "[INFO] - SET PERMISSIONS FOR HELPER SCRIPTS" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo chmod +x ${GRAYLOG_PATH}/sources/scripts/*
+
     echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf"  >/dev/null 
 
     echo "[INFO] - REMOVE INSTALLATION FOLDER ${INSTALLPATH^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -377,7 +377,7 @@ function_installGraylogStack () {
 function_addScriptRepositoryToPathVariable () {
     echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
-    echo "export PATH=${PATH:+${PATH}:}~${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+    echo "export PATH=${PATH:+${PATH}:}${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
 function_downloadAdditionalBinaries () {
