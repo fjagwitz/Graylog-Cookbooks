@@ -29,7 +29,6 @@ sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream ${INPUT_NAME^}:${INPUT_POR
 
 sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nserver {\n    listen ${INPUT_PORT};\n    listen ${INPUT_PORT} udp;\n    proxy_pass graylog-${INPUT_NAME,,}-${INPUT_PORT};\n} # Server ${INPUT_NAME^}:${INPUT_PORT}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
 
-echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 "
 echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
