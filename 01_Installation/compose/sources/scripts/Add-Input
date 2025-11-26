@@ -23,14 +23,14 @@ sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
 sudo sed -i "s/# Additional Input Ports/# Additional Input ${INPUT_NAME^} ${INPUT_PORT}:${INPUT_PORT} created by ${USER} on $(date) \n      - ${INPUT_PORT}:${INPUT_PORT}\n      - ${INPUT_PORT}:${INPUT_PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
 
 sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
-sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Additional Upstream ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nupstream graylog-${INPUT_NAME^^} {\n    zone graylog-${INPUT_NAME^^} 64k;\n    least_conn;\n    server graylog1:${INPUT_PORT};\n    server graylog2:${INPUT_PORT};\n}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
+sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Additional Upstream ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nupstream graylog-${INPUT_NAME,,}-${INPUT_PORT} {\n    zone graylog-${INPUT_NAME^^} 64k;\n    least_conn;\n    server graylog1:${INPUT_PORT};\n    server graylog2:${INPUT_PORT};\n}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
 
-sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Additional Server ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nserver {\n    listen ${INPUT_PORT};\n    listen ${INPUT_PORT} udp;\n    proxy_pass graylog-${INPUT_NAME^^};\n}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
+sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Additional Server ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nserver {\n    listen ${INPUT_PORT};\n    listen ${INPUT_PORT} udp;\n    proxy_pass graylog-${INPUT_NAME,,}-${INPUT_PORT};\n}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
 
 echo "[INFO] - RESTARTING REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
 
-ERROR_RESTART=$(sudo docker compose logs nginx1 | tail -n10 | grep -ow emerg | tail -n1)
+ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs nginx1 | tail -n10 | grep -ow emerg | tail -n1)
 
 if [[ ${ERROR_RESTART} == "emerg" ]]
 then
