@@ -16,10 +16,10 @@ echo "[INFO] - REMOVING INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
 sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
-grep -vwE ${INPUT_PORT}:${INPUT_PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE}
+grep -vwE ${INPUT_PORT}:${INPUT_PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE} 2>/dev/null >/dev/null
 
-sed -i "/# Upstream ${INPUT_NAME^}:${INPUT_PORT}/,/server graylog2:518;\n}/d" $STREAM_CONF
-sed -i "/# Server Additional:$INPUT_PORT/,/proxy_pass graylog-additional-$INPUT_PORT;\n}/d" $STREAM_CONF
+sudo sed -i "/# Upstream ${INPUT_NAME^}:${INPUT_PORT}/,/server graylog2:${INPUT_PORT};\n}/d" $STREAM_CONF
+sudo sed -i "/# Server Additional:$INPUT_PORT/,/proxy_pass graylog-additional-${INPUT_PORT};\n}/d" $STREAM_CONF
 
 echo "[INFO] - RESTARTING REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
@@ -33,4 +33,5 @@ then
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
 
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES"
+fi
 exit
