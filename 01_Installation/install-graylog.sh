@@ -373,7 +373,8 @@ function_installGraylogStack () {
 
 function_addScriptRepositoryToPathVariable () {
     echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "PATH=${PATH:+${PATH}:}~${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc
+    echo "" | sudo tee -a /etc/bash.bashrc
+    echo "export PATH=${PATH:+${PATH}:}~${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc
 }
 
 function_downloadAdditionalBinaries () {
