@@ -14,7 +14,7 @@ echo "[INFO] - REMOVING INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -
 
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
 
-grep -vwE ${INPUT_PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE}
+grep -vwE ${INPUT_PORT}:${INPUT_PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE}
 grep -vwE ${INPUT_PORT} ${STREAM_CONF} | sudo tee ${STREAM_CONF}
 
 echo "[INFO] - RESTARTING REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
