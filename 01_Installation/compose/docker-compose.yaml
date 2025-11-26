@@ -18,16 +18,13 @@ services:
       # Beats Input 5044
       - 5044:5044
       - 5044:5044/udp
-      # RAW Input 
+      # RAW Input 5555
       - 5555:5555
       - 5555:5555/udp
-      # Fortinet Input 
-      - 5556:5556
-      - 5556:5556/udp
       # Graylog Gelf Input (Self-Monitoring)
       - 9900:9900
       - 9900:9900/udp 
-      # Gelf Input
+      # Gelf Input 12201
       - 12201:12201
       - 12201:12201/udp 
       # Graylog Enterprise Forwarder Input

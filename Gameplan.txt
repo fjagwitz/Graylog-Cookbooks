@@ -1,0 +1,30 @@
+Gameplan
+
+Recipe 1: Prepare a Linux Virtual Machine
+- Virtual Hardware
+- Operating System
+- Ip Address
+- Name Resolution 
+- Internet Access
+- Certificates
+
+Recipe 2: Install Graylog
+- Run Graylog Installation Script
+- Get Graylog License (and wait)
+- Add Webserver Certificate and restart nginx1
+- Optional: Provide Self-Signed Certificate for Graylog's Trusted Root CA Store
+- Work with customizations (e.g. restore Graylog 7 look&feel)
+
+
+Recipe 11 Configure Log Source Windows 
+- Configure Audit Policy
+- Install Graylog Sidecar
+- Install Filebeat Standalone
+- Install NXLog CE
+- Define Tags based on Server Role
+- Activate Anomaly Detection
+
+Recipe 12: Configure Log Source Fortigate
+- Configure Audit Policy
+- Configure Log Target
+- Activate Anomaly Detection
