@@ -142,6 +142,17 @@ function_getSystemFqdn () {
 
 }
 
+function_checkInternetConnectivity () {
+    local INTERNET_CONNECTIVITY=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 | cut -d " " -f2)
+    if [ $INTERNET_CONNECTIVITY != 200 ]
+    then
+        echo "[INFO] - INTERNET CONNECTION NOT AVAILABLE. EXIT."
+        exit
+    else
+        echo "[INFO] - INTERNET CONNECTION SUCCESSFULLY ESTABLISHED " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    fi
+}
+
 function_checkSystemRequirements () {
 
     local INTERNET_CONNECTIVITY=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 | cut -d " " -f2)
@@ -743,6 +754,8 @@ then
     exit 
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
+    function_checkInternetConnectivity
+
     sudo mkdir -p ${GRAYLOG_PATH}
     
     clear
