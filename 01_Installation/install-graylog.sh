@@ -712,7 +712,7 @@ function_enableIlluminatePackages () {
 
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then
-        echo "[INFO] - ENABLE ILLUMINATE FOR LINUX AUDITBEAT " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ENABLE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
     fi
 }
