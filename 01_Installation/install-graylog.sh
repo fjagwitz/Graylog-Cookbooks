@@ -215,6 +215,9 @@ function_installScriptDependencies () {
         fi
     done
 
+    echo "[INFO] - ADD ${USER^^} TO TCPDUMP GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
+
 }
 
 # following https://docs.docker.com/engine/install/ubuntu
@@ -249,6 +252,9 @@ function_installDocker () {
             wait
         done
     fi
+
+    echo "[INFO] - ADD ${USER^^} TO DOCKER GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo usermod -aG docker ${USER} 2>/dev/null >/dev/null
 
     echo "[INFO] - RESTART DOCKER SERVICE" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo systemctl docker.service restart 2>/dev/null >/dev/null
@@ -526,15 +532,15 @@ function_displayClusterId () {
 
     echo "[INFO] - GRAYLOG IS NOW READY FOR TESTING"
     echo -e "[INFO] - SYSTEM URL: \e[4;33mhttp(s)://${GRAYLOG_FQDN}\e[0m"
-    echo -e "[INFO] - WINDOWS ACCESS: \e[0;32m\\\\\\\\${GRAYLOG_FQDN}\Graylog Useful Sources\e[0m"
+    echo -e "[INFO] - WINDOWS ACCESS: \e[1;32m\\\\\\\\${GRAYLOG_FQDN}\e[0m (SMB)"
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
     echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/graylog.env\e[0m"
     echo ""
-    echo "******************************************************"
-    echo "*                                                    *"
-    echo -e "* CLUSTER-ID: \e[1;31m$(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
-    echo "*                                                    *"
-    echo "******************************************************"
+    echo "       ******************************************************"
+    echo "       *                                                    *"
+    echo -e "       * CLUSTER-ID: \e[1;31m$(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
+    echo "       *                                                    *"
+    echo "       ******************************************************"
     echo ""
     echo "[INFO] - GRAYLOG STACK WILL RESTART AFTER ADDING THE LICENSE"
 }

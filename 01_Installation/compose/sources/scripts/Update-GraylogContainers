@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# This Script updates solely the Graylog Containers, not any of the others such as MongoDB or Opensearch
+#
+# Usage: 
+# Update-GraylogContainers
+
+GRAYLOG_PATH="/opt/graylog"
+COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
+
+echo "[INFO] - UPDATE CONTAINER IMAGES " | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - UPDATE CONTAINER IMAGES " 
+
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml pull 2>/dev/null >/dev/null
+
+echo "[INFO] - UPDATE CONTAINER GRAYLOG1 " | logger -p user.info -e -t GRAYLOG-HELPER
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog1 2>/dev/null >/dev/null
+wait
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d graylog1 2>/dev/null >/dev/null
+sleep 2m
+
+echo "[INFO] - UPDATE CONTAINER GRAYLOG2 " | logger -p user.info -e -t GRAYLOG-HELPER
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog2 2>/dev/null >/dev/null
+wait
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d graylog2 2>/dev/null >/dev/null
+sleep 2m
+
+while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
+    do
+    sleep 10s
+done
+
+echo "[INFO] - GRAYLOG CONTAINERS SUCCESFULLY UPDATED " | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG CONTAINERS SUCCESFULLY UPDATED " 
+
+exit
