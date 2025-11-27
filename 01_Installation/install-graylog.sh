@@ -827,7 +827,7 @@ then
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
 
-    echo "[INFO] - RESTARTING GRAYLOG STACK FOR MAINTENANCE PURPOSES"    
+    echo "[INFO] - RESTARTING GRAYLOG STACK FOR MAINTENANCE PURPOSES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     function_stopGraylogStack
     function_startGraylogStack
     function_checkSystemAvailability
