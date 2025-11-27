@@ -807,6 +807,9 @@ then
 
     sudo cp $0 /etc/cron.hourly/install-graylog
     sudo rm -- $0
+
+    echo "[INFO] - BASE INSTALLATION SUCCESSFULLY FINISHED, WAITING FOR LICENSE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
     exit
 fi
 
