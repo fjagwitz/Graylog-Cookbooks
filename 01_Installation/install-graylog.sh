@@ -246,7 +246,7 @@ function_installDocker () {
 
         echo "[INFO] - REMOVE DOCKER LEFTOVERS" | logger -p user.info -e -t GRAYLOG-INSTALLER
     
-        sudo apt-get -qq remove ${DOCKER_OS_PACKAGES} 2>/dev/null >/dev/null
+        sudo apt -qq remove ${DOCKER_OS_PACKAGES} 2>/dev/null >/dev/null
         
         echo "[INFO] - ADD DOCKER REPOSITORY" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
@@ -254,7 +254,7 @@ function_installDocker () {
         sudo curl -fsSL ${DOCKER_URL}/gpg -o ${DOCKER_KEY} 2>/dev/null >/dev/null 
         sudo chmod a+r ${DOCKER_KEY} 2>/dev/null >/dev/null 
         echo "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list 2>/dev/null >/dev/null 
-        sudo apt-get -qq update 2>/dev/null >/dev/null
+        sudo apt -qq update 2>/dev/null >/dev/null
 
         for PKG in ${DOCKER_CE_PACKAGES}
         do 
@@ -287,8 +287,8 @@ function_installGraylogSidecar () {
         sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - INSTALL GRAYLOG SIDECAR " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sudo apt-get update 2>/dev/null >/dev/null
-        sudo apt-get install graylog-sidecar 2>/dev/null >/dev/null
+        sudo apt -qq update -y 2>/dev/null >/dev/null
+        sudo apt -qq install -y graylog-sidecar 2>/dev/null >/dev/null
         sudo rm graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - CONFIGURE GRAYLOG SIDECAR ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
