@@ -210,7 +210,7 @@ function_installScriptDependencies () {
         if [[ ${DEP} != $(dpkg -l | grep -E "(^| )${DEP}($| )" | cut -d" " -f3) ]]
         then
             echo "[INFO] - INSTALL SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-            sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
+            sudo all -y ${DEP} 2>/dev/null >/dev/null
             wait
         fi
     done
