@@ -213,6 +213,9 @@ function_installScriptDependencies () {
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
             wait
         fi
+
+        echo "[INFO] - ADD CURRENT USER TO TCPDUMP GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
     done
 
 }
@@ -249,6 +252,9 @@ function_installDocker () {
             wait
         done
     fi
+
+    echo "[INFO] - ADD CURRENT USER TO DOCKER GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo usermod -aG docker ${USER} 2>/dev/null >/dev/null
 
     echo "[INFO] - RESTART DOCKER SERVICE" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo systemctl docker.service restart 2>/dev/null >/dev/null
