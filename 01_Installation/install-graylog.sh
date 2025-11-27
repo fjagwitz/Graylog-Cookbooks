@@ -215,8 +215,9 @@ function_installScriptDependencies () {
         fi
 
         echo "[INFO] - ADD ${USER^^} TO TCPDUMP GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
     done
+    
+    sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
 
 }
 
