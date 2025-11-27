@@ -3,7 +3,9 @@
 # expected Values: 
 # 1.) Input Port
 # 
-# Usage: Remove 515
+# Usage: 
+# Add a single Input Port: Remove-InputPort 515
+# Add multiple Input Ports: Remove-InputPort 515 516 517
 
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
@@ -15,7 +17,7 @@ for PORT in ${INPUT_PORT}
 do
     while [[ ${INPUT_PORT} == "" ]]
     do
-        read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER OF THE INPUT YOU WANT TO DELETE: " INPUT_PORT
+        read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER(S) OF THE INPUT YOU WANT TO DELETE: " INPUT_PORT
     done
 
     echo "[INFO] - REMOVING INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
