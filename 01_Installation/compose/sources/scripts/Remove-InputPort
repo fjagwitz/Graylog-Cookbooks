@@ -33,7 +33,7 @@ do
 
 done
 
-echo "[INFO] - RESTARTING REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
 
 ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs nginx1 | tail -n10 | grep -ow emerg | tail -n1)
