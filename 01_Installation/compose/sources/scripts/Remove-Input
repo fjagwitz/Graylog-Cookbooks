@@ -22,10 +22,8 @@ sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
 sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
 grep -vwE ${INPUT_PORT}:${INPUT_PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE} 2>/dev/null >/dev/null
-
-sudo sed -i "/# Upstream ${INPUT_NAME^}:${INPUT_PORT}/,/# Upstream ${INPUT_NAME^}:${INPUT_PORT}/d" $STREAM_CONF
-wait
-sudo sed -i "/# Server ${INPUT_NAME^}:$INPUT_PORT/,/# Server ${INPUT_NAME^}:$INPUT_PORT/d" $STREAM_CONF
+grep -vwE ::${INPUT_PORT} ${STREAM_CONF} | sudo tee ${STREAM_CONF} 2>/dev/null >/dev/null
+grep -vwE ::${INPUT_PORT} ${STREAM_CONF} | sudo tee ${STREAM_CONF} 2>/dev/null >/dev/null
 
 echo "[INFO] - RESTARTING REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
@@ -34,6 +32,10 @@ ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs 
 
 if [[ ${ERROR_RESTART} == "emerg" ]]
 then
+    echo $(date) | sudo tee -a ${COMPOSE_FILE} 2>/dev/null
+    echo $(date) | sudo tee -a ${STREAM_CONF} 2>/dev/null
+    sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.debug
+    sudo cp ${STREAM_CONF} ${STREAM_CONF}.debug
     sudo cp ${COMPOSE_FILE}.bak ${COMPOSE_FILE}
     sudo cp ${STREAM_CONF}.bak ${STREAM_CONF}
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null

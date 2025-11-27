@@ -8,7 +8,6 @@
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
-INPUT_NAME="additional"
 INPUT_PORT=${1}
 
 
@@ -17,17 +16,17 @@ do
     read -p "[INPUT] - PLEASE ASSIGN A VALID PORT NUMBER TO YOUR INPUT: " INPUT_PORT
 done
 
-echo "[INFO] - CREATE INPUT ${INPUT_NAME^^} ON PORT ${INPUT_PORT}, HANG ON "
-echo "[INFO] - CREATE INPUT ${INPUT_NAME^^} ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - CREATE INPUT ON PORT ${INPUT_PORT}, HANG ON "
+echo "[INFO] - CREATE INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
 sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
-sudo sed -i "s/# Additional Input Ports/# Input ${INPUT_NAME^} ${INPUT_PORT}:${INPUT_PORT} created by ${USER} on $(date) \n      - ${INPUT_PORT}:${INPUT_PORT}\n      - ${INPUT_PORT}:${INPUT_PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
+sudo sed -i "s/# Additional Input Ports/# Input ${INPUT_PORT}:${INPUT_PORT} created by ${USER} on $(date) \n      - ${INPUT_PORT}:${INPUT_PORT}\n      - ${INPUT_PORT}:${INPUT_PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
 
-sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nupstream graylog-${INPUT_NAME,,}-${INPUT_PORT} {\n    zone graylog-${INPUT_NAME,,}-${INPUT_PORT} 64k;\n    least_conn;\n    server graylog1:${INPUT_PORT};\n    server graylog2:${INPUT_PORT};\n} # Upstream ${INPUT_NAME^}:${INPUT_PORT}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
+sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream for Port ${INPUT_PORT} created by ${USER} on $(date) #::${INPUT_PORT}\nupstream graylog-${INPUT_PORT} {#::${INPUT_PORT}\n    zone graylog-${INPUT_PORT} 64k ; #::${INPUT_PORT}\n    least_conn; #::${INPUT_PORT}\n    server graylog1:${INPUT_PORT}; #::${INPUT_PORT}\n    server graylog2:${INPUT_PORT}; #::${INPUT_PORT}\n} # Upstream ${INPUT_PORT} #::${INPUT_PORT}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
 
-sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server ${INPUT_NAME^}:${INPUT_PORT} created by ${USER} on $(date) \nserver {\n    listen ${INPUT_PORT};\n    listen ${INPUT_PORT} udp;\n    proxy_pass graylog-${INPUT_NAME,,}-${INPUT_PORT};\n} # Server ${INPUT_NAME^}:${INPUT_PORT}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
+sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server for Port ${INPUT_PORT} created by ${USER} on $(date) #::${INPUT_PORT}\nserver { #::${INPUT_PORT}\n    listen ${INPUT_PORT}; #::${INPUT_PORT}\n    listen ${INPUT_PORT} udp; #::${INPUT_PORT}\n    proxy_pass graylog-${INPUT_PORT}; #::${INPUT_PORT}\n} #::${INPUT_PORT}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
 
 echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 
@@ -37,6 +36,10 @@ ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs 
 
 if [[ ${ERROR_RESTART} == "emerg" ]]
 then
+    echo $(date) | sudo tee -a ${COMPOSE_FILE} 2>/dev/null
+    echo $(date) | sudo tee -a ${STREAM_CONF} 2>/dev/null
+    sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.debug
+    sudo cp ${STREAM_CONF} ${STREAM_CONF}.debug
     sudo cp ${COMPOSE_FILE}.bak ${COMPOSE_FILE}
     sudo cp ${STREAM_CONF}.bak ${STREAM_CONF}
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
