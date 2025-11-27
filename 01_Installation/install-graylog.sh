@@ -213,10 +213,9 @@ function_installScriptDependencies () {
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
             wait
         fi
-
-        echo "[INFO] - ADD ${USER^^} TO TCPDUMP GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
     done
-    
+
+    echo "[INFO] - ADD ${USER^^} TO TCPDUMP GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
 
 }
