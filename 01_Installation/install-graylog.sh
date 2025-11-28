@@ -295,7 +295,7 @@ function_installGraylogSidecar () {
         sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
         sudo sed -i "s\#server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"http://localhost/api/\"\g" ${SIDECAR_YAML}
         sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YAML}
-        sudo sed -i "s\tags:\n  - default\tags:\n  - self-beats\g" ${SIDECAR_YAML}
+        sudo sed -i "s/tags:\n  - default/tags:\n  - self-beats/g" ${SIDECAR_YAML}
     fi
 }
 
