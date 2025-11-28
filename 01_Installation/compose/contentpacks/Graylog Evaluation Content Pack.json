@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "39eb4abc-b0af-4851-b461-be66536f2780",
-  "rev": 6,
+  "rev": 5,
   "name": "Graylog Evaluation Content Pack",
   "summary": "Graylog Evaluation Content Pack",
   "description": "",
@@ -15,7 +15,7 @@
         "name": "dashboard",
         "version": "2"
       },
-      "id": "f343b138-ebf8-4948-91f1-b7bfcc8eeff2",
+      "id": "0473cb75-a809-4f63-83d0-9d8790f43b4b",
       "data": {
         "summary": {
           "@type": "string",
@@ -409,6 +409,43 @@
             "widgets": [
               {
                 "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:graylog\\/graylog\\-enterprise\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "cf7f7392-d81f-4f6d-b68f-2b8028fcd0d1",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
                   "visualization": "table",
                   "units": {},
                   "column_limit": null,
@@ -520,43 +557,6 @@
                 "id": "45db354b-2c79-4778-8acb-b6ecddfedd62",
                 "filters": [],
                 "description": null
-              },
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component"
-                  ],
-                  "units": {},
-                  "show_message_row": false,
-                  "show_summary": false,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:graylog\\/graylog\\-enterprise\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 300,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "cf7f7392-d81f-4f6d-b68f-2b8028fcd0d1",
-                "filters": [],
-                "description": null
               }
             ],
             "widget_mapping": {
@@ -665,6 +665,43 @@
               },
               {
                 "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "89c08a2b-7d44-411e-bccd-01c1d7075423",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
                   "visualization": "table",
                   "units": {},
                   "column_limit": null,
@@ -725,43 +762,6 @@
                 "id": "7761b152-9033-4ac0-a29a-c45b64688634",
                 "filters": [],
                 "description": null
-              },
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component"
-                  ],
-                  "units": {},
-                  "show_message_row": false,
-                  "show_summary": false,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 300,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "89c08a2b-7d44-411e-bccd-01c1d7075423",
-                "filters": [],
-                "description": null
               }
             ],
             "widget_mapping": {
@@ -817,43 +817,6 @@
               }
             },
             "widgets": [
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component"
-                  ],
-                  "units": {},
-                  "show_message_row": false,
-                  "show_summary": false,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:mongo\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 300,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
-                "filters": [],
-                "description": null
-              },
               {
                 "config": {
                   "visualization": "pie",
@@ -967,6 +930,43 @@
                 "id": "0fc68e2d-2258-42b9-951f-74b918377684",
                 "filters": [],
                 "description": null
+              },
+              {
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:mongo\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 300,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
+                "filters": [],
+                "description": null
               }
             ],
             "widget_mapping": {
@@ -1033,7 +1033,7 @@
         "name": "pipeline",
         "version": "1"
       },
-      "id": "e0452613-1f47-47ae-9d9d-503771e1a9c6",
+      "id": "23d060a8-d2d1-4b0b-a493-fe14c3c43e02",
       "data": {
         "title": {
           "@type": "string",
@@ -1050,7 +1050,7 @@
         "connected_streams": [
           {
             "@type": "string",
-            "@value": "a4d5f43a-a0fd-40e4-bf98-b5260f1a7092"
+            "@value": "ecf981ca-13a2-4c95-b8f0-7e63b6f79139"
           }
         ]
       },
@@ -1170,7 +1170,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "374dead2-55e2-48d7-a79d-4086fd3471bd",
+      "id": "0a8a3545-4618-485c-ba22-f020c179fdcb",
       "data": {
         "title": {
           "@type": "string",
@@ -1195,7 +1195,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "4578c5c9-cbb4-4198-8a8a-4e4cf32cdeaa",
+      "id": "7272eacc-37e1-45e4-b2ae-eb22228aee57",
       "data": {
         "title": {
           "@type": "string",
@@ -1220,7 +1220,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "9687937f-727e-448f-9229-c360179181b1",
+      "id": "01170417-2806-4c1d-9b03-7324015aef7c",
       "data": {
         "title": {
           "@type": "string",
@@ -1248,7 +1248,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "cbddcce7-54a5-4e10-b5e2-ec6811ffad81",
+      "id": "6d5f198c-3bbb-4f0e-aa05-e028f508fd24",
       "data": {
         "title": {
           "@type": "string",
@@ -1273,7 +1273,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "4a016603-9c8f-4f04-9b11-55a45569fa61",
+      "id": "ceb93a4c-03f8-44f7-be9c-a60102534f49",
       "data": {
         "title": {
           "@type": "string",
@@ -1295,86 +1295,10 @@
     {
       "v": "1",
       "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "325685a3-a962-4893-b418-c319b90f3af5",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "filebeat"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "exec"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "linux"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "/usr/lib/graylog-sidecar/filebeat"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c  %s"
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "test config -c %s"
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "96f83f57-038e-429c-bace-3b087441b6e3",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "325685a3-a962-4893-b418-c319b90f3af5"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "filebeat-linux-default"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#ffffff"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n      \n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths: \n  - /var/log/syslog\n  fields_under_root: true\n  fields: \n      event_source_product: syslog\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "stream_title",
         "version": "1"
       },
-      "id": "a4d5f43a-a0fd-40e4-bf98-b5260f1a7092",
+      "id": "ecf981ca-13a2-4c95-b8f0-7e63b6f79139",
       "data": {
         "title": {
           "@type": "string",
