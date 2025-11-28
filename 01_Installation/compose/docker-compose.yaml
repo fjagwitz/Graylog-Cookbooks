@@ -18,13 +18,14 @@ services:
       # Beats Input 5044
       - 5044:5044
       - 5044:5044/udp
+      # Graylog Beats Input 5054 (Self-Monitoring, TCP only)
+      - 5054:5054
       # RAW Input 5555
       - 5555:5555
       - 5555:5555/udp
-      # Syslog Input over TLS
+      # Syslog Input over TLS (TCP only)
       - 6514:6514
-      # Graylog Gelf Input (Self-Monitoring)
-      - 9900:9900
+      # Graylog Gelf Input (Self-Monitoring, UDP only)
       - 9900:9900/udp 
       # Gelf Input 12201
       - 12201:12201

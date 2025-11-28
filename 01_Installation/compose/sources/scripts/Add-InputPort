@@ -5,7 +5,7 @@
 # 
 # Usage: 
 # Add a single Input Port: Add-InputPort 515
-# Add multiple Input Ports: Add-InputPort 515 516 517
+# Add multiple Input Ports: Add-InputPort "515 516 517"
 
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
@@ -14,27 +14,29 @@ INPUT_PORT="${1}"
 
 for PORT in ${INPUT_PORT}
 do 
-    while [[ (${INPUT_PORT} -lt 514) || ( ${INPUT_PORT} -gt 65535) ]]
+    while [[ (${PORT} -lt 514) || (${PORT} -gt 65535) || (${PORT} == "") ]]
     do
         read -p "[INPUT] - PLEASE ASSIGN A VALID PORT NUMBER(S) TO YOUR INPUT: " INPUT_PORT
     done
 
-    echo "[INFO] - CREATE INPUT ON PORT ${INPUT_PORT}, HANG ON "
-    echo "[INFO] - CREATE INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
+    echo "[INFO] - CREATE INPUT ON PORT ${PORT}, HANG ON "
+    echo "[INFO] - CREATE INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
     sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
     sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
-    sudo sed -i "s/# Additional Input Ports/# Input ${INPUT_PORT}:${INPUT_PORT} created by ${USER} on $(date) \n      - ${INPUT_PORT}:${INPUT_PORT}\n      - ${INPUT_PORT}:${INPUT_PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
+    sudo sed -i "s/# Additional Input Ports/# Input ${PORT}:${PORT} created by ${USER} on $(date) \n      - ${PORT}:${PORT}\n      - ${PORT}:${PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
     wait
-    sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream for Port ${INPUT_PORT} created by ${USER} on $(date) #::${INPUT_PORT}\nupstream graylog-${INPUT_PORT} {#::${INPUT_PORT}\n    zone graylog-${INPUT_PORT} 64k ; #::${INPUT_PORT}\n    least_conn; #::${INPUT_PORT}\n    server graylog1:${INPUT_PORT}; #::${INPUT_PORT}\n    server graylog2:${INPUT_PORT}; #::${INPUT_PORT}\n} # Upstream ${INPUT_PORT} #::${INPUT_PORT}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
+    sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream for Port ${PORT} created by ${USER} on $(date) #::${PORT}\nupstream graylog-${PORT} {#::${PORT}\n    zone graylog-${PORT} 64k ; #::${PORT}\n    least_conn; #::${PORT}\n    server graylog1:${PORT}; #::${PORT}\n    server graylog2:${PORT}; #::${PORT}\n} # Upstream ${PORT} #::${PORT}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
     wait
-    sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server for Port ${INPUT_PORT} created by ${USER} on $(date) #::${INPUT_PORT}\nserver { #::${INPUT_PORT}\n    listen ${INPUT_PORT}; #::${INPUT_PORT}\n    listen ${INPUT_PORT} udp; #::${INPUT_PORT}\n    proxy_pass graylog-${INPUT_PORT}; #::${INPUT_PORT}\n} #::${INPUT_PORT}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
+    sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server for Port ${PORT} created by ${USER} on $(date) #::${PORT}\nserver { #::${PORT}\n    listen ${PORT}; #::${PORT}\n    listen ${PORT} udp; #::${PORT}\n    proxy_pass graylog-${PORT}; #::${PORT}\n} #::${PORT}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
 
 done 
 
 echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down nginx1 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d nginx1 2>/dev/null >/dev/null
+wait
 ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs nginx1 | tail -n10 | grep -ow emerg | tail -n1)
 
 if [[ ${ERROR_RESTART} == "emerg" ]]
@@ -45,13 +47,15 @@ then
     sudo cp ${STREAM_CONF} ${STREAM_CONF}.debug
     sudo cp ${COMPOSE_FILE}.bak ${COMPOSE_FILE}
     sudo cp ${STREAM_CONF}.bak ${STREAM_CONF}
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
+
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down nginx1 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d nginx1 2>/dev/null >/dev/null
 
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES"
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES" | logger -p user.info -e -t GRAYLOG-HELPER
 else
-    echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT ${INPUT_PORT} "
-    echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
+    echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT(S) ${INPUT_PORT} "
+    echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT(S) ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 fi
 
 exit
