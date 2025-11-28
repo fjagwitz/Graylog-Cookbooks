@@ -307,7 +307,7 @@ function_installGraylogStack () {
     local DATABASE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATABASE_ENV}"
     local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
 
-    # Configure vm.max_map_count for Opensearch (https://opensearch.org/docs/2.15/install-and-configure/install-opensearch/index/#important-settings)
+    # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
     echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf >/dev/null 
     sudo sysctl -p >/dev/null 
