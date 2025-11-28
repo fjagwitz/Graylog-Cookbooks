@@ -18,6 +18,8 @@ services:
       # Beats Input 5044
       - 5044:5044
       - 5044:5044/udp
+      # Graylog Beats Input 5054 (Self-Monitoring)
+      - 5054:5054
       # RAW Input 5555
       - 5555:5555
       - 5555:5555/udp

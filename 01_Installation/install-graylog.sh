@@ -490,7 +490,10 @@ function_createBaseConfiguration () {
     local ADMIN_TOKEN=${1}
 
     echo "[INFO] - CREATE INPUT FOR SELF-MONITORING LOGS (GELF UDP 9900)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "port": 9900, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}'| jq '.id') 
+    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "port": 9900, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}'| jq '.id') 
+
+    echo "[INFO] - CREATE INPUT FOR SELF-MONITORING LOGS (BEATS TCP 5054)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INPUT_BEATS=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5054 Beats | Evaluation Input for Self-Monitoring", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5054, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' | jq '.id') 2>/dev/null >/dev/null      
 
     echo "[INFO] - CREATE FIELD TYPE PROFILE FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
@@ -501,8 +504,11 @@ function_createBaseConfiguration () {
     echo "[INFO] - CREATE STREAM FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
 
-    echo "[INFO] - CREATE STREAM RULE FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT} }" 2>/dev/null >/dev/null
+    echo "[INFO] - CREATE STREAM RULE FOR SELF-MONITORING LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
+
+    echo "[INFO] - CREATE STREAM RULE FOR SELF-MONITORING LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
 
     echo "[INFO] - START STREAM FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
@@ -625,9 +631,6 @@ function_createInputs () {
 
         # Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5044, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
-
-        # Port 5045 Beats Input for Winlogbeat, Auditbeat, Filebeat
-        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5045, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
         
         # Port 5555 RAW TCP Input
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "port": 5555, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
