@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "39eb4abc-b0af-4851-b461-be66536f2780",
-  "rev": 6,
+  "rev": 7,
   "name": "Graylog Evaluation Content Pack",
   "summary": "Graylog Evaluation Content Pack",
   "description": "",
@@ -1067,57 +1067,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "63c57780-2f33-45ff-852e-cf4fea3c743c",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser Graylog 1"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog 1\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.0+a788678"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "396bd8b7-79ee-4029-a4e7-dd097588982c",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Cleanup"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Cleanup\"\n\nwhen\n    NOT has_field(\"event_severity\")\n    \nthen\n    drop_message();\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.0+a788678"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "91ea8f99-0648-4acf-b431-aa7ae1226240",
+      "id": "3e61a900-1ff2-4859-8e76-ecb226a4688e",
       "data": {
         "title": {
           "@type": "string",
@@ -1135,7 +1085,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.0+a788678"
+          "version": ">=7.0.1+29f3984"
         }
       ]
     },
@@ -1145,7 +1095,32 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "8540a450-3009-4b11-813d-ac3a72155cd1",
+      "id": "0e325d3b-2057-4169-a074-f6db256554e4",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Cleanup"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Cleanup\"\n\nwhen\n    NOT has_field(\"event_severity\")\n    \nthen\n    drop_message();\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "5257a9ae-0d32-4d8b-a5b0-20587ef9a746",
       "data": {
         "title": {
           "@type": "string",
@@ -1160,7 +1135,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.0+a788678"
+          "version": ">=7.0.1+29f3984"
         }
       ]
     },
@@ -1170,7 +1145,32 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "374dead2-55e2-48d7-a79d-4086fd3471bd",
+      "id": "db1e9001-0d4f-4a75-b3f0-97c0b9c20475",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - Self-Monitoring Parser Graylog 1"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog 1\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "9731d68a-1faf-4ccc-a62a-4473b06e0c61",
       "data": {
         "title": {
           "@type": "string",
@@ -1180,109 +1180,6 @@
         "source": {
           "@type": "string",
           "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog Installer\"\n\nwhen\n    contains(to_string($message.message),\"GRAYLOG-INSTALLER\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{HOSTNAME:event_source}%{SPACE}%{DATA:application_component}:%{SPACE}\\\\[%{WORD:event_severity}\\\\]%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "4578c5c9-cbb4-4198-8a8a-4e4cf32cdeaa",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Cleanup"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Cleanup\"\n\nwhen\n    NOT has_field(\"event_severity\")\n    \nthen\n    drop_message();\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "9687937f-727e-448f-9229-c360179181b1",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser Opensearch 1"
-        },
-        "description": {
-          "@type": "string",
-          "@value": ""
-        },
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser Opensearch 1\"\n\nwhen\n    contains(to_string($message.image_name),\"opensearch\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "cbddcce7-54a5-4e10-b5e2-ec6811ffad81",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser Graylog 1"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog 1\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "4a016603-9c8f-4f04-9b11-55a45569fa61",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser MongoDB 1"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser MongoDB 1\"\n\nwhen\n    contains(to_string($message.image_name),\"mongo\")\n    //true\n    \nthen\n    let mylog = to_map(parse_json(to_string(flatten_json(to_string($message.message),\"flatten\"))));\n    \n    set_fields(mylog);\n    \n    rename_field(\"attr_message_msg\",\"message\");\n    rename_field(\"attr_message_verbose_level\",\"event_severity\");\n    rename_field(\"attr_message_session_name\",\"application_component\");\n    //set_field(\"touched\",true);\n\nend"
         }
       },
       "constraints": [
@@ -1339,26 +1236,38 @@
     {
       "v": "1",
       "type": {
-        "name": "sidecar_collector_configuration",
+        "name": "sidecar_collector",
         "version": "1"
       },
-      "id": "96f83f57-038e-429c-bace-3b087441b6e3",
+      "id": "a7949623-25b2-453b-a089-0504ec50f5d9",
       "data": {
-        "collector_id": {
+        "name": {
           "@type": "string",
-          "@value": "325685a3-a962-4893-b418-c319b90f3af5"
+          "@value": "filebeat"
         },
-        "title": {
+        "service_type": {
           "@type": "string",
-          "@value": "filebeat-linux-default"
+          "@value": "exec"
         },
-        "color": {
+        "node_operating_system": {
           "@type": "string",
-          "@value": "#ffffff"
+          "@value": "linux"
         },
-        "template": {
+        "executable_path": {
           "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n      \n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths: \n  - /var/log/syslog\n  fields_under_root: true\n  fields: \n      event_source_product: syslog\n"
+          "@value": "/usr/lib/graylog-sidecar/filebeat"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c  %s"
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c %s"
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
         }
       },
       "constraints": [
@@ -1371,14 +1280,26 @@
     {
       "v": "1",
       "type": {
-        "name": "stream_title",
+        "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "a4d5f43a-a0fd-40e4-bf98-b5260f1a7092",
+      "id": "df60c5f1-f9b3-41d4-acb9-27c006892f0c",
       "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "a7949623-25b2-453b-a089-0504ec50f5d9"
+        },
         "title": {
           "@type": "string",
-          "@value": "System Self Monitoring (Evaluation)"
+          "@value": "self-filebeat"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#ffffff"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5054\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n"
         }
       },
       "constraints": [
@@ -1394,7 +1315,7 @@
         "name": "url_allowlist_entry",
         "version": "1"
       },
-      "id": "3ae3c9f2-89de-4ee6-84ff-1305b7fd84ca",
+      "id": "85844a11-2b23-4cf3-8f26-01169de7cb63",
       "data": {
         "id": "71301e4c-2219-49fe-8712-14bafd01d1e4",
         "type": "regex",
@@ -1404,7 +1325,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.0+a788678"
+          "version": ">=3.1.3"
         }
       ]
     }
