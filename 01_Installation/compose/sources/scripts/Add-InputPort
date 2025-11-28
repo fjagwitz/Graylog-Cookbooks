@@ -5,7 +5,7 @@
 # 
 # Usage: 
 # Add a single Input Port: Add-InputPort 515
-# Add multiple Input Ports: Add-InputPort 515 516 517
+# Add multiple Input Ports: Add-InputPort "515 516 517"
 
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
@@ -47,7 +47,7 @@ then
     sudo cp ${STREAM_CONF} ${STREAM_CONF}.debug
     sudo cp ${COMPOSE_FILE}.bak ${COMPOSE_FILE}
     sudo cp ${STREAM_CONF}.bak ${STREAM_CONF}
-    
+
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down nginx1 2>/dev/null >/dev/null
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d nginx1 2>/dev/null >/dev/null
 
