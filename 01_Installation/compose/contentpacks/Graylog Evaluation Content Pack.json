@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "39eb4abc-b0af-4851-b461-be66536f2780",
-  "rev": 6,
+  "rev": 7,
   "name": "Graylog Evaluation Content Pack",
   "summary": "Graylog Evaluation Content Pack",
   "description": "",
@@ -1030,6 +1030,168 @@
     {
       "v": "1",
       "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "7cc0590b-45b4-4284-b503-b1c4f9bc762d",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-dns-resolution-txt"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - DNS Resolution (TXT)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation - DNS Resolution (TXT)"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "dnslookup"
+          },
+          "lookup_type": {
+            "@type": "string",
+            "@value": "TXT"
+          },
+          "server_ips": {
+            "@type": "string",
+            "@value": ""
+          },
+          "request_timeout": {
+            "@type": "integer",
+            "@value": 10
+          },
+          "cache_ttl_override_enabled": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "58eb2e4d-3571-4429-b1f8-3ad458f1afb2",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-dns-resolution"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - DNS Resolution"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation - DNS Resolution"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "dnslookup"
+          },
+          "lookup_type": {
+            "@type": "string",
+            "@value": "A"
+          },
+          "server_ips": {
+            "@type": "string",
+            "@value": ""
+          },
+          "request_timeout": {
+            "@type": "integer",
+            "@value": 10
+          },
+          "cache_ttl_override_enabled": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "98a4024a-b864-4665-8cae-b82906645405",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-dns-resolution-reverse"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation - DNS Resolution (Reverse)"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation - DNS Resolution (Reverse)"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "dnslookup"
+          },
+          "lookup_type": {
+            "@type": "string",
+            "@value": "PTR"
+          },
+          "server_ips": {
+            "@type": "string",
+            "@value": ""
+          },
+          "request_timeout": {
+            "@type": "integer",
+            "@value": 10
+          },
+          "cache_ttl_override_enabled": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "pipeline",
         "version": "1"
       },
@@ -1339,6 +1501,50 @@
     {
       "v": "1",
       "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "001a6983-499d-4048-90bd-f2e7a01bf55b",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "filebeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "exec"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "linux"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "/usr/lib/graylog-sidecar/filebeat"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c  %s"
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c %s"
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.1+29f3984"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
@@ -1371,14 +1577,26 @@
     {
       "v": "1",
       "type": {
-        "name": "stream_title",
+        "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "a4d5f43a-a0fd-40e4-bf98-b5260f1a7092",
+      "id": "513de16b-c80a-4498-a922-1830815428f2",
       "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "001a6983-499d-4048-90bd-f2e7a01bf55b"
+        },
         "title": {
           "@type": "string",
-          "@value": "System Self Monitoring (Evaluation)"
+          "@value": "self-monitoring-evaluation"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#FFFFFF"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"localhost:5054\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n"
         }
       },
       "constraints": [
