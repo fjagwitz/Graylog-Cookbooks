@@ -616,7 +616,8 @@ function_stopGraylogStack () {
 function_createInputs () {
 
     local ADMIN_TOKEN=${1}
-    local INPUT_ID_SELF_MONITORING=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==9900)' | jq -r .id )
+    local INPUT_ID_SELF_MONITORING_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==9900)' | jq -r .id )
+    local INPUT_ID_SELF_MONITORING_BEATS=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==5054)' | jq -r .id )
 
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then    
@@ -654,7 +655,7 @@ function_createInputs () {
         # Stopping all Inputs to allow a controlled Log Source Onboarding (except Self_monitoring Input)
         for INPUT in $(curl -s http://localhost/api/cluster/inputstates -u ${ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id')
         do
-            if [ ${INPUT} != ${INPUT_ID_SELF_MONITORING} ]
+            if [ (${INPUT} != ${INPUT_ID_SELF_MONITORING_GELF}) || (${INPUT} != ${INPUT_ID_SELF_MONITORING_BEATS}) ]
             then
                 curl -s http://localhost/api/cluster/inputstates/${INPUT} -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
             fi
