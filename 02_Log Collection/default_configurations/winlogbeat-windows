@@ -1,0 +1,125 @@
+# Required settings
+fields_under_root: true
+fields.collector_node_id: ${sidecar.nodeName}
+fields.gl2_source_collector: ${sidecar.nodeId}
+
+# Heads-Up ! 
+# user.windows_beats_port needs to be configured in Graylog or replaced by a portnumber, e.g. 5044
+
+output.logstash:
+hosts: ["${user.graylog_host}:${user.windows_beats_port}"]
+
+path:
+	data: ${sidecar.spoolDir!"C:\\Program Files\\Graylog\\sidecar\\cache\\winlogbeat"}\data
+	logs: ${sidecar.spoolDir!"C:\\Program Files\\Graylog\\sidecar"}\logs
+
+tags:
+	- windows
+
+winlogbeat:
+	event_logs:
+		# Windows Security Logging
+		<#if sidecar.tags.windows??>
+		- name: Security
+		ignore_older: 96h
+		- name: Microsoft-Windows-Security-Audit-Configuration-Client/Operational
+		ignore_older: 96h
+		- name: Microsoft-Windows-SMBServer/Security
+		ignore_older: 96h
+		</#if> 
+
+		# Windows Operational Logging
+		<#if sidecar.tags.windows??>
+		- name: Application
+		ignore_older: 96h
+		- name: System
+		ignore_older: 96h
+		- name: Setup
+		ignore_older: 96h
+		- name: Microsoft-Windows-GroupPolicy/Operational
+		ignore_older: 96h
+		- name: Microsoft-Windows-SMBServer/Operational
+		ignore_older: 96h
+		</#if>   
+
+		# Forwarded Events Logging
+		<#if sidecar.tags.forwarded??>
+		# (https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/use-windows-event-forwarding-to-assist-in-intrusion-detection)
+		- name: ForwardedEvents
+		forwarded: true
+		ignore_older: 96h
+		</#if> 
+
+		# Active Directory Domain Services Logging
+		<#if sidecar.tags.adds??>    
+		- name: Active Directory Web Services
+		ignore_older: 96h
+		- name: DFS Replication
+		ignore_older: 96h
+		- name: Directory Service
+		ignore_older: 96h
+		</#if> 
+
+		# Microsoft DNS Loggging
+		<#if sidecar.tags.dns??>    
+		- name: DNS Server
+		ignore_older: 96h
+		- name: Microsoft-Windows-DNSServer/Audit
+		ignore_older: 96h
+		</#if>
+
+		# OpenSSH Logging
+		<#if sidecar.tags.ssh??>    
+		- name: OpenSSH/Operational
+		ignore_older: 96h
+		</#if>        
+
+		# Microsoft Windows Best Practices Analyzer (BPA) Logging
+		<#if sidecar.tags.bpa??>    
+		- name: Microsoft-Windows-BestPractices/Operational
+		ignore_older: 96h
+		</#if> 
+
+		# BITS Transfer Logging
+		<#if sidecar.tags.bits??>    
+		- name: Microsoft-Windows-Bits-Client/Operational
+		ignore_older: 96h
+		</#if> 
+
+		# Sysmon Logging
+		<#if sidecar.tags.sysmon??>    
+		- name: Microsoft-Windows-Sysmon/Operational
+		ignore_older: 96h
+		</#if> 
+
+		# Remote Desktop Services (Terminalservices) Logging
+		<#if sidecar.tags.rds??>    
+		- name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational
+		ignore_older: 96h
+		</#if> 
+
+		# Defender Logging
+		<#if sidecar.tags.defender??>    
+		- name: Microsoft-Windows-Windows Defender/Operational
+		ignore_older: 96h
+		</#if> 
+
+		# Powershell Logging
+		<#if sidecar.tags.powershell??>   
+		- name: Windows PowerShell
+		ignore_older: 96h
+		- name: Microsoft-Windows-PowerShell/Operational
+		ignore_older: 96h
+		</#if> 
+
+		# Applocker Logging
+		<#if sidecar.tags.applocker??>    
+		- name: Microsoft-Windows-AppLocker/EXE and DLL
+		ignore_older: 96h
+		- name: Microsoft-Windows-AppLocker/MSI and Script
+		ignore_older: 96h
+		- name: Microsoft-Windows-AppLocker/Packaged app-Deployment
+		ignore_older: 96h
+		- name: Microsoft-Windows-AppLocker/Packaged app-Execution
+		ignore_older: 96h
+		</#if> 

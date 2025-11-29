@@ -1,0 +1,161 @@
+define ROOT C:\Program Files\Graylog\sidecar\nxlog
+define SYSTEMROOT C:\Windows
+
+Moduledir %ROOT%\modules
+CacheDir %ROOT%\data
+Pidfile %ROOT%\data\nxlog.pid
+SpoolDir %ROOT%\data
+LogFile %ROOT%\data\nxlog.log
+LogLevel INFO
+
+
+<Extension logrotate>
+  Module  xm_fileop
+    <Schedule>
+      When    @daily
+      Exec    file_cycle('%ROOT%\data\nxlog.log', 7);
+     </Schedule>
+</Extension>
+
+
+<Extension gelfExt>
+  Module xm_gelf
+  ShortMessageLength 65536
+</Extension>
+
+
+<Extension _json>
+    Module  xm_json
+</Extension>
+
+
+<Input wineventlog>
+    # Send Windows Security Logs
+    Module im_msvistalog
+    PollInterval 5
+    SavePos True
+    ReadFromLast True
+
+    <QueryXML>
+        <QueryList>
+          <Query Id="0">
+             <Select Path="Security">*</Select>
+             <Select Path="System">*</Select>
+             <Select Path="Application">*</Select>
+             <Select Path="Microsoft-Windows-AppLocker/EXE and DLL">*</Select>
+             <Select Path="Microsoft-Windows-AppLocker/MSI and Script">*</Select>
+             <Select Path="Microsoft-Windows-AppLocker/Packaged app-Deployment">*</Select>
+             <Select Path="Microsoft-Windows-AppLocker/Packaged app-Execution">*</Select>
+             <Select Path="Microsoft-Windows-GroupPolicy/Operational">*</Select>
+             <Select Path="Microsoft-Windows-PowerShell/Operational">*</Select>
+             <Select Path="Microsoft-Windows-Security-Audit-Configuration-Client/Operational">*</Select>
+             <Select Path="Microsoft-Windows-SMBServer/Operational">*</Select>
+             <Select Path="Microsoft-Windows-SMBServer/Security">*</Select>
+             <Select Path="Microsoft-Windows-Windows Defender/Operational">*</Select>
+          </Query>
+        </QueryList>
+    </QueryXML>
+</Input>
+
+
+<Input internal>
+    # Sending NXLog Logs
+    Module  im_internal
+</Input>
+
+
+<Input mark>
+    # Send Heartbeat every 1 Minute
+    Module          im_mark
+    MarkInterval    1
+    Mark            -=| ALIVE |=-
+</Input>
+
+
+<Input file>
+    # Send Graylog Sidecar logs
+	Module im_file
+	File "C:\Program Files\Graylog\sidecar\logs\*.log"
+	PollInterval 1
+	SavePos	True
+	ReadFromLast True
+	Recursive False
+	RenameCheck False
+	Exec $FileName = file_name();
+</Input>
+
+
+<Input powershell-1>
+    # https://docs.nxlog.co/integrate/powershell-scripts.html
+    # Send overview of installed roles every 10 minutes
+    Module im_exec
+    Restart True
+    
+    Command "%SYSTEMROOT%\system32\WindowsPowerShell\v1.0\powershell.exe"
+    
+    ## Using the configuration from the following line will only send the installed Features to Graylog
+    #Arg     Get-WindowsFeature | Where-Object { $_.Installed -eq $true } | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600
+    
+    ## Using the configuration from the following line will send an overview of all installed and available Features to Graylog
+    Arg     Get-WindowsFeature | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600
+    
+    <Exec>
+        $nxlog_tag = 'Compliance_WindowsServerRoles'; 
+        $source_ip = host_ip(); 
+        $event_source = hostname_fqdn();
+    </Exec>
+    
+</Input>
+
+
+<Input powershell-2>
+    # https://docs.nxlog.co/integrate/powershell-scripts.html
+    # Send overview of installed roles every 10 minutes
+    Module im_exec
+    Restart True
+    
+    Command "%SYSTEMROOT%\system32\WindowsPowerShell\v1.0\powershell.exe"
+    
+    ## Using the configuration from the following line will send an overview of all Users configured with reversible Password Encryption
+    Arg     Get-ADUser -filter {AllowReversiblePasswordEncryption -eq $True} -Properties "AllowReversiblePasswordEncryption" | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600
+    <Exec>
+        $nxlog_tag = 'Compliance_UserProperties'; 
+        $source_ip = host_ip(); 
+        $event_source = hostname_fqdn();
+    </Exec>
+    
+</Input>
+
+
+<Output gelf>
+	Module om_tcp
+	Host ${user.graylog_host}
+	Port 12148
+	OutputType GELF_TCP
+	<Exec>
+	  # These fields are needed for Graylog
+	  $gl2_source_collector = '${sidecar.nodeId}';
+	  $collector_node_id = '${sidecar.nodeName}';
+	  $agent_type = 'nxlog';
+	</Exec>
+</Output>
+
+
+<Route route-1>
+  Path wineventlog => gelf
+</Route>
+<Route route-2>
+  Path file => gelf
+</Route>
+<Route route-3>
+  Path internal => gelf
+</Route>
+<Route route-4>
+  Path mark => gelf
+</Route>
+<Route route-5>
+  Path powershell-1 => gelf
+</Route>
+<Route route-6>
+  Path powershell-2 => gelf
+</Route>
