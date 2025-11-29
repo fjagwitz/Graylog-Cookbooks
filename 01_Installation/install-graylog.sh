@@ -584,7 +584,7 @@ function_checkEnterpriseLicense () {
     do 
         LICENSE_ENTERPRISE=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/enterprise")' | jq -r .active )
         echo "[INFO] - WAIT FOR ENTERPRISE LICENSE TO BE AVAILABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sleep 10m
+        sleep 15s
     done
 
     echo "${LICENSE_ENTERPRISE}"
@@ -599,7 +599,7 @@ function_checkSecurityLicense () {
     do 
         LICENSE_SECURITY=$(curl -H 'Cache-Control: no-cache, no-store' -s http://localhost/api/plugins/org.graylog.plugins.license/licenses/status -u ${ADMIN_TOKEN}:token | jq .[] | jq '.[] | select(.active == true and .license.subject == "/license/security")' | jq -r .active )
         echo "[INFO] - WAIT FOR SECURITY LICENSE TO BE AVAILABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sleep 10m
+        sleep 15s
     done
 
     echo "${LICENSE_SECURITY}"
