@@ -214,6 +214,7 @@ function_installScriptDependencies () {
 
     echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq update -y 2>/dev/null >/dev/null
+    sudo apt -qq upgrade -y 2>/dev/null > /dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
 
     for DEP in ${SCRIPT_DEPENDENCIES}
@@ -481,7 +482,7 @@ function_createUserToken () {
     USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)        
     USER_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"token_ttl\":\"P${2}D\"}" | jq -r .token)
     echo ${USER_TOKEN}
-    
+
 }
 
 function_createBaseConfiguration () {
@@ -709,8 +710,8 @@ function_createEvaluationConfiguration () {
 function_enableIlluminatePackages () {
 
     local ADMIN_TOKEN=${1}
-    local ILLUMINATE_PROCESSING_PACK_IDS='["illuminate-linux-auditbeat"]'
-    local ILLUMINATE_SPOTLIGHT_PACK_IDS='["61d75c3e-3551-4b97-bbb5-ea8181472cb0"]'
+    local ILLUMINATE_PROCESSING_PACK_IDS='["illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","73788c38-0b74-4c03-8b69-2fcb4e110a9b","659b983d-9654-4141-a672-87dee3ee8176","d1aea731-2b18-4e47-9366-c526641f6dbd","illuminate-sysmon","5551b8a8-6459-446f-9ea8-63368bb39414","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","3c5c2c47-18a5-4054-9f0e-2443f6d96d02","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement"]'
+    local ILLUMINATE_SPOTLIGHT_PACK_IDS='["f39f9b0d-c24b-42f2-982b-839441ef3c27","e1629dcb-6419-4d73-b4a8-577f01278f35","a60c3607-a25a-4b5c-a565-94b6944f850b","b95c89b7-36e1-43b6-9714-b6b25e7cec04e","61d75c3e-3551-4b97-bbb5-ea8181472cb0","a2750c63-fb7c-4ff6-b10b-32171a2c96e9","4e3ba1a6-7400-40d1-b7f8-efa44bc5bfeb","cbfc3ae6-6a59-4841-a691-ea6db41b62d0","d01d7647-99a5-4914-b417-ca5cd1e37196","085d8f0e-2bee-44b2-b040-d7a11a1da2fe","90e37be0-d112-44f8-afe7-eadcafbe4ba3","52391e38-df23-4953-86e5-44e2bc667b97","66e7f007-6f77-45dc-a6f3-94cb3745541e","237e73a4-678b-4b9a-87ac-ff2f86e34563","3e40d288-5794-44e9-88b4-b590de3514b8","9f195288-9709-4f87-b2ec-e53cf94965dd","a9463b48-f009-4641-84e8-4245d3dc6e89"]'
 
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then
@@ -736,6 +737,8 @@ function_configureSecurityFeatures () {
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
         local ACTIVE_AI_REPORT=""
+        local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["core_anomaly_detection","05dc479f-9659-476b-b888-9fdaae3a7777"]'
+        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["5289b02d-ebb9-4c93-baf8-baf05e1c138b","10da1609-54b1-4e73-8757-a5326379ad26","85411e45-52b4-4a4c-8b03-a26be9900a28","759a0e52-e76a-4836-889a-1bab2fce65d3","6f6197cf-ee3f-453b-a248-c309ff91ed0a","019b5712-186d-440b-afd8-88386b1411f9","8f445386-5dfe-4d64-a790-f7a6527789b7"]'    
         
         while [[ ${ACTIVE_AI_REPORT} == "true" ]] || [[ ${ACTIVE_AI_REPORT} == "" ]]
         do 
@@ -743,9 +746,12 @@ function_configureSecurityFeatures () {
             curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
             ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
         done
-    fi 
-}
 
+        echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_SECURITY_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null 
+    fi 
+
+}
 
 
 ###############################################################################
