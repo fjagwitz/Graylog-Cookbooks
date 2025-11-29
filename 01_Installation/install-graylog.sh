@@ -609,9 +609,9 @@ function_restartGraylogContainer () {
 
     local GRAYLOG_CONTAINER=${1}
 
-    echo "[INFO] - STOP CONTAINER ${1^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - STOP CONTAINER ${1^^} (LEADER NODE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
-    echo "[INFO] - START CONTAINER ${1^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - START CONTAINER ${1^^} (LEADER NODE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} 2>/dev/null >/dev/null
 }
 
