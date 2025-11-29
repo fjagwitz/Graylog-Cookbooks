@@ -1,0 +1,36 @@
+# Required settings
+fields_under_root: true
+fields.collector_node_id: ${sidecar.nodeName}
+fields.gl2_source_collector: ${sidecar.nodeId}
+
+
+output.logstash:
+   hosts: ["${user.graylog_host}:5044"]
+path:
+  data: ${sidecar.spoolDir!"C:\\Program Files\\Graylog\\sidecar\\cache\\winlogbeat"}\data
+  logs: ${sidecar.spoolDir!"C:\\Program Files\\Graylog\\sidecar"}\logs
+tags:
+ - windows
+winlogbeat:
+  event_logs:
+   - name: Application
+     ignore_older: 96h
+   - name: System
+     ignore_older: 96h
+   - name: Security
+     ignore_older: 96h
+   - name: Setup
+     ignore_older: 96h
+   - name: ForwardedEvents
+     forwarded: true
+     ignore_older: 96h
+   - name: Microsoft-Windows-Windows Defender/Operational
+     ignore_older: 96h
+   - name: Microsoft-Windows-Sysmon/Operational
+     ignore_older: 96h
+   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational
+     ignore_older: 96h
+   - name: Microsoft-Windows-PowerShell/Operational
+     ignore_older: 96h
+   - name: windows PowerShell
+     ignore_older: 96h
