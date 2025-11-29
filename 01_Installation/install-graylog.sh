@@ -112,7 +112,7 @@ function_getSystemFqdn () {
 
     while [[ ${VALID_FQDN} != "true" ]]
     do
-        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " SYSTEM_FQDN
+        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [${GRAYLOG_FQDN}]: " SYSTEM_FQDN
         local SYSTEM_FQDN=${SYSTEM_FQDN:-${GRAYLOG_FQDN}}
         local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ')
 
@@ -214,7 +214,7 @@ function_installScriptDependencies () {
 
     echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq update -y 2>/dev/null >/dev/null
-    sudo apt -qq upgrade -y 2>/dev/null > /dev/null
+    # sudo apt -qq upgrade -y 2>/dev/null > /dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
 
     for DEP in ${SCRIPT_DEPENDENCIES}
