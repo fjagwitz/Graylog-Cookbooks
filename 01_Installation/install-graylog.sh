@@ -485,9 +485,9 @@ function_createUserToken () {
 
 }
 
-
 function_addSidecarConfigurationVariables () {
-    
+    local ADMIN_TOKEN=${1}
+
     echo "[INFO] - CREATE GRAYLOG SIDECAR CONFIGURATION VARIABLES " | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_port_windows","description":"12148 tcp","content":"12148"}'
@@ -811,6 +811,7 @@ then
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
+    function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
