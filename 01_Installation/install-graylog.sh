@@ -863,6 +863,6 @@ then
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 fi
 
-echo "[INFO] - GRAYLOG INSTALLATION FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+echo "[INFO] - FULL INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 exit
