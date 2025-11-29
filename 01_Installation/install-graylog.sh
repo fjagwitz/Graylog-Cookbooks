@@ -470,19 +470,18 @@ function_prepareSidecarConfiguration () {
 function_checkSystemAvailability () {
     while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     do
-    echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
-    sleep 10s
+        echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
+        sleep 10s
     done
 }
 
 function_createUserToken () {
 
     echo "[INFO] - CREATE GRAYLOG API TOKEN FOR ACCOUNT ${1^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)
-        
+    USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)        
     USER_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"token_ttl\":\"P${2}D\"}" | jq -r .token)
-
     echo ${USER_TOKEN}
+    
 }
 
 function_createBaseConfiguration () {
@@ -544,7 +543,7 @@ function_createBaseConfiguration () {
 
 function_displayClusterId () {
 
-    echo "  USER: \"${GRAYLOG_ADMIN}\" 
+    echo "  ADMINUSER: \"${GRAYLOG_ADMIN}\" 
             PASSWORD: \"${GRAYLOG_PASSWORD}\"
         " | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 2>/dev/null >/dev/null
 
