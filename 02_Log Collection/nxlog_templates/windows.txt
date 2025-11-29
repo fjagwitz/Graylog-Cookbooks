@@ -39,69 +39,69 @@ LogLevel INFO
     <QueryXML>
         <QueryList>
           <Query Id="0">
-        	# Windows Security Logging
-        	<#if sidecar.tags.windows??>
-        	<Select Path="Security">*</Select>
-        	<Select Path="Microsoft-Windows-Security-Audit-Configuration-Client/Operational">*</Select>
-        	</#if>
-        	# Windows Operational Logging
-        	<#if sidecar.tags.windows??>
-        	<Select Path="Application">*</Select>
-        	<Select Path="System">*</Select>
-        	<Select Path="Setup">*</Select>
-        	<Select Path="Microsoft-Windows-GroupPolicy/Operational">*</Select>
-        	</#if>
-            # Forwarded Events Logging
-        	<#if sidecar.tags.forwarded??>
-        	<Select Path="ForwardedEvents">*</Select>
-        	</#if> 
-        	# Active Directory Domain Services Logging
-            <#if sidecar.tags.adds??>   
-        	<Select Path="Active Directory Web Services">*</Select>
-        	<Select Path="DFS Replication">*</Select>
-        	<Select Path="Directory Service">*</Select>
-            </#if> 
-        	# Microsoft DNS Loggging
-        	<#if sidecar.tags.dns??>    
-        	<Select Path="DNS Server">*</Select>
-        	<Select Path="Microsoft-Windows-DNSServer/Audit">*</Select>
-        	</#if>
-        	# OpenSSH Logging
-        	<#if sidecar.tags.ssh??>    	
-        	<Select Path="OpenSSH/Operational">*</Select>
-        	</#if> 
-            # Microsoft Windows Best Practices Analyzer (BPA) Logging
-        	<#if sidecar.tags.bpa??>    	
-        	<Select Path="Microsoft-Windows-BestPractices/Operational">*</Select>
-        	</#if> 
-        	# BITS Transfer Logging
-        	<#if sidecar.tags.bits??>    
-        	<Select Path="Microsoft-Windows-Bits-Client/Operational">*</Select>
-        	</#if> 
-        	# Sysmon Logging
-        	<#if sidecar.tags.sysmon??>    
-        	<Select Path="Microsoft-Windows-Sysmon/Operational">*</Select>
-        	</#if> 
-        	# Remote Desktop Services (Terminalservices) Logging
-        	<#if sidecar.tags.rds??>    
-        	<Select Path="Microsoft-Windows-TerminalServices-LocalSessionManager/Operational">*</Select>
-        	</#if>
-        	# Defender Logging
-        	<#if sidecar.tags.defender??>    
-        	<Select Path="Microsoft-Windows-Windows Defender/Operational">*</Select>	
-        	</#if> 
-        	# Powershell Logging
-        	<#if sidecar.tags.powershell??>   	
-        	<Select Path="Windows PowerShell">*</Select>
-        	<Select Path="Microsoft-Windows-PowerShell/Operational">*</Select>
-        	</#if> 	
-        	# Applocker Logging
-        	<#if sidecar.tags.applocker??>    
-        	<Select Path="Microsoft-Windows-AppLocker/EXE and DLL">*</Select>
-        	<Select Path="Microsoft-Windows-AppLocker/MSI and Script">*</Select>
-        	<Select Path="Microsoft-Windows-AppLocker/Packaged app-Deployment">*</Select>
-        	<Select Path="Microsoft-Windows-AppLocker/Packaged app-Execution">*</Select>
-        	</#if> 
+				    	# Windows Security Logging
+				    	<#if sidecar.tags.windows??>
+				    	<Select Path="Security">*</Select>
+				    	<Select Path="Microsoft-Windows-Security-Audit-Configuration-Client/Operational">*</Select>
+				    	</#if>
+				    	# Windows Operational Logging
+				    	<#if sidecar.tags.windows??>
+				    	<Select Path="Application">*</Select>
+				    	<Select Path="System">*</Select>
+				    	<Select Path="Setup">*</Select>
+				    	<Select Path="Microsoft-Windows-GroupPolicy/Operational">*</Select>
+				    	</#if>
+				        # Forwarded Events Logging
+				    	<#if sidecar.tags.forwarded??>
+				    	<Select Path="ForwardedEvents">*</Select>
+				    	</#if> 
+				    	# Active Directory Domain Services Logging
+				        <#if sidecar.tags.adds??>   
+				    	<Select Path="Active Directory Web Services">*</Select>
+				    	<Select Path="DFS Replication">*</Select>
+				    	<Select Path="Directory Service">*</Select>
+				        </#if> 
+				    	# Microsoft DNS Loggging
+				    	<#if sidecar.tags.dns??>    
+				    	<Select Path="DNS Server">*</Select>
+				    	<Select Path="Microsoft-Windows-DNSServer/Audit">*</Select>
+				    	</#if>
+				    	# OpenSSH Logging
+				    	<#if sidecar.tags.ssh??>    	
+				    	<Select Path="OpenSSH/Operational">*</Select>
+				    	</#if> 
+				        # Microsoft Windows Best Practices Analyzer (BPA) Logging
+				    	<#if sidecar.tags.bpa??>    	
+				    	<Select Path="Microsoft-Windows-BestPractices/Operational">*</Select>
+				    	</#if> 
+				    	# BITS Transfer Logging
+				    	<#if sidecar.tags.bits??>    
+				    	<Select Path="Microsoft-Windows-Bits-Client/Operational">*</Select>
+				    	</#if> 
+				    	# Sysmon Logging
+				    	<#if sidecar.tags.sysmon??>    
+				    	<Select Path="Microsoft-Windows-Sysmon/Operational">*</Select>
+				    	</#if> 
+				    	# Remote Desktop Services (Terminalservices) Logging
+				    	<#if sidecar.tags.rds??>    
+				    	<Select Path="Microsoft-Windows-TerminalServices-LocalSessionManager/Operational">*</Select>
+				    	</#if>
+				    	# Defender Logging
+				    	<#if sidecar.tags.defender??>    
+				    	<Select Path="Microsoft-Windows-Windows Defender/Operational">*</Select>	
+				    	</#if> 
+				    	# Powershell Logging
+				    	<#if sidecar.tags.powershell??>   	
+				    	<Select Path="Windows PowerShell">*</Select>
+				    	<Select Path="Microsoft-Windows-PowerShell/Operational">*</Select>
+				    	</#if> 	
+				    	# Applocker Logging
+				    	<#if sidecar.tags.applocker??>    
+				    	<Select Path="Microsoft-Windows-AppLocker/EXE and DLL">*</Select>
+				    	<Select Path="Microsoft-Windows-AppLocker/MSI and Script">*</Select>
+				    	<Select Path="Microsoft-Windows-AppLocker/Packaged app-Deployment">*</Select>
+				    	<Select Path="Microsoft-Windows-AppLocker/Packaged app-Execution">*</Select>
+				    	</#if> 
           </Query>
         </QueryList>
     </QueryXML>
