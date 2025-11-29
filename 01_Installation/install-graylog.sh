@@ -22,7 +22,7 @@ GRAYLOG_DATABASE_ENV="opensearch.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
-GRAYLOG_FQDN=""
+GRAYLOG_FQDN=$(nslookup 172.16.199.182 | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " ")
 GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
@@ -113,7 +113,7 @@ function_getSystemFqdn () {
     while [[ ${VALID_FQDN} != "true" ]]
     do
         read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " SYSTEM_FQDN
-        local SYSTEM_FQDN=${SYSTEM_FQDN:-eval.graylog.local}
+        local SYSTEM_FQDN=${SYSTEM_FQDN:-${GRAYLOG_FQDN}}
         local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ')
 
         for IP in ${SYSTEM_IP}
@@ -482,6 +482,18 @@ function_createUserToken () {
     USER_ID=$(curl -s http://localhost/api/users -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X GET -H "X-Requested-By: localhost" | jq .[] | jq ".[] | select(.username == \"${1}\")" | jq -r .id)        
     USER_TOKEN=$(curl -s http://localhost/api/users/${USER_ID}/tokens/evaluation-$1 -u "${GRAYLOG_ADMIN}":"${GRAYLOG_PASSWORD}" -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"token_ttl\":\"P${2}D\"}" | jq -r .token)
     echo ${USER_TOKEN}
+
+}
+
+
+function_addSidecarConfigurationVariables () {
+    
+    echo "[INFO] - CREATE GRAYLOG SIDECAR CONFIGURATION VARIABLES " | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+    curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_port_windows","description":"12148 tcp","content":"12148"}'
+    curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_windows","description":"5044 tcp","content":"5044"}'
+    curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_linux","description":"5045 tcp","content":"5045"}'
+    curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_self","description":"5054 tcp","content":"5054"}'
 
 }
 
