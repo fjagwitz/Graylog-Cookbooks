@@ -663,7 +663,7 @@ function_createInputs () {
         # Port 13301 13302 TCP Input for Enterprise Forwarder 
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"type":"org.graylog.plugins.forwarder.input.ForwarderServiceInput","configuration":{"forwarder_bind_address":"0.0.0.0","forwarder_message_transmission_port":13301,"forwarder_configuration_port":13302,"forwarder_grpc_enable_tls":false,"forwarder_grpc_tls_trust_chain_cert_file":"","forwarder_grpc_tls_private_key_file":"","forwarder_grpc_tls_private_key_file_password":""},"title":"Graylog Enterprise Forwarder | Evaluation Input","global":true}' 2>/dev/null >/dev/null
 
-        echo "[INFO] - STOP EVALUATION INPUTS EXCEPT THE ONE FOR SELF-MONITORING " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - STOP EVALUATION INPUTS EXCEPT THOSE FOR SELF-MONITORING " | logger -p user.info -e -t GRAYLOG-INSTALLER
         # Stopping all Inputs to allow a controlled Log Source Onboarding (except Self_monitoring Input)
         for INPUT in $(curl -s http://localhost/api/cluster/inputstates -u ${ADMIN_TOKEN}:token -X GET | jq -r '.[] | map(.) | .[].id')
         do
