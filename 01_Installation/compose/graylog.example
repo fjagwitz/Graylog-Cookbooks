@@ -45,7 +45,7 @@ GRAYLOG_REPORT_DISABLE_SANDBOX = "true"
 #
 GRAYLOG_CONTENT_PACKS_LOADER_ENABLED = "true"
 GRAYLOG_CONTENT_PACKS_DIR = "/etc/graylog/server/contentpacks"
-GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Graylog Evaluation Content Pack.json"
+GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Graylog Evaluation Content Pack.json,Graylog Evaluation Sidecar Collection.json"
 
 ## Email Configurations
 #

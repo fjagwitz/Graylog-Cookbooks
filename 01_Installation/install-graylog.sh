@@ -153,6 +153,29 @@ function_checkInternetConnectivity () {
     fi
 }
 
+function_checkPatchLevel () {
+    
+    sudo apt -qq upgrade -y 2>/dev/null > /dev/null
+    
+    local REBOOT_REQUIRED=$(cat /var/run/reboot-required 2>/dev/null)
+
+    if [[ ${REBOOT_REQUIRED} != "" ]]
+    then
+        rm -- $0
+        echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION " 
+        
+        REBOOT=15
+        for OUTPUT in $(seq ${REBOOT})
+        do
+            echo "[INFO] - REBOOT IN ${REBOOT} SECONDS"
+            let REBOOT--
+            sleep 1s
+        done
+
+        sudo reboot
+    fi
+}
+
 function_checkSystemRequirements () {
 
     local INTERNET_CONNECTIVITY=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 | cut -d " " -f2)
@@ -214,7 +237,6 @@ function_installScriptDependencies () {
 
     echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq update -y 2>/dev/null >/dev/null
-    # sudo apt -qq upgrade -y 2>/dev/null > /dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
 
     for DEP in ${SCRIPT_DEPENDENCIES}
@@ -778,6 +800,7 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     function_checkInternetConnectivity
+    function_checkPatchLevel
 
     sudo mkdir -p ${GRAYLOG_PATH}
     
@@ -863,6 +886,6 @@ then
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 fi
 
-echo "[INFO] - GRAYLOG INSTALLATION FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+echo "[INFO] - FULL INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 exit
