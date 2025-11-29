@@ -18,6 +18,9 @@ services:
       # Beats Input 5044
       - 5044:5044
       - 5044:5044/udp
+      # Beats Input 5045
+      - 5045:5045
+      - 5045:5045/udp
       # Graylog Beats Input 5054 (Self-Monitoring, TCP only)
       - 5054:5054
       # RAW Input 5555
@@ -30,6 +33,9 @@ services:
       # Gelf Input 12201
       - 12201:12201
       - 12201:12201/udp 
+      # Gelf Input 12148
+      - 12148:12148
+      - 12148:12148/udp 
       # Graylog Enterprise Forwarder Input
       - 13301:13301
       - 13302:13302
