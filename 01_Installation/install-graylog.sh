@@ -214,6 +214,7 @@ function_installScriptDependencies () {
 
     echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq update -y 2>/dev/null >/dev/null
+    sudo apt -qq upgrade -y 2>/dev/null > /dev/null
     sudo apt -qq autoremove -y 2>/dev/null >/dev/null
 
     for DEP in ${SCRIPT_DEPENDENCIES}
