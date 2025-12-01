@@ -23,7 +23,7 @@
         },
         "title": {
           "@type": "string",
-          "@value": "Self-Monitoring-Beats"
+          "@value": "sidecar-self-monitoring"
         },
         "color": {
           "@type": "string",
