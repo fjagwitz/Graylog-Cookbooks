@@ -764,7 +764,7 @@ function_createEvaluationSidecarConfiguration() {
     local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
     local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
 
-    curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":\"${COLLECTOR_CONFIGURATION_NAME}\",\"color\":\"${COLLECTOR_CONFIGURATION_COLOR}\",\"collector_id\":\"${COLLECTOR_ID}\",\"template\":\"${COLLECTOR_CONFIGURATION_TEMPLATE}\",\"tags\":[\"test\"]}" 2>/dev/null >/dev/null
+    curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":\"${COLLECTOR_CONFIGURATION_NAME}\",\"color\":\"${COLLECTOR_CONFIGURATION_COLOR}\",\"collector_id\":\"${COLLECTOR_ID}\",\"template\":\"${COLLECTOR_CONFIGURATION_TEMPLATE}\",\"tags\":[\"sidecar-self-monitoring\"]}" 2>/dev/null >/dev/null
 }
 
 function_enableIlluminatePackages () {
