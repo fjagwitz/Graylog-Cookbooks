@@ -754,6 +754,15 @@ function_createEvaluationConfiguration () {
     
 }
 
+function_createEvaluationSidecarConfiguration() {
+    # needs to run after configuration variables have been created
+    local ADMIN_TOKEN=${1}
+    # identify Filebeat Collector for Linux
+    local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/collectors | jq .collectors | jq '.[] | select(.name == "filebeat" and .node_operating_system == "linux")' | jq -r .id)
+
+    curl -s http://localhost/api/sidecar/collectors -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"\",\"name\":\"self-monitoring-beats\",\"color\":\"#827717\",\"collector_id\":\"${COLLECTOR_ID}\",\"template\":\"# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\\"${user.graylog_host}:${user.beats_port_self}\\"]\npath:\n   data: ${sidecar.spoolDir!\\"/var/lib/graylog-sidecar/collectors/filebeat\\"}/data\n   logs: ${sidecar.spoolDir!\\"/var/lib/graylog-sidecar/collectors/filebeat\\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\",\"tags\":[\"self-beats\"]}\"}" 2>/dev/null >/dev/null
+}
+
 function_enableIlluminatePackages () {
 
     local ADMIN_TOKEN=${1}
@@ -847,6 +856,7 @@ then
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
+    function_createEvaluationSidecarConfiguration ${GRAYLOG_ADMIN_TOKEN}
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
