@@ -166,10 +166,10 @@ function_checkPatchLevel () {
 
     if [[ ${REBOOT_REQUIRED} != "" ]]
     then
-        echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION "         
-        echo "[INFO] - RESTART THE ENTIRE PROCESS AFTER REBOOT "
+        echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION "
+        echo "[INFO] - RESTART THE INSTALLATION PROCESS AFTER REBOOT "
         
-        REBOOT=15
+        REBOOT=10
 
         for OUTPUT in $(seq ${REBOOT})
         do
@@ -178,6 +178,7 @@ function_checkPatchLevel () {
             sleep 1s
         done
 
+        echo "[INFO] - SYSTEM REBOOT AFTER UPDATE INSTALLATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
         rm -- $0
         sudo reboot
     fi
