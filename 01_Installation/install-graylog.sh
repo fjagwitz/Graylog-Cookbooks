@@ -118,8 +118,8 @@ function_getSystemFqdn () {
 
     while [[ ${VALID_FQDN} != "true" ]]
     do
-        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [${GRAYLOG_FQDN}]: " SYSTEM_FQDN
-        local SYSTEM_FQDN=${SYSTEM_FQDN:-${GRAYLOG_FQDN}}
+        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [${GRAYLOG_FQDN%?}]: " SYSTEM_FQDN
+        local SYSTEM_FQDN=${SYSTEM_FQDN:-${GRAYLOG_FQDN%?}}
         local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ')
 
         for IP in ${SYSTEM_IP}
@@ -860,8 +860,6 @@ then
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
-    function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_createEvaluationSidecarConfiguration ${GRAYLOG_ADMIN_TOKEN}
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
@@ -869,6 +867,8 @@ then
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer graylog1
+    function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
+    function_createEvaluationSidecarConfiguration ${GRAYLOG_ADMIN_TOKEN}
 
     function_displayClusterId
 
