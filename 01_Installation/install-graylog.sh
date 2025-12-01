@@ -22,7 +22,7 @@ GRAYLOG_DATABASE_ENV="opensearch.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
-GRAYLOG_FQDN=if [[ $(nslookup 172.16.199.182 | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " ") == "" ]]; then echo "eval.graylog.local"; fi
+GRAYLOG_FQDN=$(nslookup 172.16.199.182 | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " " 2>/dev/null)
 GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
@@ -170,7 +170,7 @@ function_checkPatchLevel () {
         echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION " 
         
         REBOOT=15
-        
+
         for OUTPUT in $(seq ${REBOOT})
         do
             echo "[INFO] - REBOOT IN ${REBOOT} SECONDS"
@@ -810,21 +810,21 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     function_checkInternetConnectivity
-    function_checkPatchLevel
-
-    sudo mkdir -p ${GRAYLOG_PATH}
-    
+  
     clear
 
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
     function_installScriptDependencies
-       
+    function_checkPatchLevel
+
     function_checkSnapshot
     function_defineAdminName
     function_defineAdminPassword
     function_getSystemFqdn
 
     function_checkSystemRequirements
+
+    sudo mkdir -p ${GRAYLOG_PATH}
 
     echo "started" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "[INFO] - INSTALL DOCKER-CE"
