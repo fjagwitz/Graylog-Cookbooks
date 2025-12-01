@@ -159,25 +159,26 @@ function_checkInternetConnectivity () {
 }
 
 function_checkPatchLevel () {
-    
+    echo "[INFO] - DOWNLOAD AND INSTALL LATEST UPDATES "
     sudo apt -qq upgrade -y 2>/dev/null > /dev/null
     
     local REBOOT_REQUIRED=$(cat /var/run/reboot-required 2>/dev/null)
 
     if [[ ${REBOOT_REQUIRED} != "" ]]
     then
-        rm -- $0
-        echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION " 
+        echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION "         
+        echo "[INFO] - RESTART THE ENTIRE PROCESS AFTER REBOOT "
         
         REBOOT=15
 
         for OUTPUT in $(seq ${REBOOT})
         do
-            echo "[INFO] - REBOOT IN ${REBOOT} SECONDS"
+            echo "[INFO] - REBOOT IN ${REBOOT} SECONDS (PRESS CTRL+C TO INTERRUPT)"
             let REBOOT--
             sleep 1s
         done
 
+        rm -- $0
         sudo reboot
     fi
 }
