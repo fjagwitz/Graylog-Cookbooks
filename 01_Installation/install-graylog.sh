@@ -22,7 +22,7 @@ GRAYLOG_DATABASE_ENV="opensearch.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
-GRAYLOG_FQDN=$(nslookup 172.16.199.182 | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " ")
+GRAYLOG_FQDN=if [[ $(nslookup 172.16.199.182 | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " ") == "" ]]; then echo "eval.graylog.local"; fi
 GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
@@ -109,6 +109,11 @@ function_getSystemFqdn () {
 
     local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ')    
     local VALID_FQDN="false"
+
+    if [[ ${GRAYLOG_FQDN} == "" ]]
+    then 
+        GRAYLOG_FQDN="eval.graylog.local"
+    fi
 
     while [[ ${VALID_FQDN} != "true" ]]
     do
@@ -516,6 +521,8 @@ function_addSidecarConfigurationVariables () {
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_windows","description":"5044 tcp","content":"5044"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_linux","description":"5045 tcp","content":"5045"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_self","description":"5054 tcp","content":"5054"}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path","description":"C:\Program Files\nxlog","content":"C:\Program Files\nxlog"}' 2>/dev/null >/dev/null
+    curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path_sidecar","description":"C:\Program Files\Graylog\sidecar\nxlog","content":"C:\Program Files\Graylog\sidecar\nxlog"}' 2>/dev/null >/dev/null
 
 }
 
