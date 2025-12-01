@@ -22,8 +22,7 @@ GRAYLOG_DATABASE_ENV="opensearch.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
-GRAYLOG_IPV4=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ')
-GRAYLOG_FQDN=$(nslookup ${GRAYLOG_IPV4} | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " " | cut -c -n1 2>/dev/null)
+GRAYLOG_FQDN=""
 GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
 GRAYLOG_LICENSE_ENTERPRISE=""
@@ -109,19 +108,30 @@ function_defineAdminPassword () {
 
 function_getSystemFqdn () {
 
-    local SYSTEM_IP=${GRAYLOG_IPV4}   
+    local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ' 2>/dev/null)    
+    local SYSTEM_FQDN=$(nslookup ${SYSTEM_IP} | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " " | cut -c -n1 2>/dev/null)
+    local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ' 2>/dev/null)
     local VALID_FQDN="false"
 
-    if [[ ${GRAYLOG_FQDN} == "" ]]
+    for IPV4 in ${SYSTEM_FQDN}
+    do
+        if [[ $(nslookup ${SYSTEM_IP} | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " " | cut -c -n1 2>/dev/null) != "" ]]
+        then
+            local SYSTEM_EXTERNAL_IP=${IPV4}
+            echo "[INFO] - SYSTEM SERVICE IP FOUND TO BE ${SYSTEM_EXTERNAL_IP} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        fi
+    done
+
+
+    if [[ ${SYSTEM_FQDN} == "" ]]
     then 
-        GRAYLOG_FQDN="eval.graylog.local"
+        SYSTEM_FQDN="eval.graylog.local"
     fi
 
     while [[ ${VALID_FQDN} != "true" ]]
     do
-        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [${GRAYLOG_FQDN}]: " SYSTEM_FQDN
-        local SYSTEM_FQDN=${SYSTEM_FQDN:-${GRAYLOG_FQDN}}
-        local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ')
+        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [${SYSTEM_FQDN}]: " USER_FQDN
+        local SYSTEM_FQDN=${USER_FQDN:-${SYSTEM_FQDN}}
 
         for IP in ${SYSTEM_IP}
         do
