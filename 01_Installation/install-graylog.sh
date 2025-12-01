@@ -874,6 +874,8 @@ then
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer graylog1
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
+    sleep 10s
+    function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
 
     function_displayClusterId
 
@@ -909,8 +911,7 @@ then
     function_startGraylogStack
     function_checkSystemAvailability
 
-    function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
-    function_createInputs ${GRAYLOG_ADMIN_TOKEN}
+    function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}    
     function_enableGraylogSidecar
