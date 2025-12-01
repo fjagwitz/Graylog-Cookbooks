@@ -108,30 +108,15 @@ function_defineAdminPassword () {
 
 function_getSystemFqdn () {
 
-    local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ' 2>/dev/null)    
-    local SYSTEM_FQDN=$(nslookup ${SYSTEM_IP} | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " " | cut -c -n1 2>/dev/null)
-    local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ' 2>/dev/null)
+    local SYSTEM_IP=$(ip a | grep -v inet6 | grep inet | awk -F" " '{print $2}' | cut -f1 -d "/" | tr -d ' ')    
     local VALID_FQDN="false"
 
-    for IPV4 in ${SYSTEM_FQDN}
-    do
-        if [[ $(nslookup ${SYSTEM_IP} | grep in-addr.arpa | grep -v NXDOMAIN | cut -d "=" -f2 | tr -d " " | cut -c -n1 2>/dev/null) != "" ]]
-        then
-            local SYSTEM_EXTERNAL_IP=${IPV4}
-            echo "[INFO] - SYSTEM SERVICE IP FOUND TO BE ${SYSTEM_EXTERNAL_IP} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        fi
-    done
-
-
-    if [[ ${SYSTEM_FQDN} == "" ]]
-    then 
-        SYSTEM_FQDN="eval.graylog.local"
-    fi
 
     while [[ ${VALID_FQDN} != "true" ]]
     do
-        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [${SYSTEM_FQDN}]: " USER_FQDN
-        local SYSTEM_FQDN=${USER_FQDN:-${SYSTEM_FQDN}}
+        read -p "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " SYSTEM_FQDN
+        local SYSTEM_FQDN=${SYSTEM_FQDN:-eval.graylog.local}
+        local FQDN_IP=$(nslookup ${SYSTEM_FQDN} | grep -A3 answer | grep Address | awk -F":" '{print $2}' | tr -d ' ')
 
         for IP in ${SYSTEM_IP}
         do
@@ -852,7 +837,7 @@ then
 
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
     function_installScriptDependencies
-    function_checkPatchLevel
+    #function_checkPatchLevel
 
     function_checkSnapshot
     function_defineAdminName
