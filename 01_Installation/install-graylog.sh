@@ -5,7 +5,7 @@
 # author:            Friedrich von Jagwitz 
 # email:             fvj@graylog.com
 # date:              2025-11-11
-# version:           1.0
+# version:           7.0
 # usage:             bash install-graylog.sh
 # notes:             
 #==============================================================================
