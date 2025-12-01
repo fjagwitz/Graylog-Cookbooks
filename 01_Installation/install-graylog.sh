@@ -173,7 +173,7 @@ function_checkPatchLevel () {
 
         for OUTPUT in $(seq ${REBOOT})
         do
-            echo "[INFO] - REBOOT IN ${REBOOT} SECONDS (PRESS CTRL+C TO INTERRUPT)"
+            echo "[INFO] - \e[4;33mREBOOT IN ${REBOOT} SECONDS\e[0m (PRESS CTRL+C TO INTERRUPT)"
             let REBOOT--
             sleep 1s
         done
