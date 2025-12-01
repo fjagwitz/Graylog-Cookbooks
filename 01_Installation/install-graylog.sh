@@ -529,6 +529,7 @@ function_addSidecarConfigurationVariables () {
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_self","description":"5054 tcp","content":"5054"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path","description":"C:\\Program Files\\nxlog","content":"C:\\Program Files\\nxlog"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path_sidecar","description":"C:\\Program Files\\Graylog\\sidecar\\nxlog","content":"C:\\Program Files\\Graylog\\sidecar\\nxlog"}' 2>/dev/null >/dev/null
+    wait
 
 }
 
@@ -755,7 +756,7 @@ function_createEvaluationConfiguration () {
     
 }
 
-function_createEvaluationSidecarConfiguration() {
+function_addSidecarConfigurationTags () {
     # needs to run after configuration variables have been created
     local ADMIN_TOKEN=${1}
     # identify Filebeat Collector for Linux
@@ -766,6 +767,7 @@ function_createEvaluationSidecarConfiguration() {
     local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
 
     curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":\"${COLLECTOR_ID}\",\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
+    wait
 }
 
 function_enableIlluminatePackages () {
@@ -868,7 +870,7 @@ then
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer graylog1
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_createEvaluationSidecarConfiguration ${GRAYLOG_ADMIN_TOKEN}
+    function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
 
     function_displayClusterId
 
