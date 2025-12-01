@@ -769,6 +769,8 @@ function_addSidecarConfigurationTags () {
     local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
     local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
 
+    echo "Admin Token: $ADMIN_TOKEN, Collector ID: $COLLECTOR_ID, Collector Configuration ID: $COLLECTOR_CONFIGURATION_ID, Collector Configuration Name: $COLLECTOR_CONFIGURATION_NAME, Collector Configuration Color: $COLLECTOR_CONFIGURATION_COLOR, Collector Configuration Template: $COLLECTOR_CONFIGURATION_TEMPLATE"
+
     echo "[INFO] - CREATE GRAYLOG SIDECAR CONFIGURATION TAGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":\"${COLLECTOR_ID}\",\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" | logger -p user.info -e -t GRAYLOG-INSTALLER
