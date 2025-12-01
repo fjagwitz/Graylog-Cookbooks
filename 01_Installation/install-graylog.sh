@@ -170,6 +170,7 @@ function_checkPatchLevel () {
         echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION " 
         
         REBOOT=15
+        
         for OUTPUT in $(seq ${REBOOT})
         do
             echo "[INFO] - REBOOT IN ${REBOOT} SECONDS"
@@ -496,11 +497,13 @@ function_prepareSidecarConfiguration () {
 }
 
 function_checkSystemAvailability () {
+
     while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     do
         echo "[INFO] - WAIT FOR THE SYSTEM TO COME UP "
-        sleep 10s
+        sleep 15s
     done
+
 }
 
 function_createUserToken () {
