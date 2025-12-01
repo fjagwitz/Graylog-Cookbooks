@@ -653,12 +653,16 @@ function_restartGraylogContainer () {
 
 function_startGraylogStack () {
     echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up graylog1 -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up graylog2 -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
+    sleep 5s
 }
 
 function_stopGraylogStack () {
     echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog2 --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog1 --remove-orphans 2>/dev/null >/dev/null
+    sleep 5s
 }
 
 function_createInputs () {
@@ -870,7 +874,6 @@ then
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer graylog1
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
 
     function_displayClusterId
 
@@ -906,6 +909,7 @@ then
     function_startGraylogStack
     function_checkSystemAvailability
 
+    function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}    
