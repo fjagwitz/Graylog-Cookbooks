@@ -878,7 +878,7 @@ then
     function_restartGraylogContainer "graylog1"
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    # Wait for Graylog restart to effect the Content Pack Auto Loader importing the Sidecar Configuration before adding a Tag to it
+    # Wait for Graylog restart to effect the Content Pack Auto Loader importing the Sidecar Configuration before customizing it
     sleep 15s
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
 
