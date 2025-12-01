@@ -525,7 +525,6 @@ function_addSidecarConfigurationVariables () {
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_self","description":"5054 tcp","content":"5054"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path","description":"C:\\Program Files\\nxlog","content":"C:\\Program Files\\nxlog"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path_sidecar","description":"C:\\Program Files\\Graylog\\sidecar\\nxlog","content":"C:\\Program Files\\Graylog\\sidecar\\nxlog"}' 2>/dev/null >/dev/null
-    sleep 5
 
 }
 
@@ -879,6 +878,7 @@ then
     function_restartGraylogContainer "graylog1"
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
+    # Wait for Graylog restart to effect the Content Pack Auto Loader importing the Sidecar Configuration before adding a Tag to it
     sleep 15s
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
 
