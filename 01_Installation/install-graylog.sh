@@ -831,6 +831,7 @@ then
     exit 
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
+    sudo date 2>/dev/null >/dev/null
     function_checkInternetConnectivity
   
     clear
