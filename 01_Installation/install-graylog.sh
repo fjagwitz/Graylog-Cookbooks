@@ -590,8 +590,9 @@ function_displayClusterId () {
     echo "  ADMINUSER: \"${GRAYLOG_ADMIN}\" 
             PASSWORD: \"${GRAYLOG_PASSWORD}\"
         " | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 2>/dev/null >/dev/null
-
+    echo ""
     echo -e "[INFO] - \e[5;34mGRAYLOG IS NOW READY FOR TESTING\e[0m"
+    echo ""
     echo -e "[INFO] - SYSTEM URL: \e[4;33mhttp(s)://${GRAYLOG_FQDN}\e[0m"
     echo -e "[INFO] - WINDOWS ACCESS: \e[1;32m\\\\\\\\${GRAYLOG_FQDN}\e[0m (SMB)"
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
@@ -656,12 +657,6 @@ function_startGraylogStack () {
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
     sleep 5s
 }
-
-#function_stopGraylogStack () {
-#    echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-#    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
-#    sleep 5s
-#}
 
 function_createInputs () {
 
@@ -881,6 +876,7 @@ then
     # Wait for Graylog restart to effect the Content Pack Auto Loader importing the Sidecar Configuration before customizing it
     sleep 15s
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    function_enableGraylogSidecar
 
     function_displayClusterId
 
@@ -917,8 +913,7 @@ then
 
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
-    function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN}    
-    function_enableGraylogSidecar
+    function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN} 
 
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
