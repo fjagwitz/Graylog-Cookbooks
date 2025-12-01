@@ -645,24 +645,27 @@ function_checkSecurityLicense () {
 function_restartGraylogContainer () {
 
     local GRAYLOG_CONTAINER=${1}
-
-    echo "[INFO] - STOP CONTAINER ${1^^} (LEADER NODE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
-    echo "[INFO] - START CONTAINER ${1^^} (LEADER NODE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} 2>/dev/null >/dev/null
+    for CONTAINER in ${GRAYLOG_CONTAINER}
+    do
+        echo "[INFO] - STOP CONTAINER ${1^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
+    done
+    for CONTAINER in ${GRAYLOG_CONTAINER}
+    do
+        echo "[INFO] - START CONTAINER ${1^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} 2>/dev/null >/dev/null
+    done
 }
 
 function_startGraylogStack () {
     echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up graylog1 -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up graylog2 -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
     sleep 5s
 }
 
 function_stopGraylogStack () {
     echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog2 --remove-orphans 2>/dev/null >/dev/null
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog1 --remove-orphans 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
     sleep 5s
 }
 
@@ -874,7 +877,7 @@ then
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
-    function_restartGraylogContainer graylog1
+    function_restartGraylogContainer "graylog1 graylog2"
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
 
