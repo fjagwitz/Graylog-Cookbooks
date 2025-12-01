@@ -759,8 +759,12 @@ function_createEvaluationSidecarConfiguration() {
     local ADMIN_TOKEN=${1}
     # identify Filebeat Collector for Linux
     local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/collectors | jq .collectors | jq '.[] | select(.name == "filebeat" and .node_operating_system == "linux")' | jq -r .id)
+    local COLLECTOR_CONFIGURATION_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name == "sidecar-self-monitoring")' | jq -r .id)
+    local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
+    local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
+    local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
 
-    curl -s http://localhost/api/sidecar/collectors -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"\",\"name\":\"self-monitoring-beats\",\"color\":\"#827717\",\"collector_id\":\"${COLLECTOR_ID}\",\"template\":\"# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\\"${user.graylog_host}:${user.beats_port_self}\\"]\npath:\n   data: ${sidecar.spoolDir!\\"/var/lib/graylog-sidecar/collectors/filebeat\\"}/data\n   logs: ${sidecar.spoolDir!\\"/var/lib/graylog-sidecar/collectors/filebeat\\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\",\"tags\":[\"self-beats\"]}\"}" 2>/dev/null >/dev/null
+    curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":\"${COLLECTOR_CONFIGURATION_NAME}\",\"color\":\"${COLLECTOR_CONFIGURATION_COLOR}\",\"collector_id\":\"${COLLECTOR_ID}\",\"template\":\"${COLLECTOR_CONFIGURATION_TEMPLATE}\",\"tags\":[\"test\"]}" 2>/dev/null >/dev/null
 }
 
 function_enableIlluminatePackages () {
