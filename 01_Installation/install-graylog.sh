@@ -591,7 +591,7 @@ function_displayClusterId () {
             PASSWORD: \"${GRAYLOG_PASSWORD}\"
         " | sudo tee ${GRAYLOG_PATH}/your_graylog_credentials.txt 2>/dev/null >/dev/null
 
-    echo "[INFO] - GRAYLOG IS NOW READY FOR TESTING"
+    echo -e "[INFO] - \e[5;34mGRAYLOG IS NOW READY FOR TESTING\e[0m"
     echo -e "[INFO] - SYSTEM URL: \e[4;33mhttp(s)://${GRAYLOG_FQDN}\e[0m"
     echo -e "[INFO] - WINDOWS ACCESS: \e[1;32m\\\\\\\\${GRAYLOG_FQDN}\e[0m (SMB)"
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
