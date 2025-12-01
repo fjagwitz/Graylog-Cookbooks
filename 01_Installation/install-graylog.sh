@@ -651,11 +651,11 @@ function_restartGraylogContainer () {
     done
 }
 
-#function_startGraylogStack () {
-#    echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-#    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
-#    sleep 5s
-#}
+function_startGraylogStack () {
+    echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
+    sleep 5s
+}
 
 #function_stopGraylogStack () {
 #    echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
