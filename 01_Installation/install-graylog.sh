@@ -525,7 +525,6 @@ function_addSidecarConfigurationVariables () {
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"beats_port_self","description":"5054 tcp","content":"5054"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path","description":"C:\\Program Files\\nxlog","content":"C:\\Program Files\\nxlog"}' 2>/dev/null >/dev/null
     curl -s http://localhost/api/sidecar/configuration_variables -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"id":"","name":"nxlog_path_sidecar","description":"C:\\Program Files\\Graylog\\sidecar\\nxlog","content":"C:\\Program Files\\Graylog\\sidecar\\nxlog"}' 2>/dev/null >/dev/null
-    sleep 10s
 
 }
 
@@ -600,7 +599,7 @@ function_displayClusterId () {
     echo ""
     echo "       ******************************************************"
     echo "       *                                                    *"
-    echo -e "       * CLUSTER-ID: \e[1;31m$(curl -s localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
+    echo -e "       * CLUSTER-ID: \e[1;31m$(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
     echo "       *                                                    *"
     echo "       ******************************************************"
     echo ""
@@ -642,27 +641,27 @@ function_restartGraylogContainer () {
     local GRAYLOG_CONTAINER=${1}
     for CONTAINER in ${GRAYLOG_CONTAINER}
     do
-        echo "[INFO] - STOP CONTAINER ${1^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${1} 2>/dev/null >/dev/null
+        echo "[INFO] - STOP CONTAINER ${CONTAINER^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down ${CONTAINER} --remove-orphans 2>/dev/null >/dev/null
     done
     for CONTAINER in ${GRAYLOG_CONTAINER}
     do
-        echo "[INFO] - START CONTAINER ${1^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${1} 2>/dev/null >/dev/null
+        echo "[INFO] - START CONTAINER ${CONTAINER^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d ${CONTAINER} --quiet-pull --remove-orphans 2>/dev/null >/dev/null
     done
 }
 
-function_startGraylogStack () {
-    echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
-    sleep 5s
-}
+#function_startGraylogStack () {
+#    echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
+#    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d --quiet-pull --remove-orphans 2>/dev/null >/dev/null
+#    sleep 5s
+#}
 
-function_stopGraylogStack () {
-    echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
-    sleep 5s
-}
+#function_stopGraylogStack () {
+#    echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
+#    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down --remove-orphans 2>/dev/null >/dev/null
+#    sleep 5s
+#}
 
 function_createInputs () {
 
@@ -770,7 +769,6 @@ function_addSidecarConfigurationTags () {
     local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
 
     curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":\"${COLLECTOR_ID}\",\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
-    wait
 }
 
 function_enableIlluminatePackages () {
@@ -837,7 +835,7 @@ then
 
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
     function_installScriptDependencies
-    #function_checkPatchLevel
+    function_checkPatchLevel
 
     function_checkSnapshot
     function_defineAdminName
@@ -872,7 +870,8 @@ then
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
-    function_restartGraylogContainer "graylog1 graylog2"
+    function_restartGraylogContainer "graylog1"
+    function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
 
@@ -906,8 +905,7 @@ then
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
 
     echo "[INFO] - RESTARTING GRAYLOG STACK FOR MAINTENANCE PURPOSES" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    function_stopGraylogStack
-    function_startGraylogStack
+    function_restartGraylogContainer "graylog1 graylog2"
     function_checkSystemAvailability
 
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
