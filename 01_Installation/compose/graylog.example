@@ -17,6 +17,10 @@ GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "true"
 #
 GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx4g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
 
+## Use custom Root Certificates
+#
+GRAYLOG_USE_SYSTEM_CA_CERTS = "true"
+
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
 GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:9000"

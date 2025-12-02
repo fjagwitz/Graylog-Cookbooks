@@ -204,9 +204,9 @@ services:
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
-    post_start:
-      - command: update-ca-certificates
-        user: root
+    #post_start:
+    #  - command: update-ca-certificates
+    #    user: root
     env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=true"
@@ -228,7 +228,7 @@ services:
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
       # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/usr/local/share/ca-certificates/"
+      - "./rootcerts:/certificates"
     restart: "on-failure"
 
   graylog2:
@@ -244,9 +244,9 @@ services:
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
-    post_start:
-      - command: update-ca-certificates
-        user: root
+    #post_start:
+    #  - command: update-ca-certificates
+    #    user: root
     env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=false"
@@ -268,7 +268,7 @@ services:
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
       # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/usr/local/share/ca-certificates/"
+      - "./rootcerts:/certificates"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
