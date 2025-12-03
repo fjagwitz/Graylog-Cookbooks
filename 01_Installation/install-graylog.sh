@@ -65,7 +65,7 @@ function_defineAdminName () {
     do
         read -p "[INPUT] - Please add the name of your central Administration User [admin]: " ADMIN_NAME
         
-        local ADMIN_NAME=${ADMIN_NAME:-admin}
+        local ADMIN_NAME=${ADMIN_NAME:-evaladmin}
         local FORBIDDEN_USERNAMES=$(cat /etc/passwd | awk -F":" '{print $1}')
         
         if [[ ${ADMIN_NAME} =~ ^[A-Za-z0-9_-]{4,12}$ ]]
