@@ -13,8 +13,6 @@ msiexec.exe /q /i "%WORKDIR%%INSTALLER%"
 :: copy sidecar configuration file to the right place
 copy "%WORKDIR%sidecar.yml" "%SIDECAR_YML%"
 copy "%WORKDIR%%FILEBEAT%" "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
-streams.exe -nobanner -d "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
-del streams.exe
 
 ::
 :: enable and start graylog-sidecar as a system service
