@@ -1,0 +1,25 @@
+@echo off
+
+SET WORKDIR=%~dp0
+SET SIDECAR_YML=%PROGRAMFILES%\Graylog\sidecar\sidecar.yml
+FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*filebeat*.exe') DO SET "FILEBEAT=%%V"
+FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*graylog*.msi') DO SET "INSTALLER=%%V"
+
+echo "[INFO] - INSTALL GRAYLOG SIDECAR "
+echo "[WARN] - CONFIGURE TLS CONNECTION WITHOUT CERTIFICATE VALIDATION "
+msiexec.exe /q /i "%WORKDIR%%INSTALLER%" 
+
+::
+:: copy sidecar configuration file to the right place
+copy "%WORKDIR%sidecar.yml" "%SIDECAR_YML%"
+copy "%WORKDIR%%FILEBEAT%" "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
+streams.exe -nobanner -d "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
+del streams.exe
+
+::
+:: enable and start graylog-sidecar as a system service
+
+"%PROGRAMFILES%\Graylog\sidecar\graylog-sidecar.exe" -service install
+"%PROGRAMFILES%\Graylog\sidecar\graylog-sidecar.exe" -service start
+
+exit 0
