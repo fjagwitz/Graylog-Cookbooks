@@ -432,7 +432,6 @@ function_downloadAdditionalBinaries () {
     local SIDECAR_MSI="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog-sidecar-${SIDECAR_VERSION}-1.msi"
     local SIDECAR_EXE="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog_sidecar_installer_${SIDECAR_VERSION}-1.exe"
     local SIDECAR_YML="https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml"
-    local SYSINTERNALS_STREAMS="https://download.sysinternals.com/files/Streams.zip"
     local FILEBEAT_VERSION="8.19.7"
     local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip"
     local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.msi"
@@ -452,13 +451,6 @@ function_downloadAdditionalBinaries () {
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_YML}
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE -LOs ${SIDECAR_EXE}
-
-    echo "[INFO] - DOWNLOAD SYSINTERNALS STREAMS FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mkdir -p ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/streams
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/streams -LOs ${SYSINTERNALS_STREAMS}
-    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/streams/Streams.zip -d ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/streams 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/streams/streams.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/streams.exe 
-    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/streams 
 
     echo "[INFO] - DOWNLOAD FILEBEAT STANDALONE FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_ZIP}
