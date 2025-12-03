@@ -10,7 +10,8 @@ echo "[WARN] - CONFIGURE TLS CONNECTION WITHOUT CERTIFICATE VALIDATION "
 msiexec.exe /q /i "%WORKDIR%%INSTALLER%" 
 
 ::
-:: copy sidecar configuration file to the right place
+:: copy sidecar configuration file into the sidecar folder
+:: copy filebeat standalone into the sidecar folder
 copy "%WORKDIR%sidecar.yml" "%SIDECAR_YML%"
 copy "%WORKDIR%%FILEBEAT%" "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
 

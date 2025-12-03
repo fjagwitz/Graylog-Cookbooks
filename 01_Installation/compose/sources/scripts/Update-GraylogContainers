@@ -5,6 +5,8 @@
 # Usage: 
 # Update-GraylogContainers
 
+sudo date >/dev/null
+
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 

@@ -1,10 +1,17 @@
 @echo off
-SET workdir=%~dp0
-SET serverurl=""
-SET apitoken=""
-SET tags=["Evaluation","Windows","IIS"]
-FOR /F "delims=" %%V IN ('dir /b *.exe') DO SET "installer=%%V"
+SET WORKDIR=%~dp0
+SET SERVERURL=""
+SET APITOKEN=""
+SET TAGS=["evaluation","iis","windows","applocker","powershell","defender","rds","forwarded","sysmon","ssh","bpa","bits"]
+FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*graylog*.exe') DO SET "INSTALLER=%%V"
+FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*filebeat*.exe') DO SET "FILEBEAT=%%V"
 
-"%workdir%%installer%" /S -SERVERURL=%serverurl% -APITOKEN=%apitoken% -TAGS=%tags% -TLS_SKIP_VERIFY=true
+echo "[INFO] - INSTALL GRAYLOG SIDECAR "
+echo "[WARN] - CONFIGURE TLS CONNECTION WITHOUT CERTIFICATE VALIDATION "
+"%WORKDIR%%INSTALLER%" /S -SERVERURL=%SERVERURL% -APITOKEN=%APITOKEN% -TAGS=%TAGS% -TLS_SKIP_VERIFY=true
 
-exit
+::
+:: copy filebeat standalone into the sidecar folder
+copy "%WORKDIR%%FILEBEAT%" "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
+
+exit 0

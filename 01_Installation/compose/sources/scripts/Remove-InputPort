@@ -7,6 +7,8 @@
 # Remove a single Input Port: Remove-InputPort 515
 # Remove multiple Input Ports: Remove-InputPort "515 516 517"
 
+sudo date >/dev/null
+
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
