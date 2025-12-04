@@ -426,6 +426,28 @@ function_addScriptRepositoryToPathVariable () {
     echo "export PATH=${PATH:+${PATH}:}${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
+function_downloadMaxmindSources () {
+    local MAXMIND_DB_TYPES="ASN City Country"
+    local DOWNLOAD_SUCCESS=""
+
+    while [[ ${DOWNLOAD_SUCCESS} != true ]]
+    do
+        # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
+        echo "[INFO] - DOWNLOAD MAXMIND CONTENT " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        for DB_TYPE in ${MAXMIND_DB_TYPES}
+        do
+            sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE}.mmdb
+            
+            # Alternative Source: 
+            # https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-${DB_TYPE}.mmdb 
+        done
+    
+        local DOWNLOAD_SUCCESS=$(curl -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig | jq .enabled)
+
+    done
+
+}
+
 function_downloadAdditionalBinaries () {
 
     local SIDECAR_VERSION="1.5.1"
@@ -435,18 +457,7 @@ function_downloadAdditionalBinaries () {
     local FILEBEAT_VERSION="8.19.7"
     local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip"
     local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.msi"
-    local MAXMIND_DB_TYPES="ASN City Country"
     
-    # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-    echo "[INFO] - DOWNLOAD MAXMIND CONTENT " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    for DB_TYPE in ${MAXMIND_DB_TYPES}
-    do
-        sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE}.mmdb
-        
-        # Alternative Source: 
-        # https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-${DB_TYPE}.mmdb 
-    done
-
     echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_YML}
