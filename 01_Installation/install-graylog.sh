@@ -426,14 +426,15 @@ function_addScriptRepositoryToPathVariable () {
     echo "export PATH=${PATH:+${PATH}:}${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
-function_downloadMaxmindSources () {
+function_downloadMaxmindBinaries () {
+    local ADMIN_TOKEN=${1}
     local MAXMIND_DB_TYPES="ASN City Country"
     local DOWNLOAD_SUCCESS=""
 
     while [[ ${DOWNLOAD_SUCCESS} != true ]]
     do
         # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-        echo "[INFO] - DOWNLOAD MAXMIND CONTENT " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - DOWNLOAD MAXMIND DATABASE " | logger -p user.info -e -t GRAYLOG-INSTALLER
         for DB_TYPE in ${MAXMIND_DB_TYPES}
         do
             sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE}.mmdb
@@ -448,7 +449,7 @@ function_downloadMaxmindSources () {
 
 }
 
-function_downloadAdditionalBinaries () {
+function_downloadGraylogSidecarBinaries () {
 
     local SIDECAR_VERSION="1.5.1"
     local SIDECAR_MSI="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog-sidecar-${SIDECAR_VERSION}-1.msi"
@@ -477,6 +478,34 @@ function_downloadAdditionalBinaries () {
     sudo touch ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt
     echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
     echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
+}
+
+function_downloadFilebeatBinaries () {
+
+    local FILEBEAT_VERSION="8.19.7"
+    local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip"
+    local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.msi"
+    
+    echo "[INFO] - DOWNLOAD FILEBEAT STANDALONE FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_ZIP}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_MSI}
+
+    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64
+    sudo rm ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip
+
+}
+
+function_downloadNxlogBinaries () {
+
+    echo "[INFO] - PREPARE NXLOG COMMUNITY EDITION FOR WINDOWS README FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo touch ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt
+    echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
+    echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
+
 }
 
 function_prepareSidecarConfiguration () {
@@ -872,8 +901,10 @@ then
     function_startGraylogStack
     function_addScriptRepositoryToPathVariable
 
-    echo "[INFO] - PREPARE ADDITIONAL CONTENT"
-    function_downloadAdditionalBinaries
+    echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
+    function_downloadGraylogSidecarBinaries
+    function_downloadFilebeatBinaries
+    function_downloadNxlogBinaries
     function_checkSystemAvailability
 
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
@@ -891,6 +922,7 @@ then
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    function_downloadMaxmindBinaries ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
 
     function_displayClusterId
