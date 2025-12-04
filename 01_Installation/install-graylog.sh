@@ -899,7 +899,6 @@ then
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
     function_startGraylogStack
-    function_addScriptRepositoryToPathVariable
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
     function_downloadGraylogSidecarBinaries
@@ -924,6 +923,7 @@ then
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_downloadMaxmindBinaries ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
+    function_addScriptRepositoryToPathVariable
 
     function_displayClusterId
 
