@@ -38,7 +38,7 @@ SYSTEM_REQUIREMENTS_DISK="600"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
-SCRIPT_DEPENDENCIES="ca-certificates curl cron dnsutils dos2unix git htop iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
+SCRIPT_DEPENDENCIES="btop ca-certificates curl cron dnsutils dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
 
 
 ###############################################################################
@@ -251,6 +251,8 @@ function_installScriptDependencies () {
             echo "[INFO] - INSTALL SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
             sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
             wait
+        else
+            echo "[INFO] - SKIP SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
         fi
     done
 
@@ -961,6 +963,7 @@ then
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN} 
+    
     # Wait for Illuminate Content to be properly installed before starting with the Security Feature Installation
     sleep 5m
 
