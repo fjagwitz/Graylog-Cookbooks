@@ -16,6 +16,9 @@ copy "%WORKDIR%sidecar.yml" "%SIDECAR_YML%"
 copy "%WORKDIR%%FILEBEAT%" "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
 
 ::
+:: enable dns etw-logging on system level
+
+::
 :: enable and start graylog-sidecar as a system service
 
 "%PROGRAMFILES%\Graylog\sidecar\graylog-sidecar.exe" -service install
