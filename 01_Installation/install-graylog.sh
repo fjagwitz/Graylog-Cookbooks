@@ -828,7 +828,19 @@ function_enableIlluminatePackages () {
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then
         echo "[INFO] - ENABLE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
+        for PROCESSING_PACK in ${ILLUMINATE_PROCESSING_PACK_IDS}
+        do
+            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${PROCESSING_PACK}}}" 2>/dev/null >/dev/null        
+            wait
+        done
+        
+        for SPOTLIGHT_PACK in ${ILLUMINATE_SPOTLIGHT_PACK_IDS}
+        do 
+            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"spotlight_pack_ids\":${SPOTLIGHT_PACK}}}" 2>/dev/null >/dev/null
+            wait
+        done
+    else
+        echo "[INFO] - NO LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
 }
 
@@ -855,12 +867,23 @@ function_configureSecurityFeatures () {
         while [[ ${ACTIVE_AI_REPORT} == "true" ]] || [[ ${ACTIVE_AI_REPORT} == "" ]]
         do 
             echo "[INFO] - DISABLE INVESTIGATION AI REPORTS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+            
             curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
             ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
         done
 
         echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_SECURITY_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null 
+        for PROCESSING_PACK in ${ILLUMINATE_SECURITY_PROCESSING_PACK_IDS}
+        do
+            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${PROCESSING_PACK}}}" 2>/dev/null >/dev/null 
+            wait
+        done
+        
+        for SPOTLIGHT_PACK in ${ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS}
+        do 
+            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"spotlight_pack_ids\":${SPOTLIGHT_PACK}}}" 2>/dev/null >/dev/null 
+            wait
+        done
     fi 
 
 }
