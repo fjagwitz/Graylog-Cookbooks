@@ -204,9 +204,9 @@ services:
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
-    #post_start:
-    #  - command: update-ca-certificates
-    #    user: root
+    post_start:
+      - command: /__cacert_entrypoint.sh
+        user: root
     env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=true"
@@ -244,9 +244,9 @@ services:
       - "datanode2"
       - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
-    #post_start:
-    #  - command: update-ca-certificates
-    #    user: root
+    post_start:
+      - command: /__cacert_entrypoint.sh
+        user: root
     env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=false"
