@@ -167,6 +167,10 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
+    depends_on:
+      - "datanode1"
+      - "datanode2"
+      - "datanode3"
     env_file: "opensearch.env"
     environment:
       - "node.name=datanode9"
