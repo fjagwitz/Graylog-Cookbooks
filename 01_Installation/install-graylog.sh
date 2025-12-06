@@ -816,6 +816,8 @@ function_enableIlluminatePackages () {
         
         echo "[INFO] - ENABLE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
+        sleep 300s
+        echo "[INFO] - ILLUMINATE PACKAGES ENABLED " | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO ENTERPRISE LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
@@ -851,6 +853,8 @@ function_configureSecurityFeatures () {
 
         echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_SECURITY_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
+        sleep 300s
+        echo "[INFO] - ILLUMINATE SECURITY PACKAGES ENABLED" | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO SECURITY LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi 
