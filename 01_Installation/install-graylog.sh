@@ -797,7 +797,7 @@ function_addSidecarConfigurationTags () {
         local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
         
         echo "[INFO] - WAIT FOR SIDECAR CONFIGURATION TO BECOME AVAILABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sleep 5s        
+        sleep 10s        
     done
 
     echo "[INFO] - CREATE GRAYLOG SIDECAR CONFIGURATION TAGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
