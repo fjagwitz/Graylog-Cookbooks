@@ -429,7 +429,7 @@ function_addScriptRepositoryToPathVariable () {
     echo "export PATH=${PATH:+${PATH}:}${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
-function_downloadMaxmindBinaries () {
+function_enableGeoIpLocation () {
     local ADMIN_TOKEN=${1}
     local MAXMIND_DB_TYPES="ASN City Country"
     local DOWNLOAD_SUCCESS=""
@@ -437,16 +437,19 @@ function_downloadMaxmindBinaries () {
     while [[ ${DOWNLOAD_SUCCESS} != true ]]
     do
         # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-        echo "[INFO] - DOWNLOAD MAXMIND DATABASE " | logger -p user.info -e -t GRAYLOG-INSTALLER
         for DB_TYPE in ${MAXMIND_DB_TYPES}
         do
+            echo "[INFO] - DOWNLOAD MAXMIND DATABASE (${DB_TYPE}) " | logger -p user.info -e -t GRAYLOG-INSTALLER
             sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE}.mmdb
+
+            echo "[INFO] - ACTIVATE GEOIP PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
+            curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
             
             # Alternative Source: 
             # https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-${DB_TYPE}.mmdb 
         done
     
-        local DOWNLOAD_SUCCESS=$(curl -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig | jq .enabled)
+        local DOWNLOAD_SUCCESS=$(curl -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig | jq .enabled 2>/dev/null)
 
     done
 
@@ -611,9 +614,6 @@ function_createBaseConfiguration () {
 
     echo "[INFO] - ACTIVATE WHOIS PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/system/content_packs/1794d39d-077f-7360-b92b-95411b05fbce/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
-
-    echo "[INFO] - ACTIVATE GEOIP PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null
 
     echo "[INFO] - ACTIVATE THREAT INTEL PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.threatintel.ThreatIntelPluginConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"tor_enabled":true,"spamhaus_enabled":true,"abusech_ransom_enabled":false}' 2>/dev/null >/dev/null
@@ -947,7 +947,7 @@ then
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
-    function_downloadMaxmindBinaries ${GRAYLOG_ADMIN_TOKEN}
+    function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
     function_addScriptRepositoryToPathVariable
 
