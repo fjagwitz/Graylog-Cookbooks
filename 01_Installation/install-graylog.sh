@@ -439,8 +439,8 @@ function_enableGeoIpLocation () {
         # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
         for DB_TYPE in ${MAXMIND_DB_TYPES}
         do
-            echo "[INFO] - DOWNLOAD MAXMIND DATABASE (${DB_TYPE}) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-            sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE^^}.mmdb           
+            echo "[INFO] - DOWNLOAD MAXMIND DATABASE (${DB_TYPE^^}) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+            sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE}.mmdb           
             
             # Alternative Source: 
             # https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-${DB_TYPE}.mmdb 
