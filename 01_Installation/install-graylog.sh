@@ -891,8 +891,8 @@ then
     clear
 
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
-    function_installScriptDependencies
     function_checkPatchLevel
+    function_installScriptDependencies
 
     function_checkSnapshot
     function_defineAdminName
