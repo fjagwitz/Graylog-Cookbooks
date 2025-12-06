@@ -816,13 +816,13 @@ function_enableIlluminatePackages () {
         echo "[INFO] - ENABLE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         for PROCESSING_PACK in ${ILLUMINATE_PROCESSING_PACK_IDS}
         do
-            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${PROCESSING_PACK}}}" 2>/dev/null >/dev/null        
+            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${PROCESSING_PACK},,\"spotlight_pack_ids\":\"\"}}" 2>/dev/null >/dev/null     
             wait
         done
         
         for SPOTLIGHT_PACK in ${ILLUMINATE_SPOTLIGHT_PACK_IDS}
         do 
-            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"spotlight_pack_ids\":${SPOTLIGHT_PACK}}}" 2>/dev/null >/dev/null
+            curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":\"\",\"spotlight_pack_ids\":${SPOTLIGHT_PACK}}}" 2>/dev/null >/dev/null
             wait
         done
     else
