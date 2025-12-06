@@ -13,9 +13,17 @@ GRAYLOG_ROOT_TIMEZONE = "UTC"
 #
 GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "true"
 
+## Disable Preflight Checks (necessary for interaction with Graylog Data Node only)
+#
+GRAYLOG_SKIP_PREFLIGHT_CHECKS ="true"
+
 ## Set Graylog Java Heap Size
 #
 GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx4g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
+
+## Use custom Root Certificates
+#
+USE_SYSTEM_CA_CERTS = "true"
 
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
@@ -33,6 +41,7 @@ GRAYLOG_ALLOWED_AUXILIARY_PATH = "/etc/graylog/server"
 
 ## Graylog Proxy Settings (list of patterns separated by “,” - may start or end with a “*” for wildcards)
 #
+# GRAYLOG_TRUSTED_PROXIES = ""
 # GRAYLOG_HTTP_PROXY_URI = ""
 # GRAYLOG_HTTP_NON_PROXY_HOSTS = "localhost, graylog1, graylog2, mongodb1, datanode*, lookuptables, prometheus1, grafana1"
 

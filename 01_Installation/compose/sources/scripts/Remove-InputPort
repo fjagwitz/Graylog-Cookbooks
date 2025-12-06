@@ -7,6 +7,18 @@
 # Remove a single Input Port: Remove-InputPort 515
 # Remove multiple Input Ports: Remove-InputPort "515 516 517"
 
+sudo date >/dev/null
+
+read -p "[INPUT] - MOVING FORWARD WILL RESTART THE STACK [yes/no]: " CONSENT
+CONSENT=${CONSENT:-yes}
+
+if [[ ${CONSENT} != "yes" ]]
+then
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, EXIT " | logger -p user.info -e -t GRAYLOG-HELPER
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, EXIT "
+    exit
+fi 
+
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf

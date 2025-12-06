@@ -5,6 +5,18 @@
 # Usage: 
 # Update-GraylogContainers
 
+sudo date >/dev/null
+
+read -p "[INPUT] - MOVING FORWARD WILL RESTART THE STACK [yes/no]: " CONSENT
+CONSENT=${CONSENT:-yes}
+
+if [[ ${CONSENT} != "yes" ]]
+then
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, EXIT " | logger -p user.info -e -t GRAYLOG-HELPER
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, EXIT "
+    exit
+fi 
+
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 
@@ -17,13 +29,11 @@ echo "[INFO] - UPDATE CONTAINER GRAYLOG1 " | logger -p user.info -e -t GRAYLOG-H
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog1 2>/dev/null >/dev/null
 wait
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d graylog1 2>/dev/null >/dev/null
-sleep 2m
 
 echo "[INFO] - UPDATE CONTAINER GRAYLOG2 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog2 2>/dev/null >/dev/null
 wait
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d graylog2 2>/dev/null >/dev/null
-sleep 2m
 
 while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     do

@@ -1,0 +1,542 @@
+{
+  "v": "1",
+  "id": "2c62f9be-dcfc-4635-a623-bbfb3a76ce8e",
+  "rev": 7,
+  "name": "Graylog Professionals: Create privileged Accounts Overview",
+  "summary": "This content pack allows to create an overview of all accounts that logged in with elevated privileges",
+  "description": "",
+  "vendor": "Graylog Community",
+  "url": "https://community.graylog.org/",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "981c4701-37db-4963-8761-15cd7fb12f30",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "mongodb"
+          },
+          "cidr_lookup": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.2.2+8eab621"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "f6edd882-f91e-40a7-9190-8338f660737f",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "mongodb"
+          },
+          "cidr_lookup": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.2.2+8eab621"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_cache",
+        "version": "1"
+      },
+      "id": "77f8ee4d-008d-4e5b-a424-402b2f695a79",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "guava_cache"
+          },
+          "max_size": {
+            "@type": "integer",
+            "@value": 1000
+          },
+          "expire_after_access": {
+            "@type": "long",
+            "@value": 60
+          },
+          "expire_after_access_unit": {
+            "@type": "string",
+            "@value": "SECONDS"
+          },
+          "expire_after_write": {
+            "@type": "long",
+            "@value": 0
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.2.2+8eab621"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_cache",
+        "version": "1"
+      },
+      "id": "89a7c323-3e37-4caa-a73a-33feb0ed1cac",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "guava_cache"
+          },
+          "max_size": {
+            "@type": "integer",
+            "@value": 1000
+          },
+          "expire_after_access": {
+            "@type": "long",
+            "@value": 60
+          },
+          "expire_after_access_unit": {
+            "@type": "string",
+            "@value": "SECONDS"
+          },
+          "expire_after_write": {
+            "@type": "long",
+            "@value": 0
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.2.2+8eab621"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_table",
+        "version": "1"
+      },
+      "id": "d15a9b2c-d778-47cf-97a6-0a988541aab3",
+      "data": {
+        "default_single_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "cache_name": {
+          "@type": "string",
+          "@value": "77f8ee4d-008d-4e5b-a424-402b2f695a79"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "default_multi_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "default_multi_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "data_adapter_name": {
+          "@type": "string",
+          "@value": "f6edd882-f91e-40a7-9190-8338f660737f"
+        },
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        },
+        "default_single_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "description": {
+          "@type": "string",
+          "@value": "windows-security-privileged-users"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.2.2+8eab621"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_table",
+        "version": "1"
+      },
+      "id": "aaf081ac-bd66-4c31-a9c9-193cb63e7ec6",
+      "data": {
+        "default_single_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "cache_name": {
+          "@type": "string",
+          "@value": "89a7c323-3e37-4caa-a73a-33feb0ed1cac"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "default_multi_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "default_multi_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "data_adapter_name": {
+          "@type": "string",
+          "@value": "981c4701-37db-4963-8761-15cd7fb12f30"
+        },
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        },
+        "default_single_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "description": {
+          "@type": "string",
+          "@value": "windows-security-service-users"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=5.2.2+8eab621"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "dc477c25-a47a-4ef1-899a-a2ea2a6934fe",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Refinements"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Windows - Security - Refinements"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Windows - Security - Refinements\"\nstage 10 match pass\nrule \"Windows - Security - Update Privileged Users List\"\nrule \"Windows - Security - Update Service Users List\"\nstage 20 match either\nrule \"Windows - Security - Add Privileged Users Field\"\nrule \"Windows - Security - Add Service Users Field\"\nstage 30 match pass\nrule \"Windows - Security - Enrich Privileged Users\"\nrule \"Windows - Security - Enrich Service Users\"\nstage 90 match either\nrule \"Windows - Security - Cleanup - NXLog\"\nend"
+        },
+        "connected_streams": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "ce9dba66-c8e1-41d7-8499-2fcb4771dac4",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Cleanup - NXLog"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Windows - Security - Cleanup - NXLog"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows - Security - Cleanup - NXLog\"\n\nwhen\n    to_string($message.agent_type) == \"nxlog\"\n    \nthen\n    remove_field(\"[A-Z].*\");\n    remove_field(\"agent_type\");\n    remove_field(\"collector_node_id\");\n    remove_field(\"full_message\");\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "4e8fa40a-e506-4cbf-8d47-3130c3e471ff",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Enrich Service Users"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Setting Field \"user_is_service\" as \"true\" on users from \"windows-security-service-users\""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows - Security - Enrich Service Users\"\n\nwhen\n    has_field(\"user_is_service\") AND\n    lookup_has_value(\n        lookup_table: \"windows-security-service-users\",\n        key: to_string($message.user_name)\n        ) \n\nthen\n    set_field(\"user_is_service\", true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "9289e86d-97b5-485e-92b1-f732333ff255",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Update Privileged Users List"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Adding users to \"windows-security-privileged-users\" on \"special logon\""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows - Security - Update Privileged Users List\" \n\nwhen\n    has_field(\"privilege_name\") AND\n    to_string($message.event_outcome) == \"success\"\n    AND\n        (to_string($message.user_type) == \"user\" OR\n        to_string($message.user_sid_rid) == \"500\")\n    AND\n        (to_string($message.user_domain) != \"localhost\" AND\n        to_string($message.user_domain) != \"Font Driver Host\" AND\n        to_string($message.user_domain) != \"Window Manager\") \n        \nthen\n    let privileged_user = lookup_set_value(\n        lookup_table: \"windows-security-privileged-users\",\n        key: to_string($message.user_name),\n        value: $message.privilege_name,\n        // 33 days lifetime\n        ttl: 2851200\n    );\n    \n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "59f81c2b-ee29-4176-9ef5-5c2a8ded2d8c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Update Service Users List"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Adding users to \"windows-security-service-users\" on \"Service logon\"\t"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows - Security - Update Service Users List\" \n\nwhen\n    to_string($message.windows_logon_type) == \"5\" AND\n    to_string($message.user_type) == \"user\" \n        \nthen\n    let service_user = lookup_set_value(\n        lookup_table: \"windows-security-service-users\",\n        key: to_string($message.user_name),\n        value: to_string($message.event_source),\n        // 33 days lifetime\n        ttl: 2851200\n    );\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "ea0f721a-641f-4f43-8fa4-6312e6abeba2",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Add Privileged Users Field"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Setting Field \"user_is_privileged\" as \"false\" on all users \n"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows - Security - Add Privileged Users Field\"\n\nwhen\n    has_field(\"user_name\") \n    AND\n        (to_string($message.user_type) == \"user\" OR\n        to_string($message.user_sid_rid) == \"500\")\n    AND\n        (to_string($message.user_domain) != \"localhost\" AND\n        to_string($message.user_domain) != \"Font Driver Host\" AND\n        to_string($message.user_domain) != \"Window Manager\") \n        \n    \nthen\n    set_field(\n        field: \"user_is_privileged\",\n        value: false\n        );\n        \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "e645b03e-752b-49d5-b88e-c3d37661f150",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Enrich Privileged Users"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Setting Field \"user_is_privileged\" as \"true\" on users from \"windows-security-privileged-users\"\t\n"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows - Security - Enrich Privileged Users\"\n\nwhen\n    has_field(\"user_is_privileged\") AND\n    lookup_has_value(\n        lookup_table: \"windows-security-privileged-users\",\n        key: to_string($message.user_name)\n        ) \n\nthen\n    set_field(\"user_is_privileged\",true);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "aa3dcdee-7a3b-481f-bb77-3dcd8aff6e93",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows - Security - Add Service Users Field"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Setting Field \"user_is_service\" as \"false\" on all users\t"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Windows - Security - Add Service Users Field\"\n\nwhen\n    has_field(\"user_name\") \n    AND\n        (to_string($message.user_type) == \"user\" OR\n        to_string($message.user_sid_rid) == \"500\")\n    AND\n        (to_string($message.user_domain) != \"localhost\" AND\n        to_string($message.user_domain) != \"Font Driver Host\" AND\n        to_string($message.user_domain) != \"Window Manager\") \n    \nthen\n    set_field(\n        field: \"user_is_service\",\n        value: false\n        );\n        \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.2+7a367fe"
+        }
+      ]
+    }
+  ]
+}

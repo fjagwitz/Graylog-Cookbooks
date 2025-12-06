@@ -7,6 +7,18 @@
 # Add a single Input Port: Add-InputPort 515
 # Add multiple Input Ports: Add-InputPort "515 516 517"
 
+sudo date >/dev/null
+
+read -p "[INPUT] - MOVING FORWARD WILL RESTART THE STACK [yes/no]: " CONSENT
+CONSENT=${CONSENT:-yes}
+
+if [[ ${CONSENT} != "yes" ]]
+then
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, EXIT " | logger -p user.info -e -t GRAYLOG-HELPER
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, EXIT "
+    exit
+fi 
+
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
@@ -35,7 +47,7 @@ done
 
 echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down nginx1 2>/dev/null >/dev/null
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d nginx1 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d 2>/dev/null >/dev/null
 wait
 ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs nginx1 | tail -n10 | grep -ow emerg | tail -n1)
 
@@ -54,6 +66,10 @@ then
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES"
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES" | logger -p user.info -e -t GRAYLOG-HELPER
 else
+    echo "[INFO] - RESTART GRAYLOG CONTAINERS DUE TO PORT CHANGES IN NGINX " | logger -p user.info -e -t GRAYLOG-HELPER
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog1 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog2 2>/dev/null >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d 2>/dev/null >/dev/null
     echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT(S) ${INPUT_PORT} "
     echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT(S) ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 fi
