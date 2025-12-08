@@ -424,9 +424,17 @@ function_installGraylogStack () {
 }
 
 function_addScriptRepositoryToPathVariable () {
-    echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
-    echo "export PATH=${PATH:+${PATH}:}${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+    local SCRIPTFOLDER="${GRAYLOG_PATH}/sources/scripts"
+    local PATHCHECK=$(echo $PATH | grep -wo ${SCRIPTFOLDER})
+
+    if [[ ${PATHCHECK} == ${SCRIPTFOLDER} ]]
+    then
+        echo "[INFO] - PATH VARIABLE IN /ETC/BASH.BASHRC DOES ALREADY CONTAIN SCRIPT FOLDER" | logger -p user.info -e -t GRAYLOG-INSTALLER        
+    else
+        echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER        
+        echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+        echo "export PATH=${PATH:+${PATH}:}${SCRIPTFOLDER}" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+    fi
 }
 
 function_enableGeoIpLocation () {

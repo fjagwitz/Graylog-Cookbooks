@@ -9,7 +9,7 @@
 
 sudo date >/dev/null
 
-read -p "[INPUT] - MOVING FORWARD WILL RESTART THE STACK [yes/no]: " CONSENT
+read -p "[INPUT] - MOVING FORWARD WILL CAUSE A SHORT SERVICE INTERRUPTION [yes/no]: " CONSENT
 CONSENT=${CONSENT:-yes}
 
 if [[ ${CONSENT} != "yes" ]]
@@ -24,6 +24,9 @@ COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
 INPUT_PORT="${1}"
 
+sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
+sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
+
 for PORT in ${INPUT_PORT}
 do
     while [[ ${PORT} == "" ]]
@@ -33,9 +36,6 @@ do
 
     echo "[INFO] - REMOVING INPUT ON PORT ${PORT} "
     echo "[INFO] - REMOVING INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
-
-    sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
-    sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
     grep -vwE ${PORT}:${PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE} 2>/dev/null >/dev/null
     wait
