@@ -339,8 +339,8 @@ services:
   #
   ## In case you have to deal with self-signed certificates, you can simply mount yours into the Nessus Container
   #    volumes: 
-  #    - ./nginx1/ssl/cert.crt:/opt/nessus/com/nessus/CA/servercert.pem:ro
-  #    - ./nginx1/ssl/cert.key:/opt/nessus/var/nessus/CA/serverkey.pem:ro
+  #    - ./nessus/ssl/cert.crt:/opt/nessus/com/nessus/CA/servercert.pem:ro
+  #    - ./nessus/ssl/cert.key:/opt/nessus/var/nessus/CA/serverkey.pem:ro
   #    - ./rootcerts/my-root-ca.crt:/opt/nessus/com/nessus/CA/cacert.pem:ro
 
 volumes:
