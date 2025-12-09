@@ -339,8 +339,11 @@ services:
   #
   ## In case you have to deal with self-signed certificates, you can simply mount yours into the Nessus Container
   #    volumes: 
-  #    - ./nessus/ssl/cert.crt:/opt/nessus/com/nessus/CA/servercert.pem:ro
+  ## Public Key (Base64 encoded)
+  #    - ./nessus/ssl/cert.crt:/opt/nessus/com/nessus/CA/servercert.pem:ro 
+  ## Private Key (Base64 encoded)
   #    - ./nessus/ssl/cert.key:/opt/nessus/var/nessus/CA/serverkey.pem:ro
+  ## Public Root CA Key (Base64 encoded)
   #    - ./rootcerts/my-root-ca.crt:/opt/nessus/com/nessus/CA/cacert.pem:ro
 
 volumes:
