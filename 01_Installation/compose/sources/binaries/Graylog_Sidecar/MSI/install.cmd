@@ -17,6 +17,7 @@ copy "%WORKDIR%%FILEBEAT%" "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
 
 ::
 :: enable dns etw-logging on system level
+:: wevtutil sl Microsoft-Windows-DNSServer/Analytical /Enabled:true /quiet
 
 ::
 :: enable and start graylog-sidecar as a system service
