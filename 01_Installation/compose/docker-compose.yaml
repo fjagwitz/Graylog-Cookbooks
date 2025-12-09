@@ -326,7 +326,7 @@ services:
       - ./sources:/storage/sources
     restart: always
 
-  ## This container can be skipped based on your needs
+  ## This container is not required to test Graylog but can be interesting to work with
   #  nessus1:
   #  image: tenable/nessus:latest-ubuntu
   #  hostname: nessus1
