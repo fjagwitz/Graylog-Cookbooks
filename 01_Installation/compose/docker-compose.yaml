@@ -326,6 +326,26 @@ services:
       - ./sources:/storage/sources
     restart: always
 
+  ## This container can be skipped based on your needs
+  #  nessus1:
+  #  image: tenable/nessus:latest-ubuntu
+  #  hostname: nessus1
+  #  ports:
+  #    - "8834:8834"
+  #  environment:
+  #    - USERNAME=admin 
+  #    - PASSWORD=admin
+  #  restart: unless-stopped
+  #
+  ## In case you have to deal with self-signed certificates, you can simply mount yours into the Nessus Container
+  #    volumes: 
+  ## Public Key (Base64 encoded)
+  #    - ./nessus/ssl/cert.crt:/opt/nessus/com/nessus/CA/servercert.pem:ro 
+  ## Private Key (Base64 encoded)
+  #    - ./nessus/ssl/cert.key:/opt/nessus/var/nessus/CA/serverkey.pem:ro
+  ## Public Root CA Key (Base64 encoded)
+  #    - ./rootcerts/my-root-ca.crt:/opt/nessus/com/nessus/CA/cacert.pem:ro
+
 volumes:
   grafana-data-01:
   prometheus-data-01:

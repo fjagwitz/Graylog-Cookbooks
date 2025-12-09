@@ -347,7 +347,7 @@ function_installGraylogStack () {
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nginx1,nginx2,notifications,prometheus,rootcerts,samba,sources/{scripts,binaries/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,NXLog_CommunityEdition},other}}
+    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/{ssl},nginx1,nginx2,notifications,prometheus,rootcerts,samba,sources/{scripts,binaries/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,NXLog_CommunityEdition},other}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
@@ -424,9 +424,17 @@ function_installGraylogStack () {
 }
 
 function_addScriptRepositoryToPathVariable () {
-    echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
-    echo "export PATH=${PATH:+${PATH}:}${GRAYLOG_PATH}/sources/scripts" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+    local SCRIPTFOLDER="${GRAYLOG_PATH}/sources/scripts"
+    local PATHCHECK=$(echo $PATH | grep -wo ${SCRIPTFOLDER})
+
+    if [[ ${PATHCHECK} == ${SCRIPTFOLDER} ]]
+    then
+        echo "[INFO] - PATH VARIABLE IN /ETC/BASH.BASHRC DOES ALREADY CONTAIN SCRIPT FOLDER" | logger -p user.info -e -t GRAYLOG-INSTALLER        
+    else
+        echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER        
+        echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+        echo "export PATH=${PATH:+${PATH}:}${SCRIPTFOLDER}" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+    fi
 }
 
 function_enableGeoIpLocation () {

@@ -9,7 +9,7 @@
 
 sudo date >/dev/null
 
-read -p "[INPUT] - MOVING FORWARD WILL RESTART THE STACK [yes/no]: " CONSENT
+read -p "[INPUT] - MOVING FORWARD WILL CAUSE A SHORT SERVICE INTERRUPTION [yes/no]: " CONSENT
 CONSENT=${CONSENT:-yes}
 
 if [[ ${CONSENT} != "yes" ]]
@@ -24,6 +24,9 @@ COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
 INPUT_PORT="${1}"
 
+sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
+sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
+
 for PORT in ${INPUT_PORT}
 do 
     while [[ (${PORT} -lt 514) || (${PORT} -gt 65535) || (${PORT} == "") ]]
@@ -34,20 +37,17 @@ do
     echo "[INFO] - CREATE INPUT ON PORT ${PORT}, HANG ON "
     echo "[INFO] - CREATE INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
-    sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
-    sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
-
     sudo sed -i "s/# Additional Input Ports/# Input ${PORT}:${PORT} created by ${USER} on $(date) \n      - ${PORT}:${PORT}\n      - ${PORT}:${PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
     wait
-    sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream for Port ${PORT} created by ${USER} on $(date) #::${PORT}\nupstream graylog-${PORT} {#::${PORT}\n    zone graylog-${PORT} 64k ; #::${PORT}\n    least_conn; #::${PORT}\n    server graylog1:${PORT}; #::${PORT}\n    server graylog2:${PORT}; #::${PORT}\n} # Upstream ${PORT} #::${PORT}\n\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
+    sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream for Port ${PORT} created by ${USER} on $(date) \t\t\t#::${PORT}\nupstream graylog-${PORT} {\t\t\t\t\t\t\t\t\t\t#::${PORT}\n    zone graylog-${PORT} 64k ; \t\t\t\t\t\t\t\t\t#::${PORT}\n    least_conn; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    server graylog1:${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n    server graylog2:${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n} \t\t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
     wait
-    sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server for Port ${PORT} created by ${USER} on $(date) #::${PORT}\nserver { #::${PORT}\n    listen ${PORT}; #::${PORT}\n    listen ${PORT} udp; #::${PORT}\n    proxy_pass graylog-${PORT}; #::${PORT}\n} #::${PORT}\n\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
+    sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server for Port ${PORT} created by ${USER} on $(date) \t\t\t#::${PORT}\nserver { \t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n    listen ${PORT}; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    listen ${PORT} udp; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    proxy_pass graylog-${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n} \t\t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
 
 done 
 
 echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down nginx1 2>/dev/null >/dev/null
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d nginx1 2>/dev/null >/dev/null
 wait
 ERROR_RESTART=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs nginx1 | tail -n10 | grep -ow emerg | tail -n1)
 
@@ -66,10 +66,6 @@ then
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES"
     echo "[INFO] - AN ERROR OCCURED DURING THE CONFIGURATION, SYSTEM WAS RESET TO STANDARD VALUES" | logger -p user.info -e -t GRAYLOG-HELPER
 else
-    echo "[INFO] - RESTART GRAYLOG CONTAINERS DUE TO PORT CHANGES IN NGINX " | logger -p user.info -e -t GRAYLOG-HELPER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog1 2>/dev/null >/dev/null
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down graylog2 2>/dev/null >/dev/null
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d 2>/dev/null >/dev/null
     echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT(S) ${INPUT_PORT} "
     echo "[INFO] - SUCCESSFULLY CREATED INPUT ON PORT(S) ${INPUT_PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 fi

@@ -11,6 +11,10 @@ echo "[WARN] - CONFIGURE TLS CONNECTION WITHOUT CERTIFICATE VALIDATION "
 "%WORKDIR%%INSTALLER%" /S -SERVERURL=%SERVERURL% -APITOKEN=%APITOKEN% -TAGS=%TAGS% -TLS_SKIP_VERIFY=true
 
 ::
+:: enable dns etw-logging on system level
+:: wevtutil sl Microsoft-Windows-DNSServer/Analytical /Enabled:true /quiet
+
+::
 :: copy filebeat standalone into the sidecar folder
 copy "%WORKDIR%%FILEBEAT%" "%PROGRAMFILES%\Graylog\sidecar\%FILEBEAT%"
 
