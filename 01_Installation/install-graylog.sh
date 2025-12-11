@@ -601,7 +601,7 @@ function_configurePlugins () {
 function_configureSelfMonitoring () {
 
     local ADMIN_TOKEN=${1}
-    local LOG_ITEM="graylog-self-monitoring"
+    local LOG_ITEM="evaluation-self-monitoring"
     local ITEM_TITLE="Evaluation: Self Monitoring Logs"
 
     echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF UDP 9900)" | logger -p user.info -e -t GRAYLOG-INSTALLER
