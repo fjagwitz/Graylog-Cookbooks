@@ -675,6 +675,7 @@ function_displayClusterId () {
     echo "       *                                                    *"
     echo "       ******************************************************"
     echo ""
+    echo "[INFO] - CLUSTER-ID: $(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - GRAYLOG STACK WILL RESTART AFTER ADDING THE LICENSE"
 }
 
@@ -782,7 +783,7 @@ function_createInputs () {
     fi
 }
 
-function_createEvaluationConfiguration () {
+function_configureEvaluationSetup () {
 
     local ADMIN_TOKEN=${1}
     local SELF_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "System Self Monitoring (Evaluation)")' | jq -r .id)
@@ -1011,7 +1012,7 @@ then
     function_checkSystemAvailability
 
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
-    function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
+    function_configureEvaluationSetup ${GRAYLOG_ADMIN_TOKEN}
     function_configureEnterpriseFeatures ${GRAYLOG_ADMIN_TOKEN} 
 
     echo "[INFO] - GRAYLOG ENTERPRISE INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
