@@ -1379,7 +1379,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "System Self Monitoring (Evaluation)"
+          "@value": "Evaluation: Self Monitoring Logs"
         }
       },
       "constraints": [
