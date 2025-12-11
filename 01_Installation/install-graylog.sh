@@ -622,6 +622,31 @@ function_createBaseConfiguration () {
     curl -s http://${GRAYLOG_ADMIN}:$GRAYLOG_PASSWORD@localhost/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null >/dev/null
 }
 
+function_configureWindowsSidecarMonitoring () {
+
+    local ADMIN_TOKEN=${1}
+    local LOG_ITEM="windows-sidecar-monitoring"
+
+    echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF TCP 12149)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12149 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "port": 12149, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}'| jq '.id') 
+
+    echo "[INFO] - CREATE FIELD TYPE PROFILE FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
+
+    echo "[INFO] - CREATE INDEX FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"shards\": 1, \"replicas\": 0, \"rotation_strategy_class\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy\", \"rotation_strategy\": {\"type\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"retention_strategy_class\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy\", \"retention_strategy\": { \"type\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig\", \"max_number_of_indices\": 20 }, \"data_tiering\": {\"type\": \"hot_only\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"title\": \"Graylog Sidecar for Windows Messages (Evaluation)\", \"description\": \"Stores Graylog Sidecar for Windows Messages\", \"index_prefix\": \"gl-sidecar-windows-monitoring\", \"index_analyzer\": \"standard\", \"index_optimization_max_num_segments\": 1, \"index_optimization_disabled\": false, \"field_type_refresh_interval\": 5000, \"field_type_profile\": ${MONITORING_FIELD_TYPE_PROFILE}, \"use_legacy_rotation\": false, \"writable\": true}" | jq '.id')
+
+    echo "[INFO] - CREATE STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all monitoring events created Graylog Sidecar on Windows\", \"title\": \"Graylog Sidecar on Windows (Evaluation)\", \"remove_matches_from_default_stream\": true, \"matching_type\": \"OR\", \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
+
+    echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Windows Sidecar Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
+
+    echo "[INFO] - START STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
+
+}
+
 function_displayClusterId () {
 
     echo "  ADMINUSER: \"${GRAYLOG_ADMIN}\" 
@@ -922,8 +947,8 @@ then
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
-    function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
+    function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer "graylog1"
@@ -932,6 +957,7 @@ then
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
+    function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
     function_addScriptRepositoryToPathVariable
 
     function_displayClusterId
