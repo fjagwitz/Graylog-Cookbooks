@@ -1203,7 +1203,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1237,7 +1237,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1262,7 +1262,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1287,7 +1287,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1312,7 +1312,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1337,7 +1337,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1365,7 +1365,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1385,7 +1385,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.0+a788678"
         }
       ]
     },
@@ -1405,7 +1405,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=3.1.3"
+          "version": ">=7.0.0+a788678"
         }
       ]
     }
