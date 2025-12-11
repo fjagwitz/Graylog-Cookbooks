@@ -637,7 +637,7 @@ function_configureWindowsSidecarMonitoring () {
     local ITEM_TITLE="Evaluation: Sidecar for Windows Logs"
 
     echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF TCP 12149)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12149 TCP GELF | ${ITEM_TITLE}", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "port": 12149, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}'| jq '.id') 
+    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 12149 TCP GELF | ${ITEM_TITLE}\", \"type\": \"org.graylog2.inputs.gelf.tcp.GELFTCPInput\", \"configuration\": { \"port\": 12149, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id') 
 
     echo "[INFO] - CREATE FIELD TYPE PROFILE FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"custom_field_mappings\":[{ \"field\": \"command\", \"type\": \"string\" }, { \"field\": \"container_name\", \"type\": \"string\" }, { \"field\": \"image_name\", \"type\": \"string\" }, { \"field\": \"container_name\", \"type\": \"string\" }], \"name\": \"${ITEM_TITLE}\", \"description\": \"Field Mappings for Windows Sidecar Monitoring Messages\" }" | jq '.id')
@@ -967,6 +967,7 @@ then
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
     function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
     function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer "graylog1"
@@ -974,8 +975,6 @@ then
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
     function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
-    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
-    function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
     function_addScriptRepositoryToPathVariable
 
