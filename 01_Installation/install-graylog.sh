@@ -850,7 +850,17 @@ function_addSidecarConfigurationTags () {
 
 }
 
-function_enableIlluminatePackages () {
+function_enableGraylogSidecar () {
+
+    local SIDECAR_TOKEN=${1}
+    
+    echo "[INFO] - ENABLE AND START GRAYLOG SIDECAR ON HOST " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo graylog-sidecar -service install 2>/dev/null >/dev/null
+    sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
+    sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
+}
+
+function_configureEnterpriseFeatures () {
 
     local ADMIN_TOKEN=${1}
     local ILLUMINATE_PROCESSING_PACK_IDS='["illuminate-linux-auditbeat","illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","73788c38-0b74-4c03-8b69-2fcb4e110a9b","659b983d-9654-4141-a672-87dee3ee8176","d1aea731-2b18-4e47-9366-c526641f6dbd","illuminate-sysmon","5551b8a8-6459-446f-9ea8-63368bb39414","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","3c5c2c47-18a5-4054-9f0e-2443f6d96d02","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement"]'
@@ -861,21 +871,11 @@ function_enableIlluminatePackages () {
         
         echo "[INFO] - ENABLE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
-        sleep 300s
+        sleep 90s
         echo "[INFO] - ILLUMINATE PACKAGES ENABLED " | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO ENTERPRISE LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
-}
-
-function_enableGraylogSidecar () {
-
-    local SIDECAR_TOKEN=${1}
-    
-    echo "[INFO] - ENABLE AND START GRAYLOG SIDECAR ON HOST " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo graylog-sidecar -service install 2>/dev/null >/dev/null
-    sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
-    sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
 }
 
 function_configureSecurityFeatures () {
@@ -898,7 +898,7 @@ function_configureSecurityFeatures () {
 
         echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_SECURITY_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
-        sleep 300s
+        sleep 90s
         echo "[INFO] - ILLUMINATE SECURITY PACKAGES ENABLED" | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO SECURITY LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -1012,7 +1012,7 @@ then
 
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
-    function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN} 
+    function_configureEnterpriseFeatures ${GRAYLOG_ADMIN_TOKEN} 
 
     echo "[INFO] - GRAYLOG ENTERPRISE INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
