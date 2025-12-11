@@ -24,9 +24,9 @@ COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
 INPUT_PORT="${1}"
 
-while [[ (${PORT} -lt 514) || (${PORT} -gt 65535) || (${PORT} == "") ]]
+while [[ (${INPUT_PORT} -lt 514) || (${INPUT_PORT} -gt 65535) || (${INPUT_PORT} == "") ]]
 do
-    read -p "[INPUT] - PLEASE ASSIGN A VALID PORT NUMBER(S) TO YOUR INPUT: " INPUT_PORT
+    read -p "[INPUT] - PLEASE ASSIGN A VALID INPUT_PORT NUMBER(S) TO YOUR INPUT: " INPUT_PORT
 done
     
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
@@ -34,15 +34,23 @@ sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
 for PORT in ${INPUT_PORT}
 do 
-    echo "[INFO] - CREATE INPUT ON PORT ${PORT}, HANG ON "
-    echo "[INFO] - CREATE INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
+    CHECK_INPUT_PORT=$(grep ${PORT} ${COMPOSE_FILE})
 
-    sudo sed -i "s/# Additional Input Ports/# Input ${PORT}:${PORT} created by ${USER} on $(date) \n      - ${PORT}:${PORT}\n      - ${PORT}:${PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
-    wait
-    sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream for Port ${PORT} created by ${USER} on $(date) \t\t\t#::${PORT}\nupstream graylog-${PORT} {\t\t\t\t\t\t\t\t\t\t#::${PORT}\n    zone graylog-${PORT} 64k ; \t\t\t\t\t\t\t\t\t#::${PORT}\n    least_conn; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    server graylog1:${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n    server graylog2:${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n} \t\t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
-    wait
-    sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server for Port ${PORT} created by ${USER} on $(date) \t\t\t#::${PORT}\nserver { \t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n    listen ${PORT}; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    listen ${PORT} udp; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    proxy_pass graylog-${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n} \t\t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
+    if [[ ${CHECK_INPUT_PORT} == ${PORT} ]]
+    then
+        echo "[INFO] - CREATE INPUT ON PORT ${PORT}, HANG ON "
+        echo "[INFO] - CREATE INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
+        sudo sed -i "s/# Additional Input Ports/# Input ${PORT}:${PORT} created by ${USER} on $(date) \n      - ${PORT}:${PORT}\n      - ${PORT}:${PORT}\/udp\n      # Additional Input Ports/g" ${COMPOSE_FILE}
+        wait
+        sudo sed -i "s/# ADDITIONAL UPSTREAM ENTRY/# Upstream for Port ${PORT} created by ${USER} on $(date) \t\t\t#::${PORT}\nupstream graylog-${PORT} {\t\t\t\t\t\t\t\t\t\t#::${PORT}\n    zone graylog-${PORT} 64k ; \t\t\t\t\t\t\t\t\t#::${PORT}\n    least_conn; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    server graylog1:${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n    server graylog2:${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n} \t\t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n# ADDITIONAL UPSTREAM ENTRY/g" ${STREAM_CONF}
+        wait
+        sudo sed -i "s/# ADDITIONAL SERVER ENTRY/# Server for Port ${PORT} created by ${USER} on $(date) \t\t\t#::${PORT}\nserver { \t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n    listen ${PORT}; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    listen ${PORT} udp; \t\t\t\t\t\t\t\t\t\t#::${PORT}\n    proxy_pass graylog-${PORT}; \t\t\t\t\t\t\t\t\t#::${PORT}\n} \t\t\t\t\t\t\t\t\t\t\t\t#::${PORT}\n# ADDITIONAL SERVER ENTRY/g" ${STREAM_CONF}
+    else
+        echo "[INFO] - PORT ${PORT} HAS ALREADY BEEN PUBLISHED ON THIS SYSTEM"
+        echo "[INFO] - PORT ${PORT} HAS ALREADY BEEN PUBLISHED ON THIS SYSTEM" | logger -p user.info -e -t GRAYLOG-HELPER
+        exit
+    fi
 done 
 
 echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
