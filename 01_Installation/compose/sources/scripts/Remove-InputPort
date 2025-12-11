@@ -34,9 +34,9 @@ sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
 for PORT in ${INPUT_PORT}
 do
-    CHECK_INPUT_PORT=$(grep ${PORT} ${COMPOSE_FILE})
+    CHECK_INPUT_PORT=$(grep -ow ${PORT}:${PORT}/udp ${COMPOSE_FILE})
 
-    if [[ ${CHECK_INPUT_PORT} == ${PORT} ]]
+    if [[ "${CHECK_INPUT_PORT}" == "${PORT}:${PORT}/udp" ]]
     then
         echo "[INFO] - REMOVING INPUT ON PORT ${PORT} "
         echo "[INFO] - REMOVING INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
