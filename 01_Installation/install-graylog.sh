@@ -786,7 +786,7 @@ function_createInputs () {
 function_configureEvaluationSetup () {
 
     local ADMIN_TOKEN=${1}
-    local SELF_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "System Self Monitoring (Evaluation)")' | jq -r .id)
+    local SELF_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "Evaluation: Self Monitoring Logs")' | jq -r .id)
  
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then        
