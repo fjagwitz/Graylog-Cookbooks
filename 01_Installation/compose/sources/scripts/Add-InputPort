@@ -9,7 +9,7 @@
 
 sudo date >/dev/null
 
-read -p "[INPUT] - MOVING FORWARD WILL CAUSE A SHORT SERVICE INTERRUPTION [yes/no]: " CONSENT
+read -p "[INPUT] - MOVING FORWARD WILL CAUSE A SHORT SERVICE INTERRUPTION [yes]: " CONSENT
 CONSENT=${CONSENT:-yes}
 
 if [[ ${CONSENT} != "yes" ]]
