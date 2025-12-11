@@ -30,12 +30,12 @@ services:
       - 6514:6514
       # Graylog Gelf Input (Self-Monitoring, UDP only)
       - 9900:9900/udp 
-      # Gelf Input 12201
-      - 12201:12201
-      - 12201:12201/udp 
       # Gelf Input 12148
       - 12148:12148
       - 12148:12148/udp 
+      # Gelf Input 12201
+      - 12201:12201
+      - 12201:12201/udp 
       # Graylog Enterprise Forwarder Input
       - 13301:13301
       - 13302:13302
@@ -326,7 +326,7 @@ services:
       - ./sources:/storage/sources
     restart: always
 
-  ## This container can be skipped based on your needs
+  ## This container is not required to test Graylog but can be interesting to work with
   #  nessus1:
   #  image: tenable/nessus:latest-ubuntu
   #  hostname: nessus1

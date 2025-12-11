@@ -568,33 +568,9 @@ function_addSidecarConfigurationVariables () {
     
 }
 
-function_createBaseConfiguration () {
+function_configurePlugins () {
     
     local ADMIN_TOKEN=${1}
-
-    echo "[INFO] - CREATE INPUT FOR SELF-MONITORING LOGS (GELF UDP 9900)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 9900 UDP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.udp.GELFUDPInput", "configuration": { "port": 9900, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}'| jq '.id') 
-
-    echo "[INFO] - CREATE INPUT FOR SELF-MONITORING LOGS (BEATS TCP 5054)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_INPUT_BEATS=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5054 Beats | Evaluation Input for Self-Monitoring", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5054, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' | jq '.id')  
-
-    echo "[INFO] - CREATE FIELD TYPE PROFILE FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "custom_field_mappings":[{ "field": "command", "type": "string" }, { "field": "container_name", "type": "string" }, { "field": "image_name", "type": "string" }, { "field": "container_name", "type": "string" }], "name": "Self Monitoring Messages (Evaluation)", "description": "Field Mappings for Self Monitoring Messages" }' | jq '.id')
-
-    echo "[INFO] - CREATE INDEX FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"shards\": 1, \"replicas\": 0, \"rotation_strategy_class\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy\", \"rotation_strategy\": {\"type\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"retention_strategy_class\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy\", \"retention_strategy\": { \"type\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig\", \"max_number_of_indices\": 20 }, \"data_tiering\": {\"type\": \"hot_only\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"title\": \"Self Monitoring Messages (Evaluation)\", \"description\": \"Stores Evaluation System Self Monitoring Messages\", \"index_prefix\": \"gl-self-monitoring\", \"index_analyzer\": \"standard\", \"index_optimization_max_num_segments\": 1, \"index_optimization_disabled\": false, \"field_type_refresh_interval\": 5000, \"field_type_profile\": ${MONITORING_FIELD_TYPE_PROFILE}, \"use_legacy_rotation\": false, \"writable\": true}" | jq '.id')
-
-    echo "[INFO] - CREATE STREAM FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all self monitoring events created by Docker\", \"title\": \"System Self Monitoring (Evaluation)\", \"remove_matches_from_default_stream\": true, \"matching_type\": \"OR\", \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
-
-    echo "[INFO] - CREATE STREAM RULE FOR SELF-MONITORING LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
-
-    echo "[INFO] - CREATE STREAM RULE FOR SELF-MONITORING LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"Self Monitoring Logs\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
-
-    echo "[INFO] - START STREAM FOR SELF-MONITORING LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
 
     echo "[INFO] - ACTIVATE OTX PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
@@ -622,6 +598,64 @@ function_createBaseConfiguration () {
     curl -s http://${GRAYLOG_ADMIN}:$GRAYLOG_PASSWORD@localhost/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null >/dev/null
 }
 
+function_configureSelfMonitoring () {
+
+    local ADMIN_TOKEN=${1}
+    local LOG_ITEM="evaluation-self-monitoring"
+    local ITEM_TITLE="Evaluation: Self Monitoring Logs"
+
+    echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF UDP 9900)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 9900 UDP GELF | ${ITEM_TITLE}\", \"type\": \"org.graylog2.inputs.gelf.udp.GELFUDPInput\", \"configuration\": { \"port\": 9900, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id') 
+
+    echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (BEATS TCP 5054)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INPUT_BEATS=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 5054 Beats | ${ITEM_TITLE}\", \"type\": \"org.graylog.plugins.beats.Beats2Input\", \"configuration\": { \"port\": 5054, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id')  
+
+    echo "[INFO] - CREATE FIELD TYPE PROFILE FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"custom_field_mappings\":[{ \"field\": \"command\", \"type\": \"string\" }, { \"field\": \"container_name\", \"type\": \"string\" }, { \"field\": \"image_name\", \"type\": \"string\" }, { \"field\": \"container_name\", \"type\": \"string\" }], \"name\": \"${ITEM_TITLE}\", \"description\": \"${ITEM_TITLE}\" }" | jq '.id')
+
+    echo "[INFO] - CREATE INDEX FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"shards\": 1, \"replicas\": 0, \"rotation_strategy_class\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy\", \"rotation_strategy\": {\"type\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"retention_strategy_class\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy\", \"retention_strategy\": { \"type\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig\", \"max_number_of_indices\": 20 }, \"data_tiering\": {\"type\": \"hot_only\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"title\": \"${ITEM_TITLE}\", \"description\": \"${ITEM_TITLE}\", \"index_prefix\": \"${LOG_ITEM}\", \"index_analyzer\": \"standard\", \"index_optimization_max_num_segments\": 1, \"index_optimization_disabled\": false, \"field_type_refresh_interval\": 5000, \"field_type_profile\": ${MONITORING_FIELD_TYPE_PROFILE}, \"use_legacy_rotation\": false, \"writable\": true}" | jq '.id')
+
+    echo "[INFO] - CREATE STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"${ITEM_TITLE}\", \"title\": \"${ITEM_TITLE}\", \"remove_matches_from_default_stream\": true, \"matching_type\": \"OR\", \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
+
+    echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-docker\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
+
+    echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-beats\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
+
+    echo "[INFO] - START STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
+
+}
+
+function_configureWindowsSidecarMonitoring () {
+
+    local ADMIN_TOKEN=${1}
+    local LOG_ITEM="windows-sidecar-monitoring"
+    local ITEM_TITLE="Evaluation: Sidecar for Windows Logs"
+
+    echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF TCP 12149)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 12149 TCP GELF | ${ITEM_TITLE}\", \"type\": \"org.graylog2.inputs.gelf.tcp.GELFTCPInput\", \"configuration\": { \"port\": 12149, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id') 
+
+    echo "[INFO] - CREATE FIELD TYPE PROFILE FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_FIELD_TYPE_PROFILE=$(curl -s http://localhost/api/system/indices/index_sets/profiles -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"custom_field_mappings\":[{ \"field\": \"command\", \"type\": \"string\" }, { \"field\": \"container_name\", \"type\": \"string\" }, { \"field\": \"image_name\", \"type\": \"string\" }, { \"field\": \"container_name\", \"type\": \"string\" }], \"name\": \"${ITEM_TITLE}\", \"description\": \"Field Mappings for Windows Sidecar Monitoring Messages\" }" | jq '.id')
+
+    echo "[INFO] - CREATE INDEX FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_INDEX=$(curl -s http://localhost/api/system/indices/index_sets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"shards\": 1, \"replicas\": 0, \"rotation_strategy_class\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategy\", \"rotation_strategy\": {\"type\": \"org.graylog2.indexer.rotation.strategies.TimeBasedSizeOptimizingStrategyConfig\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"retention_strategy_class\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy\", \"retention_strategy\": { \"type\": \"org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig\", \"max_number_of_indices\": 20 }, \"data_tiering\": {\"type\": \"hot_only\", \"index_lifetime_min\": \"P30D\", \"index_lifetime_max\": \"P90D\"}, \"title\": \"${ITEM_TITLE}\", \"description\": \"${ITEM_TITLE}\", \"index_prefix\": \"${LOG_ITEM}\", \"index_analyzer\": \"standard\", \"index_optimization_max_num_segments\": 1, \"index_optimization_disabled\": false, \"field_type_refresh_interval\": 5000, \"field_type_profile\": ${MONITORING_FIELD_TYPE_PROFILE}, \"use_legacy_rotation\": false, \"writable\": true}" | jq '.id')
+
+    echo "[INFO] - CREATE STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing all monitoring events created Graylog Sidecar on Windows\", \"title\": \"${ITEM_TITLE}\", \"remove_matches_from_default_stream\": true, \"matching_type\": \"OR\", \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
+
+    echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
+
+    echo "[INFO] - START STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
+
+}
+
 function_displayClusterId () {
 
     echo "  ADMINUSER: \"${GRAYLOG_ADMIN}\" 
@@ -641,6 +675,7 @@ function_displayClusterId () {
     echo "       *                                                    *"
     echo "       ******************************************************"
     echo ""
+    echo "[INFO] - CLUSTER-ID: $(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - GRAYLOG STACK WILL RESTART AFTER ADDING THE LICENSE"
 }
 
@@ -723,6 +758,9 @@ function_createInputs () {
 
         # Port 6514 Syslog TCP over TLS Input for Network Devices
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 6514 TCP Syslog over TLS | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "port": 6514, "number_worker_threads": 2, "bind_address": "0.0.0.0", "tls_cert_file": "/etc/graylog/server/input_tls/cert.crt", "tls_key_file": "/etc/graylog/server/input_tls/tls.key", "tls_enable": false, "tls_key_password": "" }}' 2>/dev/null >/dev/null
+        
+        # Port 12148 GELF TCP Input for NXLog
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12148 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "port": 12148, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
         # Port 12201 GELF TCP Input for NXLog
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 12201 TCP GELF | Evaluation Input", "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput", "configuration": { "port": 12201, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
@@ -745,10 +783,10 @@ function_createInputs () {
     fi
 }
 
-function_createEvaluationConfiguration () {
+function_configureEvaluationSetup () {
 
     local ADMIN_TOKEN=${1}
-    local SELF_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "System Self Monitoring (Evaluation)")' | jq -r .id)
+    local SELF_MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "Evaluation: Self Monitoring Logs")' | jq -r .id)
  
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then        
@@ -813,7 +851,17 @@ function_addSidecarConfigurationTags () {
 
 }
 
-function_enableIlluminatePackages () {
+function_enableGraylogSidecar () {
+
+    local SIDECAR_TOKEN=${1}
+    
+    echo "[INFO] - ENABLE AND START GRAYLOG SIDECAR ON HOST " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo graylog-sidecar -service install 2>/dev/null >/dev/null
+    sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
+    sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
+}
+
+function_configureEnterpriseFeatures () {
 
     local ADMIN_TOKEN=${1}
     local ILLUMINATE_PROCESSING_PACK_IDS='["illuminate-linux-auditbeat","illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","73788c38-0b74-4c03-8b69-2fcb4e110a9b","659b983d-9654-4141-a672-87dee3ee8176","d1aea731-2b18-4e47-9366-c526641f6dbd","illuminate-sysmon","5551b8a8-6459-446f-9ea8-63368bb39414","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","3c5c2c47-18a5-4054-9f0e-2443f6d96d02","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement"]'
@@ -824,21 +872,11 @@ function_enableIlluminatePackages () {
         
         echo "[INFO] - ENABLE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
-        sleep 300s
+        sleep 90s
         echo "[INFO] - ILLUMINATE PACKAGES ENABLED " | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO ENTERPRISE LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
-}
-
-function_enableGraylogSidecar () {
-
-    local SIDECAR_TOKEN=${1}
-    
-    echo "[INFO] - ENABLE AND START GRAYLOG SIDECAR ON HOST " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo graylog-sidecar -service install 2>/dev/null >/dev/null
-    sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
-    sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
 }
 
 function_configureSecurityFeatures () {
@@ -861,12 +899,17 @@ function_configureSecurityFeatures () {
 
         echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_SECURITY_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
-        sleep 300s
+        sleep 90s
         echo "[INFO] - ILLUMINATE SECURITY PACKAGES ENABLED" | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO SECURITY LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi 
 
+}
+
+function_restoreSystem () {
+    sudo rm -rf ${GRAYLOG_PATH}
+    grep -vwE PATH /etc/bash.bashrc | sudo tee /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
 
@@ -875,9 +918,11 @@ function_configureSecurityFeatures () {
 # Graylog Installation
 if [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "started" ]]
 then
-    echo "[INFO] - INSTALLATION WAS INTERRUPTED, RESET TO SNAPSHOT AND START AGAIN" 
-    read -p "press enter to continue..."
-    exit 
+    echo "[INFO] - GRAYLOG INSTALLATION FAILED - DELETING TRACES" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - GRAYLOG INSTALLATION FAILED - PLEASE RESTART THE PROCESS" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    read -p "[INFO] - PRESS ENTER TO CONTINUE..."
+    function_restoreSystem
+    exit
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     sudo date 2>/dev/null >/dev/null
@@ -919,8 +964,10 @@ then
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
-    function_createBaseConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
+    function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
+    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer "graylog1"
@@ -965,13 +1012,24 @@ then
     function_checkSystemAvailability
 
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
-    function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
-    function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN} 
+    function_configureEvaluationSetup ${GRAYLOG_ADMIN_TOKEN}
+    function_configureEnterpriseFeatures ${GRAYLOG_ADMIN_TOKEN} 
+
+    echo "[INFO] - GRAYLOG ENTERPRISE INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
+
+    echo "[INFO] - GRAYLOG SECURITY INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+else
+    echo "[INFO] - GRAYLOG INSTALLATION FAILED - DELETING TRACES" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - GRAYLOG INSTALLATION FAILED - PLEASE RESTART THE PROCESS" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    read -p "[INFO] - PRESS ENTER TO CONTINUE..."
+    function_restoreSystem
+    exit
 fi
 
-echo "[INFO] - FULL INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 exit

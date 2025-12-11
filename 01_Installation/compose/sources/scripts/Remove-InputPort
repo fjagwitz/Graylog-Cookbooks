@@ -9,7 +9,7 @@
 
 sudo date >/dev/null
 
-read -p "[INPUT] - MOVING FORWARD WILL CAUSE A SHORT SERVICE INTERRUPTION [yes/no]: " CONSENT
+read -p "[INPUT] - MOVING FORWARD WILL CAUSE A SHORT SERVICE INTERRUPTION [yes]: " CONSENT
 CONSENT=${CONSENT:-yes}
 
 if [[ ${CONSENT} != "yes" ]]
@@ -24,25 +24,33 @@ COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
 INPUT_PORT="${1}"
 
+while [[ ${INPUT_PORT} == "" ]]
+do
+    read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER(S) OF THE INPUT YOU WANT TO DELETE: " INPUT_PORT
+done
+
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
 sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
 for PORT in ${INPUT_PORT}
 do
-    while [[ ${PORT} == "" ]]
-    do
-        read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER(S) OF THE INPUT YOU WANT TO DELETE: " PORT
-    done
+    CHECK_INPUT_PORT=$(grep -ow ${PORT}:${PORT}/udp ${COMPOSE_FILE})
 
-    echo "[INFO] - REMOVING INPUT ON PORT ${PORT} "
-    echo "[INFO] - REMOVING INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
+    if [[ "${CHECK_INPUT_PORT}" == "${PORT}:${PORT}/udp" ]]
+    then
+        echo "[INFO] - REMOVING INPUT ON PORT ${PORT} "
+        echo "[INFO] - REMOVING INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
-    grep -vwE ${PORT}:${PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE} 2>/dev/null >/dev/null
-    wait
-    grep -vwE ::${PORT} ${STREAM_CONF} | sudo tee ${STREAM_CONF} 2>/dev/null >/dev/null
-    wait
-    grep -vwE ::${PORT} ${STREAM_CONF} | sudo tee ${STREAM_CONF} 2>/dev/null >/dev/null
-
+        grep -vwE ${PORT}:${PORT} ${COMPOSE_FILE} | sudo tee ${COMPOSE_FILE} 2>/dev/null >/dev/null
+        wait
+        grep -vwE ::${PORT} ${STREAM_CONF} | sudo tee ${STREAM_CONF} 2>/dev/null >/dev/null
+        wait
+        grep -vwE ::${PORT} ${STREAM_CONF} | sudo tee ${STREAM_CONF} 2>/dev/null >/dev/null
+    else
+        echo "[INFO] - PORT ${PORT} HAS NOT BEEN PUBLISHED ON THIS SYSTEM" 
+        echo "[INFO] - PORT ${PORT} HAS NOT BEEN PUBLISHED ON THIS SYSTEM" | logger -p user.info -e -t GRAYLOG-HELPER
+        exit
+    fi
 done
 
 echo "[INFO] - RESTART REVERSE PROXY CONTAINER NGINX1 " | logger -p user.info -e -t GRAYLOG-HELPER
