@@ -24,16 +24,16 @@ COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
 INPUT_PORT="${1}"
 
+while [[ ${PORT} == "" ]]
+do
+    read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER(S) OF THE INPUT YOU WANT TO DELETE: " PORT
+done
+
 sudo cp ${COMPOSE_FILE} ${COMPOSE_FILE}.bak
 sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
 for PORT in ${INPUT_PORT}
 do
-    while [[ ${PORT} == "" ]]
-    do
-        read -p "[INPUT] - PLEASE DEFINE THE PORT NUMBER(S) OF THE INPUT YOU WANT TO DELETE: " PORT
-    done
-
     echo "[INFO] - REMOVING INPUT ON PORT ${PORT} "
     echo "[INFO] - REMOVING INPUT ON PORT ${PORT} " | logger -p user.info -e -t GRAYLOG-HELPER
 
