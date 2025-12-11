@@ -1014,8 +1014,13 @@ then
     function_createEvaluationConfiguration ${GRAYLOG_ADMIN_TOKEN}
     function_enableIlluminatePackages ${GRAYLOG_ADMIN_TOKEN} 
 
+    echo "[INFO] - GRAYLOG ENTERPRISE INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
+
+    echo "[INFO] - GRAYLOG SECURITY INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
 else
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - DELETING TRACES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - PLEASE RESTART THE PROCESS" | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -1024,6 +1029,6 @@ else
     exit
 fi
 
-echo "[INFO] - FULL INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 exit
