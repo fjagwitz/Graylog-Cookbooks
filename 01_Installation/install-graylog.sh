@@ -28,7 +28,7 @@ GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(cat /etc/environment | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(env | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
 
 # Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
@@ -834,7 +834,7 @@ function_addSidecarConfigurationTags () {
     # identify Filebeat Collector for Linux
     local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/collectors | jq .collectors | jq '.[] | select(.name == "filebeat" and .node_operating_system == "linux")' | jq -r .id)
     local COLLECTOR_CONFIGURATION_ID=""
-    
+
     while [[ ${COLLECTOR_CONFIGURATION_ID}  == "" ]]
     do
         local COLLECTOR_CONFIGURATION_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name == "evaluation-sidecar-self-monitoring")' | jq -r .id)
