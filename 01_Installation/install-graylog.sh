@@ -28,7 +28,7 @@ GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(env | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(printenv | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
 
 # Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
