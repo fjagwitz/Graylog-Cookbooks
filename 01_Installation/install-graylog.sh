@@ -932,7 +932,7 @@ then
 
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
     function_checkPatchLevel
-    function_installScriptDependencies &
+    function_installScriptDependencies 
 
     function_checkSnapshot
     function_defineAdminName
@@ -949,7 +949,7 @@ then
 
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
-    function_startGraylogStack &
+    function_startGraylogStack
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
     function_downloadGraylogSidecarBinaries 
