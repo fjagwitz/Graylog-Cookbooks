@@ -834,10 +834,10 @@ function_addSidecarConfigurationTags () {
     # identify Filebeat Collector for Linux
     local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/collectors | jq .collectors | jq '.[] | select(.name == "filebeat" and .node_operating_system == "linux")' | jq -r .id)
     local COLLECTOR_CONFIGURATION_ID=""
-
+    
     while [[ ${COLLECTOR_CONFIGURATION_ID}  == "" ]]
     do
-        local COLLECTOR_CONFIGURATION_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name == "sidecar-self-monitoring")' | jq -r .id)
+        local COLLECTOR_CONFIGURATION_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name == "evaluation-sidecar-self-monitoring")' | jq -r .id)
         local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
         local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
         local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
