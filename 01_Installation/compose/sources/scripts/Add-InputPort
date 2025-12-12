@@ -24,7 +24,7 @@ COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
 STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
 INPUT_PORT="${1}"
 
-while [[ (${INPUT_PORT} -lt 514) || (${INPUT_PORT} -gt 65535) || (${INPUT_PORT} == "") ]]
+while [[ (${INPUT_PORT} == "") ]]
 do
     read -p "[INPUT] - PLEASE ASSIGN A VALID INPUT_PORT NUMBER(S) TO YOUR INPUT: " INPUT_PORT
 done
@@ -34,6 +34,11 @@ sudo cp ${STREAM_CONF} ${STREAM_CONF}.bak
 
 for PORT in ${INPUT_PORT}
 do 
+    while [[ (${PORT} -lt 514) || (${PORT} -gt 65535) ]]
+    do
+        read -p "[INPUT] - PLEASE ASSIGN A VALID INPUT_PORT NUMBER(S) TO YOUR INPUT: " PORT
+    done
+    
     CHECK_INPUT_PORT=$(grep -ow ${PORT}:${PORT}/udp ${COMPOSE_FILE})
 
     if [[ "${CHECK_INPUT_PORT}" == "${PORT}:${PORT}/udp" ]]
