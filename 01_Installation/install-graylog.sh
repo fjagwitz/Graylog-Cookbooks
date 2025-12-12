@@ -932,7 +932,7 @@ then
 
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
     function_checkPatchLevel
-    function_installScriptDependencies
+    function_installScriptDependencies &
 
     function_checkSnapshot
     function_defineAdminName
@@ -949,12 +949,12 @@ then
 
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
-    function_startGraylogStack
+    function_startGraylogStack &
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
-    function_downloadGraylogSidecarBinaries
-    function_downloadFilebeatBinaries
-    function_downloadNxlogBinaries
+    function_downloadGraylogSidecarBinaries 
+    function_downloadFilebeatBinaries 
+    function_downloadNxlogBinaries 
     function_checkSystemAvailability
 
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
