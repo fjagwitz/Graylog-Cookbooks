@@ -25,6 +25,12 @@ GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx4g -server -XX:+UseG1GC -XX:-OmitStackTrace
 #
 USE_SYSTEM_CA_CERTS = "true"
 
+## Configure Audit Log (settings known from server.conf: https://go2docs.graylog.org/current/interacting_with_your_log_data/audit_log.html)
+#
+GRAYLOG_AUDITLOG_MONGODB_KEEP_ENTRIES = 365d
+GRAYLOG_AUDITLOG_MONGODB_CLEANUP_INTERVAL = 1h
+GRAYLOG_AUDITLOG_MESSAGE_SIGNING_ENABLED = true
+
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
 #
 GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:9000"
