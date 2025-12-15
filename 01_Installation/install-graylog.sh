@@ -830,7 +830,7 @@ function_configureEvaluationSetup () {
     
 }
 
-function_addSidecarConfigurationTags () {
+function_addHostSidecarConfigurationTags () {
     # needs to run after configuration variables have been created
     local ADMIN_TOKEN=${1}
     # identify Filebeat Collector for Linux
@@ -848,8 +848,26 @@ function_addSidecarConfigurationTags () {
         sleep 10s        
     done
 
-    echo "[INFO] - CREATE GRAYLOG SIDECAR CONFIGURATION TAGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - CREATE GRAYLOG HOST SIDECAR CONFIGURATION TAG " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":\"${COLLECTOR_ID}\",\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
+}
+
+function_addWindowsSidecarConfigurationTags () {
+    # this function is only required unless https://github.com/Graylog2/graylog2-server/issues/24398 will be resolved 
+    local ADMIN_TOKEN=${1}
+    local GRAYLOG_SIDECAR_TAG="evaluation"
+    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name |test("evaluation-windows-*"))' | jq -r .id | xargs)
+
+    for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
+    do
+        local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
+        local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
+        local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
+        local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
+
+        echo "[INFO] - CREATE GRAYLOG WINDOWS SIDECAR CONFIGURATION TAG ON ${COLLECTOR_CONFIGURATION_NAME^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":\"${COLLECTOR_ID}\",\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
+    done
 
 }
 
@@ -975,7 +993,8 @@ then
     function_restartGraylogContainer "graylog1"
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_addSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
     function_addScriptRepositoryToPathVariable
