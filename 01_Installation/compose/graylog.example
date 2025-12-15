@@ -53,9 +53,9 @@ GRAYLOG_ALLOWED_AUXILIARY_PATH = "/etc/graylog/server"
 
 ## Graylog Reporting Configurations
 #
-GRAYLOG_REPORT_RENDER_URI = ""
+# GRAYLOG_REPORT_RENDER_URI = ""
+# GRAYLOG_REPORT_ACCEPT_INSECURE_CERTS = "true"
 GRAYLOG_REPORT_DISABLE_SANDBOX = "true"
-GRAYLOG_REPORT_ACCEPT_INSECURE_CERTS = "true"
 
 ## Graylog Content Pack Handling
 #
