@@ -860,7 +860,7 @@ function_addWindowsSidecarConfigurationTags () {
 
     for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
     do
-        local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | .collector_id)
+        local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
         local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
         local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
         local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
