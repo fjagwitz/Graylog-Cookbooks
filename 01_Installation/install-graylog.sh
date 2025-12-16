@@ -156,7 +156,6 @@ function_checkInternetConnectivity () {
 }
 
 function_checkPatchLevel () {
-    echo "[INFO] - DOWNLOAD AND INSTALL LATEST UPDATES "
     echo "[INFO] - DOWNLOAD AND INSTALL LATEST UPDATES " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq upgrade -y 2>/dev/null > /dev/null
     
