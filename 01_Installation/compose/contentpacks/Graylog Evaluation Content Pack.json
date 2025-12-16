@@ -1565,7 +1565,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.2+7a367fe"
+          "version": ">=7.0.1+29f3984"
         }
       ]
     },
@@ -1693,7 +1693,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.2+7a367fe"
+          "version": ">=7.0.1+29f3984"
         }
       ]
     }
