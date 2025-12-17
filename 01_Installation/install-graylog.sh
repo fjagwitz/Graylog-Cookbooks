@@ -156,7 +156,6 @@ function_checkInternetConnectivity () {
 }
 
 function_checkPatchLevel () {
-    echo "[INFO] - DOWNLOAD AND INSTALL LATEST UPDATES "
     echo "[INFO] - DOWNLOAD AND INSTALL LATEST UPDATES " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo apt -qq upgrade -y 2>/dev/null > /dev/null
     
@@ -401,7 +400,6 @@ function_installGraylogStack () {
     sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
     sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
 
-    sudo sed -i "s\hostname: \"samba1\"\hostname: \"${GRAYLOG_FQDN}\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
     sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
 
     echo "[INFO] - CONFIGURE SAMBA CONTAINER " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -570,6 +568,9 @@ function_addSidecarConfigurationVariables () {
 function_configurePlugins () {
     
     local ADMIN_TOKEN=${1}
+
+    echo "[INFO] - ADD INTERNAL WEBSERVER TO WHITELIST" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/system/urlallowlist -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By:localhost" -H 'Content-Type:application/json' -d '{"entries":[{"id":"5089e707-cd98-4b1d-9423-850a12272bbe","title":"Internal Webserver","value":"http://lookuptables/*","type":"regex"}],"disabled":false}'
 
     echo "[INFO] - ACTIVATE OTX PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
