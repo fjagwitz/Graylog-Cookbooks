@@ -569,7 +569,7 @@ function_configurePlugins () {
     
     local ADMIN_TOKEN=${1}
 
-    echo "[INFO] - ADD INTERNAL WEBSERVER TO WHITELIST" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - ADD INTERNAL WEBSERVER TO ALLOWLIST" | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/system/urlallowlist -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By:localhost" -H 'Content-Type:application/json' -d '{"entries":[{"id":"5089e707-cd98-4b1d-9423-850a12272bbe","title":"Internal Webserver","value":"http://lookuptables/*","type":"regex"}],"disabled":false}'
 
     echo "[INFO] - ACTIVATE OTX PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
