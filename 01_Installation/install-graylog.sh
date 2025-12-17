@@ -569,9 +569,10 @@ function_addSidecarConfigurationVariables () {
 function_configurePlugins () {
     
     local ADMIN_TOKEN=${1}
+    local ALLOWLIST_ENTRIES="{\"type\":\"regex\",\"title\":\"Internal Webserver\",\"value\":\"http://lookuptables/*\"}"
 
-    echo "[INFO] - ADD INTERNAL WEBSERVER TO WHITELIST" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/system/urlallowlist -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By:localhost" -H 'Content-Type:application/json' -d { "entries":[{"id":"c0f767e0-0696-4a39-ade1-66c611742de5","type":"regex","title":"Internal Webserver","value":"http://lookuptables/*"}],"disabled":false}
+    echo "[INFO] - ADD INTERNAL WEBSERVER TO ALLOWLIST" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/system/urlallowlist -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By:localhost" -H 'Content-Type:application/json' -d {\"entries\":[${ALLOWLIST_ENTRIES}],\"disabled\":false}"
 
     echo "[INFO] - ACTIVATE OTX PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/system/content_packs/daf6355e-2d5e-08d3-f9ba-44e84a43df1a/1/installations -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"entity":{"parameters":{},"comment":"Activated for Evaluation"}}' 2>/dev/null >/dev/null
