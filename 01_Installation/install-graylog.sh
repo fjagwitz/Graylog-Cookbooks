@@ -500,12 +500,12 @@ function_downloadBeatsBinaries () {
     sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64
     sudo rm ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip
 
-    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
-    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64
-    sudo rm ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip
+    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64
+    sudo rm ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip
 
 }
 
