@@ -13,6 +13,11 @@ This Section contains preconfigured Audit Policies that have been created along 
 - The high amount of logs might overwhelm your Log Management System in case you are not prepared
 
 
+**What to consider when auditing Applications:**
+- Start linking the Domain Application Audit Policy with specific Systems (preferrably not the entire Domain) and review the Logs before extending the Scope
+- The Policy is configured in *Audit Mode* and is not expected to impact your System's availability. Review the Settings after importing the Policy before activating it
+
+
 **Links:** 
 - Microsoft Security Baselines Introduction: https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines
 - Microsoft Audit Policy Recommendations: https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/audit-policy-recommendations
