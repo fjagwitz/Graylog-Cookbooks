@@ -4,11 +4,11 @@ This Section contains preconfigured Audit Policies that have been created along 
 
 Domain Controller Audit Policies should be linked with the Domain Controllers OU to properly control the Scope of the Audit Settings: 
 
-    ![Example_DC](.Images/Domain_Controllers_Audit_Policy.png)
+![Example_DC](.Images/Domain_Controllers_Audit_Policy.png)
 
 Domain Member Server Audit Policies should be linked with one or more OUs being used for Device Management:
 
-    ![Example_MS](.Images/Domain_Member_Servers_Audit_Policy.png)
+![Example_MS](.Images/Domain_Member_Servers_Audit_Policy.png)
 
 
 
