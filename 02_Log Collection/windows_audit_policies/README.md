@@ -10,7 +10,7 @@ This Section contains preconfigured Audit Policies that have been created along 
 - Global Object Access Auditing can create large amounts of logs; this can impact your System's availability
 - The high amount of logs might overwhelm your Log Management System in case you are not prepared
 
-Links: 
+> #### Links: 
 - Microsoft Security Baselines Introduction: https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines
 - Microsoft Audit Policy Recommendations: https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/audit-policy-recommendations
 - Best Practices regarding Advanced Audit Policy: https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/advanced-audit-policy-configuration
