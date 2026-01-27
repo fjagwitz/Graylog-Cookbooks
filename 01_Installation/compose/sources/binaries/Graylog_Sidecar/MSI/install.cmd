@@ -8,19 +8,19 @@ FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*filebeat*.exe') DO SET "FILEBEAT=%%V"
 FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*winlogbeat*.exe') DO SET "WINLOGBEAT=%%V"
 FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*graylog*.msi') DO SET "INSTALLER=%%V"
 
-echo "[INFO] - INSTALL GRAYLOG SIDECAR "
+echo [INFO] - INSTALL GRAYLOG SIDECAR
 msiexec.exe /q /i "%WORKDIR%%INSTALLER%" 
 
 ::
 :: copy sidecar configuration file into the sidecar folder
-echo "[INFO] - CONNECT SIDECAR WITH YOUR GRAYLOG CLUSTER"
+echo [INFO] - CONNECT SIDECAR WITH YOUR GRAYLOG CLUSTER
 robocopy %WORKDIR% "%SIDECAR_FOLDER%" %SIDECAR_YML% /NFL /NDL /NJH /NJS >nul
 
 ::
 :: copy filebeat standalone into the sidecar folder
 :: copy winlogbeat standalone into the sidecar folder
 
-echo "[INFO] - REPLACE BEATS OSS BY BEATS STANDALONE "
+echo [INFO] - REPLACE BEATS OSS BY BEATS STANDALONE
 robocopy %WORKDIR% "%SIDECAR_FOLDER%" %FILEBEAT% /NFL /NDL /NJH /NJS >nul
 robocopy %WORKDIR% "%SIDECAR_FOLDER%" %WINLOGBEAT% /NFL /NDL /NJH /NJS >nul
 
@@ -32,7 +32,18 @@ FOR /F "tokens=*" %%V IN (' %DNS% ') DO SET DNSSERVER=%%V
 
 :: enable dns etw-logging on system level
 :: wevtutil sl Microsoft-Windows-DNSServer/Analytical /Enabled:true /quiet
-IF %DNSSERVER%==Installed echo "To activate DNS Logging on this System, type wevtutil sl Microsoft-Windows-DNSServer/Analytical /Enabled:true /quiet"
+IF %DNSSERVER%==Installed (
+echo.
+echo.
+echo 	To activate DNS Logging on this System, follow the instructions on 
+echo 	https://learn.microsoft.com/en-us/windows-server/networking/dns/dns-logging-and-diagnostics
+echo.
+echo 	In case you are more the TL;DR type of Admin, just type the command below into your console:  
+echo.
+echo 	wevtutil sl Microsoft-Windows-DNSServer/Analytical /Enabled:true /quiet
+echo.
+echo.  
+)
 
 ::
 :: enable and start graylog-sidecar as a system service
