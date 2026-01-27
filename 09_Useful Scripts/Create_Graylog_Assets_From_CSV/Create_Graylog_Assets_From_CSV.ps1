@@ -1,6 +1,6 @@
 ﻿ $assetFile = "asset_data.csv"
- $assetData = Import-Csv -Path $assetFile -Delimiter ";"
- $targetSystem = "your.graylog.local"
+ $assetData = Import-Csv -Path $assetFile -Delimiter ";" -Encoding UTF8
+ $targetSystem = "my.graylog.intern"
  $cred = Get-Credential
 
  foreach ($asset in $assetData) {
@@ -59,13 +59,25 @@
         }         
     }
 
+    
     $Body = ConvertTo-Json -InputObject $Body -Depth 10
 
-    Invoke-RestMethod `
-        -Uri "http://$targetSystem/api/plugins/org.graylog.plugins.securityapp.asset/assets" `
-        -Credential $cred `
-        -Method Post `
-        -ContentType application/json `
-        -Headers @{ 'X-Requested-By' = "$hostname" } `
-        -Body $Body
+    try {
+        $outcome=Invoke-RestMethod `
+            -Uri "http://$targetSystem/api/plugins/org.graylog.plugins.securityapp.asset/assets" `
+            -Credential $cred `
+            -Method Post `
+            -ContentType "application/json; charset=utf-8" `
+            -Headers @{ 
+                'X-Requested-By' = "$hostname"
+             } `
+            -Body $Body
+    }
+    
+    catch {
+        
+        $assetId= ConvertFrom-Json -InputObject $body | Select-Object -ExpandProperty name
+        Write-Host -ForegroundColor Red "The Asset with the Asset ID $assetId has not been properly created"
+    }
+    
 }
