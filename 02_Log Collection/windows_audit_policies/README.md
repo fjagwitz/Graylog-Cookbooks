@@ -2,7 +2,7 @@
 
 This Section contains preconfigured Audit Policies that have been created along the Microsoft Audit Policy Recommendations. Microsoft makes a difference between Auditing Domain Controllers and Domain Member Servers, as these require different Audit Settings. You will find Policies excluding/including Global Object Access Auditing (GOAA), as activating this functionality requires some consideration in Advance. 
 
-You can download these policies and import them into your Active Directory. Before you link any of these Policies to any of your OUs, carefully review the Settings and decide wisely, whether or not these require changes before using them in production .
+You can download these policies and import them into your Active Directory. Before you link any of these Policies to any of your OUs, carefully review the Settings and decide wisely, whether or not these require changes before using them in production.
 
 
 **What to consider when linking Auditing GPOs:**
