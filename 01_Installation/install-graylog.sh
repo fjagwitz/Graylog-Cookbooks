@@ -871,7 +871,7 @@ function_addWindowsSidecarConfigurationTags () {
     # this function is only required unless https://github.com/Graylog2/graylog2-server/issues/24398 will be resolved 
     local ADMIN_TOKEN=${1}
     local GRAYLOG_SIDECAR_TAG="evaluation"
-    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name |test("evaluation-windows-*"))' | jq -r .id | xargs)
+    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("evaluation-windows-*"))' | jq -r .id | xargs)
 
     for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
     do
@@ -945,6 +945,14 @@ function_configureSecurityFeatures () {
 function_restoreSystem () {
     sudo rm -rf ${GRAYLOG_PATH}
     grep -vwE PATH /etc/bash.bashrc | sudo tee /etc/bash.bashrc 2>/dev/null >/dev/null
+}
+
+function_removeAdminToken () {
+    local ADMIN_TOKEN=${1}
+    local ADMIN_TOKEN_ID=(curl -s http://localhost/api/users/local:admin/tokens -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .tokens | jq '.[] | select(.name | test("evaluation-*"))' | jq .id| 2>/dev/null >/dev/null)
+
+    curl -s http://localhost/api/users/local:admin/tokens -u ${ADMIN_TOKEN}:token -X DELETE http://localhost/api/users/local:admin/tokens/${ADMIN_TOKEN_ID}
+           
 }
 
 
@@ -1058,6 +1066,10 @@ then
 
     echo "[INFO] - GRAYLOG SECURITY INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
+    function_removeAdminToken ${GRAYLOG_ADMIN_TOKEN}
+
+    echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
 else
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - DELETING TRACES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - PLEASE RESTART THE PROCESS" | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -1065,7 +1077,5 @@ else
     function_restoreSystem
     exit
 fi
-
-echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 exit
