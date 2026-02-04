@@ -535,7 +535,7 @@ function_prepareSidecarConfiguration () {
     # Disable TLS validation enforcement
     sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tags
-    sudo sed -i 's/tags: [[]]/tags:\n  - evaluation\n  - windows\n  - applocker\n  - powershell\n  - defender\n  - rds\n  - forwarded\n  - sysmon\n  - ssh\n  - bpa\n  - bits/g' ${SIDECAR_YML}
+    sudo sed -i 's/tags: [[]]/tags:\n  - evaluation\n  - windows\n  - applocker\n  - powershell\n  - defender\n  - rds\n  - forwarded\n  - sysmon\n  - ssh\n  - bpa\n  - bits\n  #- adds # Active Directory Domain Controller\n  #- dns # Domain Name Server/g' ${SIDECAR_YML}
     # Change LF to CRLF as this is a Windows Configuration File
     sudo unix2dos ${SIDECAR_YML} 2>/dev/null >/dev/null
 
