@@ -4,14 +4,14 @@ SET WORKDIR=%~dp0
 SET SIDECAR_FOLDER=%PROGRAMFILES%\Graylog\sidecar
 SET SIDECAR_YML=sidecar.yml
 
-FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*filebeat*.exe') DO SET "FILEBEAT=%%V"
-FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*winlogbeat*.exe') DO SET "WINLOGBEAT=%%V"
-FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*graylog*.msi') DO SET "GRAYLOG=%%V"
-FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*nxlog-ce*.msi') DO SET "NXLOG=%%V"
+FOR /F "delims=" %%V IN ('dir /b "%WORKDIR%*filebeat*.exe"') DO SET "FILEBEAT=%%V"
+FOR /F "delims=" %%V IN ('dir /b "%WORKDIR%*winlogbeat*.exe"') DO SET "WINLOGBEAT=%%V"
+FOR /F "delims=" %%V IN ('dir /b "%WORKDIR%*graylog*.msi"') DO SET "GRAYLOG=%%V"
+FOR /F "delims=" %%V IN ('dir /b "%WORKDIR%*nxlog-ce*.msi"') DO SET "NXLOG=%%V"
 
 ::
 :: install NXLog CE
-IF EXIST %WORKDIR%%NXLOG% ( echo [INFO] - INSTALL NXLOG CE 
+IF EXIST "%WORKDIR%%NXLOG%" ( echo [INFO] - INSTALL NXLOG CE 
 msiexec.exe /q ALLUSERS=2 /i "%WORKDIR%%NXLOG%" INSTALLDIR="%PROGRAMFILES%\nxlog"
 net stop nxlog >NUL 2>&1
 "%PROGRAMFILES%\nxlog\nxlog" -u >NUL 2>&1 
@@ -41,6 +41,7 @@ copy "%WORKDIR%%WINLOGBEAT%" "%SIDECAR_FOLDER%\%WINLOGBEAT%" >NUL
 ::
 :: check for DNS Server role installed on the system
 :: enable dns etw-logging on system level
+echo [INFO] - RUN DNS SERVICE AVAILABILITY CHECK
 SET DNS="powershell (Get-WindowsFeature -Name DNS).InstallState"
 FOR /F "tokens=*" %%V IN (' %DNS% ') DO SET DNSSERVER=%%V
 
@@ -67,7 +68,7 @@ echo.
 
 SET SIDECAR="sc query graylog-sidecar | FIND /C "RUNNING""
 FOR /F "tokens=*" %%V IN (' %SIDECAR% ') DO SET SIDECARCONNECTION=%%V
-if %SIDECARCONNECTION%==1 echo[INFO] - SIDECAR SUCCESSFULLY CONNECTED TO YOUR GRAYLOG CLUSTER
+if %SIDECARCONNECTION%==1 echo [INFO] - SIDECAR SUCCESSFULLY CONNECTED TO YOUR GRAYLOG CLUSTER
 
 echo [WARN] - CONFIGURED TLS CONNECTION WITHOUT CERTIFICATE VALIDATION
 echo [WARN] - CONIFGURING TLS IN A SECURE WAY NEEDS MANUAL INTERACTION
