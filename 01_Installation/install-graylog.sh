@@ -944,12 +944,13 @@ function_configureSecurityFeatures () {
 
 function_restoreSystem () {
     sudo rm -rf ${GRAYLOG_PATH}
+    sudo apt purge graylog-sidecar -y
     grep -vwE PATH /etc/bash.bashrc | sudo tee /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
 function_removeAdminToken () {
     local ADMIN_TOKEN=${1}
-    local ADMIN_TOKEN_ID=$(curl -s http://localhost/api/users/local:admin/tokens -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .tokens | jq '.[] | select(.name | test("evaluation-*"))' | jq .id| 2>/dev/null >/dev/null)
+    local ADMIN_TOKEN_ID=$(curl -s http://localhost/api/users/local:admin/tokens -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .tokens | jq '.[] | select(.name | test("evaluation-*"))' | jq .id 2>/dev/null >/dev/null)
 
     curl -s http://localhost/api/users/local:admin/tokens -u ${ADMIN_TOKEN}:token -X DELETE http://localhost/api/users/local:admin/tokens/${ADMIN_TOKEN_ID}
            
