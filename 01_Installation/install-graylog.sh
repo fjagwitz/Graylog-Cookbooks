@@ -346,7 +346,7 @@ function_installGraylogStack () {
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/{ssl},nginx1,nginx2,notifications,prometheus,rootcerts,samba,sources/{scripts,binaries/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,NXLog_CommunityEdition},other}}
+    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/{ssl},nginx1,nginx2,notifications,prometheus,rootcerts,samba,sources/{scripts,binaries/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition},other}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
@@ -468,9 +468,6 @@ function_downloadGraylogSidecarBinaries () {
     # https://github.com/Graylog2/collector-sidecar/releases/download/1.5.1/graylog_sidecar_installer_1.5.1-1.exe
     local SIDECAR_EXE="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog_sidecar_installer_${SIDECAR_VERSION}-1.exe"
     local SIDECAR_YML="https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml"
-    local FILEBEAT_VERSION="8.19.7"
-    local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip"
-    local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.msi"
     
     echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
@@ -478,22 +475,37 @@ function_downloadGraylogSidecarBinaries () {
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE -LOs ${SIDECAR_EXE}
 }
 
-function_downloadFilebeatBinaries () {
+function_downloadBeatsBinaries () {
 
-    local FILEBEAT_VERSION="8.19.7"
-    local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip"
-    local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-windows-x86_64.msi"
+    local BEATS_VERSION="8.19.10"
+
+    local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.zip"
+    local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.msi"
+
+    local WINLOGBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip"
+    local WINLOGBEAT_MSI="https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-${BEATS_VERSION}-windows-x86_64.msi"
     
     echo "[INFO] - DOWNLOAD FILEBEAT STANDALONE FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_ZIP}
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_MSI}
 
-    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
-    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64
-    sudo rm ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${FILEBEAT_VERSION}-windows-x86_64.zip
+    echo "[INFO] - DOWNLOAD WINLOGBEAT STANDALONE FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone -LOs ${WINLOGBEAT_ZIP}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone -LOs ${WINLOGBEAT_MSI}
+
+    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64
+    sudo rm ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip
+
+    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64
+    sudo rm ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip
 
 }
 
@@ -523,7 +535,7 @@ function_prepareSidecarConfiguration () {
     # Disable TLS validation enforcement
     sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tags
-    sudo sed -i 's/tags: [[]]/tags:\n  - evaluation\n  - windows\n  - applocker\n  - powershell\n  - defender\n  - rds\n  - forwarded\n  - sysmon\n  - ssh\n  - bpa\n  - bits/g' ${SIDECAR_YML}
+    sudo sed -i 's/tags: [[]]/tags:\n  - evaluation\n  - windows\n  - applocker\n  - powershell\n  - defender\n  - rds\n  - forwarded\n  - sysmon\n  - ssh\n  - bpa\n  - bits\n  #- adds # Active Directory Domain Controller\n  #- dns # Domain Name Server/g' ${SIDECAR_YML}
     # Change LF to CRLF as this is a Windows Configuration File
     sudo unix2dos ${SIDECAR_YML} 2>/dev/null >/dev/null
 
@@ -859,7 +871,7 @@ function_addWindowsSidecarConfigurationTags () {
     # this function is only required unless https://github.com/Graylog2/graylog2-server/issues/24398 will be resolved 
     local ADMIN_TOKEN=${1}
     local GRAYLOG_SIDECAR_TAG="evaluation"
-    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name |test("evaluation-windows-*"))' | jq -r .id | xargs)
+    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("evaluation-windows-*"))' | jq -r .id | xargs)
 
     for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
     do
@@ -935,6 +947,14 @@ function_restoreSystem () {
     grep -vwE PATH /etc/bash.bashrc | sudo tee /etc/bash.bashrc 2>/dev/null >/dev/null
 }
 
+function_removeAdminToken () {
+    local ADMIN_TOKEN=${1}
+    local ADMIN_TOKEN_ID=$(curl -s http://localhost/api/users/local:admin/tokens -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .tokens | jq '.[] | select(.name | test("evaluation-*"))' | jq .id| 2>/dev/null >/dev/null)
+
+    curl -s http://localhost/api/users/local:admin/tokens -u ${ADMIN_TOKEN}:token -X DELETE http://localhost/api/users/local:admin/tokens/${ADMIN_TOKEN_ID}
+           
+}
+
 
 ###############################################################################
 #
@@ -976,7 +996,7 @@ then
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
     function_downloadGraylogSidecarBinaries 
-    function_downloadFilebeatBinaries 
+    function_downloadBeatsBinaries 
     function_downloadNxlogBinaries 
     function_checkSystemAvailability
 
@@ -1046,6 +1066,10 @@ then
 
     echo "[INFO] - GRAYLOG SECURITY INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
+    function_removeAdminToken ${GRAYLOG_ADMIN_TOKEN}
+
+    echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
 else
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - DELETING TRACES" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - PLEASE RESTART THE PROCESS" | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -1053,7 +1077,5 @@ else
     function_restoreSystem
     exit
 fi
-
-echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 exit
