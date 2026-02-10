@@ -1,25 +1,211 @@
 {
   "v": 1,
-  "id": "68efd81d-aeff-4aa0-b2fa-9f793b15bc1f",
+  "id": "5c2f7a21-ef6a-4f3a-8158-c54b10b3f4e0",
   "rev": 1,
-  "name": "Evaluation Content Pack",
-  "summary": "Evaluation Content Pack",
-  "description": "Evaluation Content Pack",
-  "vendor": "Evaluation Content Pack",
+  "name": "Community: Evaluation Content Pack",
+  "summary": "Community: Evaluation Content Pack",
+  "description": "Community: Evaluation Content Pack",
+  "vendor": "Graylog Community",
   "url": "https://github.com/fjagwitz/Graylog-Cookbooks",
   "parameters": [],
   "entities": [
     {
       "v": "1",
       "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "8cfbe90c-2986-4a89-a064-b35106e8ac47",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "14249a10-ad74-4752-a6f7-66b963ab53f7"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "evaluation-sidecar-self-monitoring"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#827717"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_self}\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\n- type: filestream\n  id: graylog-sidecar-filestream\n  enabled: true\n  paths:\n  - /var/log/graylog-sidecar/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: graylog-sidecar\n\n- type: filestream\n  id: logsamples-filestream\n  enabled: true\n  paths:\n  - /opt/graylog/logsamples/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: logsamples\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "a07c3de6-7fe4-416b-93d9-08427c473b9c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Graylog Monitoring - Self 001"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Parser Opensearch"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation: Graylog Monitoring - Self 001\"\n\nwhen\n    contains(to_string($message.image_name),\"opensearch\")\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "b8ed9f58-92de-424f-8574-bddc6edd34a7",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Graylog Monitoring - Self 004"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Parser MongoDB"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule\"Evaluation: Graylog Monitoring - Self 004\"\n\nwhen\n    contains(to_string($message.image_name),\"mongo\")\n    //true\nthen\n    \n    let mylog = flatten_json(to_string(parse_json(replace(to_string($message.message),\"$\"))),\"flatten\",true);\n    \n    set_fields(to_map(mylog));\n\n    rename_field(\"attr_message_msg\",\"message\");\n    rename_field(\"attr_message_verbose_level\",\"event_severity\");\n    rename_field(\"attr_message_session_name\",\"application_component\");\n    rename_field(\"t_date\",\"event_created\");\n    rename_field(\"created\",\"container_created\");\n    \n    remove_multiple_fields(\n        pattern: \"attr_[A-Za-z-_]*\",\n        names: [\"c\",\"container_id\",\"ctx\",\"id\",\"image_id\",\"msg\",\"s\",\"tag\"]\n    );\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "5a35300f-d87e-406a-9b63-05e7ade3059f",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "54f2f62d-54e9-4da3-9610-3eefccb71213"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "evaluation-windows-nxlog"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#33691e"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "define ROOT ${user.nxlog_path}\ndefine SYSTEMROOT C:\\Windows\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n\n<Extension logrotate>\n  Module  xm_fileop\n  <Schedule>\n    When    @daily\n    Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n  </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  ShortMessageLength 65536\n</Extension>\n\n\n<Extension _json>\n  Module  xm_json\n</Extension>\n\n<#if sidecar.tags.nxlog??>\n<Input wineventlog>\n  # Send Windows Security Logs\n  Module im_msvistalog\n  PollInterval 5\n  SavePos True\n  ReadFromLast True\n\n  <QueryXML>\n    <QueryList>\n      <Query Id=\"0\">\n        # Windows Security Logging\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Security\">*</Select>\n        <Select Path=\"Microsoft-Windows-Security-Audit-Configuration-Client/Operational\">*</Select>\n        </#if>\n        # Windows Operational Logging\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Application\">*</Select>\n        <Select Path=\"System\">*</Select>\n        <Select Path=\"Setup\">*</Select>\n        <Select Path=\"Microsoft-Windows-GroupPolicy/Operational\">*</Select>\n        </#if>\n        # Forwarded Events Logging\n        <#if sidecar.tags.forwarded??>\n        <Select Path=\"ForwardedEvents\">*</Select>\n        </#if> \n        # Active Directory Domain Services Logging\n        <#if sidecar.tags.adds??>   \n        <Select Path=\"Active Directory Web Services\">*</Select>\n        <Select Path=\"DFS Replication\">*</Select>\n        <Select Path=\"Directory Service\">*</Select>\n        </#if> \n        # Microsoft DNS Loggging\n        <#if sidecar.tags.dns??>    \n        <Select Path=\"DNS Server\">*</Select>\n        <Select Path=\"Microsoft-Windows-DNSServer/Audit\">*</Select>\n        </#if>\n        # OpenSSH Logging\n        <#if sidecar.tags.ssh??>      \n        <Select Path=\"OpenSSH/Operational\">*</Select>\n        </#if> \n        # Microsoft Windows Best Practices Analyzer (BPA) Logging\n        <#if sidecar.tags.bpa??>      \n        <Select Path=\"Microsoft-Windows-BestPractices/Operational\">*</Select>\n        </#if> \n        # BITS Transfer Logging\n        <#if sidecar.tags.bits??>    \n        <Select Path=\"Microsoft-Windows-Bits-Client/Operational\">*</Select>\n        </#if> \n        # Sysmon Logging\n        <#if sidecar.tags.sysmon??>    \n        <Select Path=\"Microsoft-Windows-Sysmon/Operational\">*</Select>\n        </#if> \n        # Remote Desktop Services (Terminalservices) Logging\n        <#if sidecar.tags.rds??>    \n        <Select Path=\"Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\">*</Select>\n        </#if>\n        # Defender Logging\n        <#if sidecar.tags.defender??>    \n        <Select Path=\"Microsoft-Windows-Windows Defender/Operational\">*</Select>  \n        </#if> \n        # Powershell Logging\n        <#if sidecar.tags.powershell??>     \n        <Select Path=\"Windows PowerShell\">*</Select>\n        <Select Path=\"Microsoft-Windows-PowerShell/Operational\">*</Select>\n        </#if>   \n        # Applocker Logging\n        <#if sidecar.tags.applocker??>    \n        <Select Path=\"Microsoft-Windows-AppLocker/EXE and DLL\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/MSI and Script\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Deployment\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Execution\">*</Select>\n        </#if> \n      </Query>\n    </QueryList>\n  </QueryXML>\n</Input>\n</#if>\n\n\n<Input internal>\n  # Sending NXLog Logs\n  Module  im_internal\n</Input>\n\n\n<Input system-heartbeat>\n  # Send Heartbeat every 1 Minute\n  Module          im_mark\n  MarkInterval    1\n  Mark            -=| ALIVE |=-\n</Input>\n\n<#if sidecar.tags.nxlog??>\n<Input file>\n  # Send Graylog Sidecar logs\n  Module im_file\n  File \"C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\"\n  PollInterval 1\n  SavePos  True\n  ReadFromLast True\n  Recursive False\n  RenameCheck False\n  Exec $FileName = file_name();\n</Input>\n</#if>\n\n\n<Input windows-features>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n\n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n\n  ## Using the configuration from the following line will only send the installed Features to Graylog\n  #Arg     Get-WindowsFeature | Where-Object { $_.Installed -eq $true } | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n\n  ## Using the configuration from the following line will send an overview of all installed and available Features to Graylog\n  Arg     Get-WindowsFeature | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n\n  <Exec>\n    $nxlog_tag = 'Compliance_WindowsServerRoles'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n  </Exec>\n\n</Input>\n\n\n<Input users-with-reversible-password-encryption>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n  \n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n  \n  ## Using the configuration from the following line will send an overview of all Users configured with reversible Password Encryption\n  Arg     Get-ADUser -filter {AllowReversiblePasswordEncryption -eq $True} -Properties \"AllowReversiblePasswordEncryption\" | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n  <Exec>\n    $nxlog_tag = 'Compliance_UserProperties'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n  </Exec>\n    \n</Input>\n\n\n<Output gelf>\n  Module om_tcp\n  Host ${user.graylog_host}\n  Port ${user.nxlog_port_windows}\n  OutputType GELF_TCP\n  <Exec>\n    # These fields are needed for Graylog\n    $gl2_source_collector = '${sidecar.nodeId}';\n    $collector_node_id = '${sidecar.nodeName}';\n    $agent_type = 'nxlog';\n  </Exec>\n</Output>\n\n\n<#if sidecar.tags.nxlog??>    \n<Route route-1>\n  Path wineventlog => gelf\n</Route>\n</#if>\n<#if sidecar.tags.nxlog??>    \n<Route route-2>\n  Path file => gelf\n</Route>\n</#if>\n<Route route-3>\n  Path internal => gelf\n</Route>\n<Route route-4>\n  Path system-heartbeat => gelf\n</Route>\n<Route route-5>\n  Path windows-features => gelf\n</Route>\n<Route route-6>\n  Path users-with-reversible-password-encryption => gelf\n</Route>\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "eb935c57-64f0-40ba-a0d8-8b750c17ada5",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "d14ed077-c246-415d-b182-89b6743fb996"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "evaluation-windows-filebeat"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#194d33"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\n\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\n\n\n<#if sidecar.tags.dns??>\nfilebeat.inputs:\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "cb201e4d-35ec-420c-9072-8d0883dd90a3",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Graylog Monitoring - Self"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation: Graylog Monitoring - Self"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Evaluation: Graylog Monitoring - Self\"\nstage 1 match pass\nrule \"Evaluation: Graylog Monitoring - Self 001\"\nrule \"Evaluation: Graylog Monitoring - Self 002\"\nrule \"Evaluation: Graylog Monitoring - Self 003\"\nrule \"Evaluation: Graylog Monitoring - Self 004\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "ff24841b-8da5-48b3-a2bf-bf78fa8bec82"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "dashboard",
         "version": "2"
       },
-      "id": "920d88c4-b4c0-41db-a77c-1cc3678d37f6",
+      "id": "c17abc20-2027-4533-8137-9ef85fba5a3d",
       "data": {
         "summary": {
           "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Dashboard"
+          "@value": "Evaluation: Graylog Monitoring - Self"
         },
         "search": {
           "queries": [
@@ -407,7 +593,7 @@
                   },
                   "offset": 0,
                   "streams": [
-                    "66efed04-c69d-4b2e-9b65-4c9f891d0e76"
+                    "ff24841b-8da5-48b3-a2bf-bf78fa8bec82"
                   ],
                   "filter": null,
                   "decorators": [],
@@ -429,7 +615,7 @@
                   },
                   "offset": 0,
                   "streams": [
-                    "66efed04-c69d-4b2e-9b65-4c9f891d0e76"
+                    "ff24841b-8da5-48b3-a2bf-bf78fa8bec82"
                   ],
                   "filter": null,
                   "decorators": [],
@@ -673,6 +859,44 @@
             "widgets": [
               {
                 "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component",
+                    "message"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 86400,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "89c08a2b-7d44-411e-bccd-01c1d7075423",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
                   "visualization": "table",
                   "units": {},
                   "column_limit": null,
@@ -784,44 +1008,6 @@
                 "id": "3bfcec39-947a-421a-b700-1caf10180cf4",
                 "filters": [],
                 "description": null
-              },
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component",
-                    "message"
-                  ],
-                  "units": {},
-                  "show_message_row": false,
-                  "show_summary": false,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 86400,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "89c08a2b-7d44-411e-bccd-01c1d7075423",
-                "filters": [],
-                "description": null
               }
             ],
             "widget_mapping": {
@@ -877,44 +1063,6 @@
               }
             },
             "widgets": [
-              {
-                "config": {
-                  "fields": [
-                    "timestamp",
-                    "container_name",
-                    "event_severity",
-                    "application_component",
-                    "message"
-                  ],
-                  "units": {},
-                  "show_message_row": false,
-                  "show_summary": false,
-                  "decorators": [],
-                  "sort": [
-                    {
-                      "type": "pivot",
-                      "field": "timestamp",
-                      "direction": "Descending"
-                    }
-                  ]
-                },
-                "query": {
-                  "type": "elasticsearch",
-                  "query_string": "image_name:mongo\\:*"
-                },
-                "context": null,
-                "timerange": {
-                  "from": 86400,
-                  "type": "relative"
-                },
-                "streams": [],
-                "filter": null,
-                "type": "messages",
-                "stream_categories": [],
-                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
-                "filters": [],
-                "description": null
-              },
               {
                 "config": {
                   "visualization": "table",
@@ -1028,6 +1176,44 @@
                 "id": "18e26276-e304-4188-b0c7-2abe623aacbd",
                 "filters": [],
                 "description": null
+              },
+              {
+                "config": {
+                  "fields": [
+                    "timestamp",
+                    "container_name",
+                    "event_severity",
+                    "application_component",
+                    "message"
+                  ],
+                  "units": {},
+                  "show_message_row": false,
+                  "show_summary": false,
+                  "decorators": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "image_name:mongo\\:*"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 86400,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "messages",
+                "stream_categories": [],
+                "id": "6578c54f-9d83-46f9-8b71-f55961a7cde8",
+                "filters": [],
+                "description": null
               }
             ],
             "widget_mapping": {
@@ -1113,7 +1299,7 @@
                   "type": "relative"
                 },
                 "streams": [
-                  "66efed04-c69d-4b2e-9b65-4c9f891d0e76"
+                  "ff24841b-8da5-48b3-a2bf-bf78fa8bec82"
                 ],
                 "filter": null,
                 "type": "messages",
@@ -1153,7 +1339,7 @@
                   "type": "relative"
                 },
                 "streams": [
-                  "66efed04-c69d-4b2e-9b65-4c9f891d0e76"
+                  "ff24841b-8da5-48b3-a2bf-bf78fa8bec82"
                 ],
                 "filter": null,
                 "type": "messages",
@@ -1197,82 +1383,18 @@
         "owner": "admin",
         "title": {
           "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Dashboard"
+          "@value": "Evaluation: Graylog Monitoring - Self"
         },
         "type": "DASHBOARD",
         "description": {
           "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Dashboard"
+          "@value": "Evaluation: Graylog Monitoring - Self"
         }
       },
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "403a8303-65f9-4280-a71b-3f91c5abda8d",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "14997415-4ab5-431d-9094-384c9baa28f5"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "evaluation-windows-filebeat"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#194d33"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\n\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\n\n\n<#if sidecar.tags.dns??>\nfilebeat.inputs:\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "82169126-44d2-4e3b-b3ab-3b20e670ccb8",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "d70d56f5-282a-41c5-adc4-80151197451c"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "evaluation-windows-nxlog"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#33691e"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "define ROOT ${user.nxlog_path}\ndefine SYSTEMROOT C:\\Windows\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n\n<Extension logrotate>\n  Module  xm_fileop\n  <Schedule>\n    When    @daily\n    Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n  </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  ShortMessageLength 65536\n</Extension>\n\n\n<Extension _json>\n  Module  xm_json\n</Extension>\n\n<#if sidecar.tags.nxlog??>\n<Input wineventlog>\n  # Send Windows Security Logs\n  Module im_msvistalog\n  PollInterval 5\n  SavePos True\n  ReadFromLast True\n\n  <QueryXML>\n    <QueryList>\n      <Query Id=\"0\">\n        # Windows Security Logging\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Security\">*</Select>\n        <Select Path=\"Microsoft-Windows-Security-Audit-Configuration-Client/Operational\">*</Select>\n        </#if>\n        # Windows Operational Logging\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Application\">*</Select>\n        <Select Path=\"System\">*</Select>\n        <Select Path=\"Setup\">*</Select>\n        <Select Path=\"Microsoft-Windows-GroupPolicy/Operational\">*</Select>\n        </#if>\n        # Forwarded Events Logging\n        <#if sidecar.tags.forwarded??>\n        <Select Path=\"ForwardedEvents\">*</Select>\n        </#if> \n        # Active Directory Domain Services Logging\n        <#if sidecar.tags.adds??>   \n        <Select Path=\"Active Directory Web Services\">*</Select>\n        <Select Path=\"DFS Replication\">*</Select>\n        <Select Path=\"Directory Service\">*</Select>\n        </#if> \n        # Microsoft DNS Loggging\n        <#if sidecar.tags.dns??>    \n        <Select Path=\"DNS Server\">*</Select>\n        <Select Path=\"Microsoft-Windows-DNSServer/Audit\">*</Select>\n        </#if>\n        # OpenSSH Logging\n        <#if sidecar.tags.ssh??>      \n        <Select Path=\"OpenSSH/Operational\">*</Select>\n        </#if> \n        # Microsoft Windows Best Practices Analyzer (BPA) Logging\n        <#if sidecar.tags.bpa??>      \n        <Select Path=\"Microsoft-Windows-BestPractices/Operational\">*</Select>\n        </#if> \n        # BITS Transfer Logging\n        <#if sidecar.tags.bits??>    \n        <Select Path=\"Microsoft-Windows-Bits-Client/Operational\">*</Select>\n        </#if> \n        # Sysmon Logging\n        <#if sidecar.tags.sysmon??>    \n        <Select Path=\"Microsoft-Windows-Sysmon/Operational\">*</Select>\n        </#if> \n        # Remote Desktop Services (Terminalservices) Logging\n        <#if sidecar.tags.rds??>    \n        <Select Path=\"Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\">*</Select>\n        </#if>\n        # Defender Logging\n        <#if sidecar.tags.defender??>    \n        <Select Path=\"Microsoft-Windows-Windows Defender/Operational\">*</Select>  \n        </#if> \n        # Powershell Logging\n        <#if sidecar.tags.powershell??>     \n        <Select Path=\"Windows PowerShell\">*</Select>\n        <Select Path=\"Microsoft-Windows-PowerShell/Operational\">*</Select>\n        </#if>   \n        # Applocker Logging\n        <#if sidecar.tags.applocker??>    \n        <Select Path=\"Microsoft-Windows-AppLocker/EXE and DLL\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/MSI and Script\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Deployment\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Execution\">*</Select>\n        </#if> \n      </Query>\n    </QueryList>\n  </QueryXML>\n</Input>\n</#if>\n\n\n<Input internal>\n  # Sending NXLog Logs\n  Module  im_internal\n</Input>\n\n\n<Input system-heartbeat>\n  # Send Heartbeat every 1 Minute\n  Module          im_mark\n  MarkInterval    1\n  Mark            -=| ALIVE |=-\n</Input>\n\n<#if sidecar.tags.nxlog??>\n<Input file>\n  # Send Graylog Sidecar logs\n  Module im_file\n  File \"C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\"\n  PollInterval 1\n  SavePos  True\n  ReadFromLast True\n  Recursive False\n  RenameCheck False\n  Exec $FileName = file_name();\n</Input>\n</#if>\n\n\n<Input windows-features>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n\n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n\n  ## Using the configuration from the following line will only send the installed Features to Graylog\n  #Arg     Get-WindowsFeature | Where-Object { $_.Installed -eq $true } | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n\n  ## Using the configuration from the following line will send an overview of all installed and available Features to Graylog\n  Arg     Get-WindowsFeature | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n\n  <Exec>\n    $nxlog_tag = 'Compliance_WindowsServerRoles'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n  </Exec>\n\n</Input>\n\n\n<Input users-with-reversible-password-encryption>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n  \n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n  \n  ## Using the configuration from the following line will send an overview of all Users configured with reversible Password Encryption\n  Arg     Get-ADUser -filter {AllowReversiblePasswordEncryption -eq $True} -Properties \"AllowReversiblePasswordEncryption\" | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n  <Exec>\n    $nxlog_tag = 'Compliance_UserProperties'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n  </Exec>\n    \n</Input>\n\n\n<Output gelf>\n  Module om_tcp\n  Host ${user.graylog_host}\n  Port ${user.nxlog_port_windows}\n  OutputType GELF_TCP\n  <Exec>\n    # These fields are needed for Graylog\n    $gl2_source_collector = '${sidecar.nodeId}';\n    $collector_node_id = '${sidecar.nodeName}';\n    $agent_type = 'nxlog';\n  </Exec>\n</Output>\n\n\n<#if sidecar.tags.nxlog??>    \n<Route route-1>\n  Path wineventlog => gelf\n</Route>\n</#if>\n<#if sidecar.tags.nxlog??>    \n<Route route-2>\n  Path file => gelf\n</Route>\n</#if>\n<Route route-3>\n  Path internal => gelf\n</Route>\n<Route route-4>\n  Path system-heartbeat => gelf\n</Route>\n<Route route-5>\n  Path windows-features => gelf\n</Route>\n<Route route-6>\n  Path users-with-reversible-password-encryption => gelf\n</Route>\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.4+ac94792"
         }
       ]
     },
@@ -1282,25 +1404,25 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "fec419b7-c2ab-4831-bf88-d755fef87dbb",
+      "id": "6837b4af-dea3-4a4f-931f-7fa34e2a0d0c",
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser Opensearch 1"
+          "@value": "Evaluation: Graylog Monitoring - Self 002"
         },
         "description": {
           "@type": "string",
-          "@value": ""
+          "@value": "Parser Graylog"
         },
         "source": {
           "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser Opensearch 1\"\n\nwhen\n    contains(to_string($message.image_name),\"opensearch\")\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\nend"
+          "@value": "rule\"Evaluation: Graylog Monitoring - Self 002\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    let eventcreated = regex_replace(\n        value: \"event_created\",\n        pattern: \"^([0-9\\\\-]+?)\\\\s([0-9:]+?),\",\n        replacement: \"$1T$2\"\n    );\n    \n    set_field(\n        value: to_date(regex_replace(value: \"event_created\",pattern: \"^([0-9\\\\-]+?)\\\\s([0-9:]+?),\",replacement: \"$1T$2\")),\n        field: \"event_created\"\n    );\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\n    \nend"
         }
       },
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.4+ac94792"
         }
       ]
     },
@@ -1310,106 +1432,25 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "8dcb9342-8947-450c-9425-7f0dcf8ad6cf",
+      "id": "08e6cbff-d593-480b-a3ee-cfd2c5f01347",
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser Graylog 1"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog 1\"\n\nwhen\n    contains(to_string($message.image_name),\"graylog\")\n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{WORD:event_severity}%{SPACE}:%{SPACE}%{NOTSPACE:application_component}%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    let eventcreated = regex_replace(\n        value: \"event_created\",\n        pattern: \"^([0-9\\\\-]+?)\\\\s([0-9:]+?),\",\n        replacement: \"$1T$2\"\n    );\n    \n    set_field(\n        value: to_date(regex_replace(value: \"event_created\",pattern: \"^([0-9\\\\-]+?)\\\\s([0-9:]+?),\",replacement: \"$1T$2\")),\n        field: \"event_created\"\n    );\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\n    \nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "6a0c831c-4c18-4079-922d-77b2b4b47f45",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser Graylog Installer"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser Graylog Installer\"\n\nwhen\n    contains(to_string($message.message),\"GRAYLOG-\") \n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{HOSTNAME:event_source}%{SPACE}%{DATA:application_component}:%{SPACE}\\\\[%{WORD:event_severity}\\\\]%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline_rule",
-        "version": "1"
-      },
-      "id": "6ae3761a-6011-4740-8fbe-977c29ba7175",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Parser MongoDB 1"
-        },
-        "description": null,
-        "source": {
-          "@type": "string",
-          "@value": "rule\"Evaluation - Self-Monitoring Parser MongoDB 1\"\n\nwhen\n    contains(to_string($message.image_name),\"mongo\")\n    //true\nthen\n    \n    let mylog = flatten_json(to_string(parse_json(replace(to_string($message.message),\"$\"))),\"flatten\",true);\n    \n    set_fields(to_map(mylog));\n\n    rename_field(\"attr_message_msg\",\"message\");\n    rename_field(\"attr_message_verbose_level\",\"event_severity\");\n    rename_field(\"attr_message_session_name\",\"application_component\");\n    rename_field(\"t_date\",\"event_created\");\n    rename_field(\"created\",\"container_created\");\n    \n    remove_multiple_fields(\n        pattern: \"attr_[A-Za-z-_]*\",\n        names: [\"c\",\"container_id\",\"ctx\",\"id\",\"image_id\",\"msg\",\"s\",\"tag\"]\n    );\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "pipeline",
-        "version": "1"
-      },
-      "id": "4b737066-71dd-4ec7-804c-1a137b676411",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Pipeline"
+          "@value": "Evaluation: Graylog Monitoring - Self 003"
         },
         "description": {
           "@type": "string",
-          "@value": "Evaluation - Self-Monitoring Pipeline"
+          "@value": "Parser Graylog Custom"
         },
         "source": {
           "@type": "string",
-          "@value": "pipeline \"Evaluation - Self-Monitoring Pipeline\"\nstage 0 match either\nrule \"Evaluation - Self-Monitoring Parser Graylog 1\"\nrule \"Evaluation - Self-Monitoring Parser MongoDB 1\"\nrule \"Evaluation - Self-Monitoring Parser Opensearch 1\"\nrule \"Evaluation - Self-Monitoring Parser Graylog Installer\"\nend"
-        },
-        "connected_streams": [
-          {
-            "@type": "string",
-            "@value": "66efed04-c69d-4b2e-9b65-4c9f891d0e76"
-          }
-        ]
+          "@value": "rule\"Evaluation: Graylog Monitoring - Self 003\"\n\nwhen\n    contains(to_string($message.message),\"GRAYLOG-\") \n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{HOSTNAME:event_source}%{SPACE}%{DATA:application_component}:%{SPACE}\\\\[%{WORD:event_severity}\\\\]%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
+        }
       },
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.4+ac94792"
         }
       ]
     },
@@ -1419,11 +1460,11 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "0777b54f-daa1-4f52-8100-4fd56e8cdc78",
+      "id": "bec6582b-38c9-4eba-a99e-a96221050f83",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "1cc13a0b-e755-4719-b9b4-fbafcc509318"
+          "@value": "6ae4d661-c92c-4af9-9106-13aeb8647235"
         },
         "title": {
           "@type": "string",
@@ -1441,59 +1482,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "70327f78-e37f-4064-a783-dc51a3f7bc4d",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "ab139a9c-e1b6-4963-9c65-708e505d150e"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "evaluation-sidecar-self-monitoring"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#827717"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_self}\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\n- type: filestream\n  id: graylog-sidecar-filestream\n  enabled: true\n  paths:\n  - /var/log/graylog-sidecar/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: graylog-sidecar\n\n- type: filestream\n  id: logsamples-filestream\n  enabled: true\n  paths:\n  - /opt/graylog/logsamples/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: logsamples\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "stream_title",
-        "version": "1"
-      },
-      "id": "66efed04-c69d-4b2e-9b65-4c9f891d0e76",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation: Self Monitoring Logs"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.4+ac94792"
         }
       ]
     },
@@ -1503,139 +1492,7 @@
         "name": "sidecar_collector",
         "version": "1"
       },
-      "id": "14997415-4ab5-431d-9094-384c9baa28f5",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "filebeat"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "svc"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "windows"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "C:\\Program Files\\Graylog\\sidecar\\filebeat.exe"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c \"%s\""
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "test config -c \"%s\""
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n- windows\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\logs\\log.log\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "d70d56f5-282a-41c5-adc4-80151197451c",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "nxlog64"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "svc"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "windows"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "C:\\Program Files\\nxlog\\nxlog.exe"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c \"%s\""
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "-v -f -c \"%s\""
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "define ROOT ${sidecar.spoolDir!\"C:\\Program Files\\nxlog\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n<Extension logrotate>\n    Module  xm_fileop\n    <Schedule>\n        When    @daily\n        Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n     </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  # Avoid truncation of the short_message field to 64 characters.\n  ShortMessageLength 65536\n</Extension>\n\n<Input eventlog>\n        Module im_msvistalog\n        PollInterval 1\n        SavePos True\n        ReadFromLast True\n        \n        #Channel System\n        #<QueryXML>\n        #  <QueryList>\n        #   <Query Id='1'>\n        #    <Select Path='Security'>*[System/Level=4]</Select>\n        #    </Query>\n        #  </QueryList>\n        #</QueryXML>\n</Input>\n\n\n<Input file>\n\tModule im_file\n\tFile 'C:\\Windows\\MyLogDir\\\\*.log'\n\tPollInterval 1\n\tSavePos\tTrue\n\tReadFromLast True\n\tRecursive False\n\tRenameCheck False\n\tExec $FileName = file_name(); # Send file name with each message\n</Input>\n\n\n<Output gelf>\n\tModule om_tcp\n\tHost ${user.graylog_host}\n\tPort 12201\n\tOutputType  GELF_TCP\n\t<Exec>\n\t  # These fields are needed for ingestion\n\t  $gl2_source_collector = '${sidecar.nodeId}';\n\t  $collector_node_id = '${sidecar.nodeName}';\n\t</Exec>\n</Output>\n\n\n<Route route-1>\n  Path eventlog => gelf\n</Route>\n<Route route-2>\n  Path file => gelf\n</Route>\n\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "1cc13a0b-e755-4719-b9b4-fbafcc509318",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "winlogbeat"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "svc"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "windows"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "C:\\Program Files\\Graylog\\sidecar\\winlogbeat.exe"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c \"%s\""
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "test config -c \"%s\""
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n  - windows\nwinlogbeat:\n  event_logs:\n   - name: Application\n     ignore_older: 96h\n   - name: System\n     ignore_older: 96h\n   - name: Security\n     ignore_older: 96h\n   - name: Setup\n     ignore_older: 96h\n   - name: ForwardedEvents\n     forwarded: true\n     ignore_older: 96h\n   - name: Microsoft-Windows-Windows Defender/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-Sysmon/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-PowerShell/Operational\n     ignore_older: 96h\n   - name: windows PowerShell\n     ignore_older: 96h"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.1+29f3984"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "ab139a9c-e1b6-4963-9c65-708e505d150e",
+      "id": "14249a10-ad74-4752-a6f7-66b963ab53f7",
       "data": {
         "name": {
           "@type": "string",
@@ -1669,7 +1526,159 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.1+29f3984"
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "54f2f62d-54e9-4da3-9610-3eefccb71213",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "nxlog64"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\nxlog\\nxlog.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "-v -f -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "define ROOT ${sidecar.spoolDir!\"C:\\Program Files\\nxlog\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n<Extension logrotate>\n    Module  xm_fileop\n    <Schedule>\n        When    @daily\n        Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n     </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  # Avoid truncation of the short_message field to 64 characters.\n  ShortMessageLength 65536\n</Extension>\n\n<Input eventlog>\n        Module im_msvistalog\n        PollInterval 1\n        SavePos True\n        ReadFromLast True\n        \n        #Channel System\n        #<QueryXML>\n        #  <QueryList>\n        #   <Query Id='1'>\n        #    <Select Path='Security'>*[System/Level=4]</Select>\n        #    </Query>\n        #  </QueryList>\n        #</QueryXML>\n</Input>\n\n\n<Input file>\n\tModule im_file\n\tFile 'C:\\Windows\\MyLogDir\\\\*.log'\n\tPollInterval 1\n\tSavePos\tTrue\n\tReadFromLast True\n\tRecursive False\n\tRenameCheck False\n\tExec $FileName = file_name(); # Send file name with each message\n</Input>\n\n\n<Output gelf>\n\tModule om_tcp\n\tHost ${user.graylog_host}\n\tPort 12201\n\tOutputType  GELF_TCP\n\t<Exec>\n\t  # These fields are needed for ingestion\n\t  $gl2_source_collector = '${sidecar.nodeId}';\n\t  $collector_node_id = '${sidecar.nodeName}';\n\t</Exec>\n</Output>\n\n\n<Route route-1>\n  Path eventlog => gelf\n</Route>\n<Route route-2>\n  Path file => gelf\n</Route>\n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "d14ed077-c246-415d-b182-89b6743fb996",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "filebeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\Graylog\\sidecar\\filebeat.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n- windows\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\logs\\log.log\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream_title",
+        "version": "1"
+      },
+      "id": "ff24841b-8da5-48b3-a2bf-bf78fa8bec82",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self Monitoring Logs"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "6ae4d661-c92c-4af9-9106-13aeb8647235",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "winlogbeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\Graylog\\sidecar\\winlogbeat.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n - windows\nwinlogbeat:\n  event_logs:\n   - name: Application\n     ignore_older: 96h\n   - name: System\n     ignore_older: 96h\n   - name: Security\n     ignore_older: 96h\n   - name: Setup\n     ignore_older: 96h\n   - name: ForwardedEvents\n     forwarded: true\n     ignore_older: 96h\n   - name: Microsoft-Windows-Windows Defender/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-Sysmon/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-PowerShell/Operational\n     ignore_older: 96h\n   - name: windows PowerShell\n     ignore_older: 96h"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.0.4+ac94792"
         }
       ]
     }
