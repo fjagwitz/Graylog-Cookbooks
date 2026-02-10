@@ -2,15 +2,25 @@
 #
 # Usage: 
 # Reset System to Install-Ready Status: Reset-GraylogInstallation "/opt/graylog"
-# GRAYLOG_PATH=$1
-
+GRAYLOG_PATH=$1
 
 sudo date >/dev/null
 
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down >/dev/null
-sudo apt purge graylog-sidecar -y >/dev/null
-sudo rm -rf ${GRAYLOG_PATH} >/dev/null
+if [[ ${GRAYLOG_PATH}  == "" ]]
+then
+    GRAYLOG_PATH=/opt/graylog
 
-echo "[INFO] - SYSTEM CAN BE USED FOR ANOTHER CLEAN GRAYLOG INSTALLATION"
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down >/dev/null
+    wait
+
+    sudo apt purge graylog-sidecar -y >/dev/null
+    wait
+
+    sudo rm -rf ${GRAYLOG_PATH} >/dev/null
+    grep -vwE PATH /etc/bash.bashrc | sudo tee /etc/bash.bashrc 2>/dev/null >/dev/null
+
+    echo "[INFO] - SYSTEM CAN BE USED FOR ANOTHER CLEAN GRAYLOG INSTALLATION" 
+    echo "[INFO] - SYSTEM CAN BE USED FOR ANOTHER CLEAN GRAYLOG INSTALLATION" | logger -p user.info -e -t GRAYLOG-HELPER
+fi
 
 exit
