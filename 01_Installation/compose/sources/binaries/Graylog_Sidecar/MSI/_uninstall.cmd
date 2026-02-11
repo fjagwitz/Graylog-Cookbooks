@@ -2,8 +2,8 @@
 
 SET WORKDIR=%~dp0
 SET SIDECAR_YML=%PROGRAMFILES%\Graylog\sidecar\sidecar.yml
-FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*graylog*.msi') DO SET "GRAYLOG=%%V"
-FOR /F "delims=" %%V IN ('dir /b %WORKDIR%*nxlog*.msi') DO SET "NXLOG=%%V"
+FOR /F "delims=" %%V IN ('dir /b "%WORKDIR%*graylog*.msi"') DO SET "GRAYLOG=%%V"
+FOR /F "delims=" %%V IN ('dir /b "%WORKDIR%*nxlog*.msi"') DO SET "NXLOG=%%V"
 
 echo [INFO] - DISABLE GRAYLOG SIDECAR SERVICE
 ::
