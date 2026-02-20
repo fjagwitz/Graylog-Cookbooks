@@ -358,17 +358,22 @@ function_installGraylogStack () {
     do
         sudo cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
     done
-    
+
     # Start pulling Containers
     echo "[INFO] - PULL CONTAINERS FOR GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml pull --quiet 2>/dev/null >/dev/null &
 
-    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1000 (OPENSEARCH)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
-    sudo chown -R 1000:1000 ${GRAYLOG_PATH}/database
+    # Reformat all Windows files to DOS format
+    echo "[INFO] - Reformatting files to DOS CRLF " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    find ${GRAYLOG_PATH}/sources/binaries/ -type f -print0 | xargs -0 unix2dos -- 2>/dev/null >/dev/null
+    find ${GRAYLOG_PATH}/lookuptables/ -type f -print0 | xargs -0 unix2dos -- 2>/dev/null >/dev/null
 
-    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1100 (GRAYLOG) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
+    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1000 (OPENSEARCH)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo chown -R 1000:1000 ${GRAYLOG_PATH}/database
+    
     # Adapting Permissions for proper access by the Graylog Containers (1100:1100)
+    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1100 (GRAYLOG) " | logger -p user.info -e -t GRAYLOG-INSTALLER
     for FOLDER in ${FOLDERS_WITH_GRAYLOG_PERMISSIONS}
     do
         sudo chown -R 1100:1100 ${GRAYLOG_PATH}/${FOLDER}
