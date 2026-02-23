@@ -346,7 +346,7 @@ function_installGraylogStack () {
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,sources/{scripts,binaries/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition},other}}
+    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
@@ -417,7 +417,7 @@ function_installGraylogStack () {
     done
 
     echo "[INFO] - SET PERMISSIONS FOR HELPER SCRIPTS" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo chmod +x ${GRAYLOG_PATH}/sources/scripts/*
+    sudo chmod +x ${GRAYLOG_PATH}/scripts/*
 
     echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf"  >/dev/null 
 
@@ -426,7 +426,7 @@ function_installGraylogStack () {
 }
 
 function_addScriptRepositoryToPathVariable () {
-    local SCRIPTFOLDER="${GRAYLOG_PATH}/sources/scripts"
+    local SCRIPTFOLDER="${GRAYLOG_PATH}/scripts"
     local PATHCHECK=$(echo $PATH | grep -wo ${SCRIPTFOLDER})
 
     if [[ ${PATHCHECK} == ${SCRIPTFOLDER} ]]

@@ -40,7 +40,7 @@ while [[ $(curl -s http://localhost/api/system/lbstatus) != "ALIVE" ]]
     sleep 10s
 done
 
-echo "[INFO] - GRAYLOG CONTAINERS SUCCESFULLY UPDATED " | logger -p user.info -e -t GRAYLOG-HELPER
-echo "[INFO] - GRAYLOG CONTAINERS SUCCESFULLY UPDATED " 
+echo "[INFO] - GRAYLOG CONTAINERS SUCCESFULLY UPDATED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG CONTAINERS SUCCESFULLY UPDATED BY ${USER^^}" 
 
 exit

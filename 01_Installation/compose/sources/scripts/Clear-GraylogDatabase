@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Usage: 
+# Clear-GraylogDatabase
+
+sudo date >/dev/null
+
+read -p "[INPUT] - MOVING FORWARD WILL DELETE ALL LOG MESSAGES COLLECTED SO FAR [yes]: " CONSENT
+CONSENT=${CONSENT:-yes}
+
+if [[ ${CONSENT} != "yes" ]]
+then
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, NO DATA DELETED, EXIT " | logger -p user.info -e -t GRAYLOG-HELPER
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, NO DATA DELETED, EXIT "
+    exit
+fi 
+
+GRAYLOG_PATH="/opt/graylog"
+
+echo "[INFO] - GRAYLOG DATABASE BEING CLEARED RIGHT NOW, THIS TAKES SOME TIME... "
+echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-HELPER
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down nginx1 2>/dev/null >/dev/null
+
+echo "[INFO] - DELETE ALL LOG MESSAGES FROM GRAYLOG DATABASE " | logger -p user.info -e -t GRAYLOG-HELPER
+sudo rm -rf ${GRAYLOG_PATH}/database/datanode[1-3]/*
+
+echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-HELPER
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d nginx1 2>/dev/null >/dev/null
+
+echo "[INFO] - GRAYLOG DATABASE COMPLETELY CLEARED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG DATABASE COMPLETELY CLEARED BY ${USER^^}" 
+
+exit
