@@ -10,7 +10,7 @@ if [[ ${GRAYLOG_PATH}  == "" ]]
 then
     GRAYLOG_PATH=/opt/graylog
 
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down >/dev/null
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
     wait
 
     sudo apt purge graylog-sidecar -y >/dev/null
