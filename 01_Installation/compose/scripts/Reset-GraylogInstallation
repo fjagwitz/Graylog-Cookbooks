@@ -6,6 +6,16 @@ GRAYLOG_PATH=$1
 
 sudo date >/dev/null
 
+read -p "[INPUT] - MOVING FORWARD WILL DELETE YOUR ENTIRE GRAYLOG STACK INCLUDING CONFIGURATION AND LOG DATA [yes]: " CONSENT
+CONSENT=${CONSENT:-yes}
+
+if [[ ${CONSENT} != "yes" ]]
+then
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, NO DATA DELETED, EXIT " | logger -p user.info -e -t GRAYLOG-HELPER
+    echo "[INFO] - SCRIPT EXECUTION INTERRUPTED, NO DATA DELETED, EXIT "
+    exit
+fi 
+
 if [[ ${GRAYLOG_PATH}  == "" ]]
 then
     GRAYLOG_PATH=/opt/graylog
@@ -13,7 +23,7 @@ then
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
     wait
 
-    sudo apt purge graylog-sidecar -y >/dev/null
+    sudo apt purge graylog-sidecar -y 2>/dev/null >/dev/null
     wait
 
     sudo rm -rf ${GRAYLOG_PATH} >/dev/null
