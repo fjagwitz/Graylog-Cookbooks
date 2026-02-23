@@ -8,17 +8,14 @@ sudo date >/dev/null
 GRAYLOG_PATH="/opt/graylog"
 CONFIGURATION_DUMP_FILE="$(date "+%Y-%m-%d_%H-%M-%S")_GRAYLOG_CONFIGURATION_DUMP"
 
-sudo docker compose exec mongodb1 mongodump --host=localhost --port=27017 --out "/configuration_dump/${CONFIGURATION_DUMP_FILE}" --quiet
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml exec mongodb1 mongodump --host=localhost --port=27017 --out "/configuration_dump/${CONFIGURATION_DUMP_FILE}" --quiet
 sudo tar -czf "${GRAYLOG_PATH}/configuration_dump/${CONFIGURATION_DUMP_FILE}.tar.gz" "${GRAYLOG_PATH}/configuration_dump/${CONFIGURATION_DUMP_FILE}" 2>/dev/null
 
 sudo rm -rf "${GRAYLOG_PATH}/configuration_dump/${CONFIGURATION_DUMP_FILE}"
 
+CONFIGURATION_DUMP_FILE_SIZE=$(du -h "${GRAYLOG_PATH}/configuration_dump/${CONFIGURATION_DUMP_FILE}.tar.gz" | cut -f1)
 
-CONFIGURATION_DUMP_FILE_SIZE=$(du -sh ${GRAYLOG_PATH}/configuration_dump/${CONFIGURATION_DUMP_FILE})
-
-
-
-echo "[INFO] - GRAYLOG CONFIGURATION BACKUP (SIZE: ${CONFIGURATION_DUMP_FILE}) SUCCESSFULLY CREATED BY ${USER^^}" 
-echo "[INFO] - GRAYLOG CONFIGURATION BACKUP (SIZE: ${CONFIGURATION_DUMP_FILE}) SUCCESSFULLY CREATED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG CONFIGURATION BACKUP (SIZE: ${CONFIGURATION_DUMP_FILE_SIZE}) SUCCESSFULLY CREATED BY ${USER^^}" 
+echo "[INFO] - GRAYLOG CONFIGURATION BACKUP (SIZE: ${CONFIGURATION_DUMP_FILE_SIZE}) SUCCESSFULLY CREATED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
 
 exit
