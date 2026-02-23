@@ -1035,6 +1035,7 @@ then
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null 
 
+    sudo cp ${GRAYLOG_PATH}/scripts/Clear-GraylogDatabase /etc/cron.daily/
     sudo cp $0 /etc/cron.hourly/install-graylog
     sudo rm -- $0
 
