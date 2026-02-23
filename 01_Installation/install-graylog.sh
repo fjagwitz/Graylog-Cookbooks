@@ -365,7 +365,7 @@ function_installGraylogStack () {
 
     # Reformat all Windows files to DOS format
     echo "[INFO] - REFORMAT WINDOWS FILES TO DOS CRLF " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    find ${GRAYLOG_PATH}/sources/binaries/ -type f -print0 | xargs -0 unix2dos -- 2>/dev/null >/dev/null
+    find ${GRAYLOG_PATH}/sources/ -type f -print0 | xargs -0 unix2dos -- 2>/dev/null >/dev/null
     find ${GRAYLOG_PATH}/lookuptables/ -type f -print0 | xargs -0 unix2dos -- 2>/dev/null >/dev/null
 
     # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
@@ -475,9 +475,9 @@ function_downloadGraylogSidecarBinaries () {
     local SIDECAR_YML="https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml"
     
     echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI -LOs ${SIDECAR_YML}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE -LOs ${SIDECAR_EXE}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI -LOs ${SIDECAR_YML}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE -LOs ${SIDECAR_EXE}
 }
 
 function_downloadBeatsBinaries () {
@@ -491,47 +491,47 @@ function_downloadBeatsBinaries () {
     local WINLOGBEAT_MSI="https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-${BEATS_VERSION}-windows-x86_64.msi"
     
     echo "[INFO] - DOWNLOAD FILEBEAT STANDALONE FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_ZIP}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone -LOs ${FILEBEAT_MSI}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Filebeat_Standalone -LOs ${FILEBEAT_ZIP}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Filebeat_Standalone -LOs ${FILEBEAT_MSI}
 
     echo "[INFO] - DOWNLOAD WINLOGBEAT STANDALONE FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone -LOs ${WINLOGBEAT_ZIP}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone -LOs ${WINLOGBEAT_MSI}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone -LOs ${WINLOGBEAT_ZIP}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone -LOs ${WINLOGBEAT_MSI}
 
-    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
-    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64
-    sudo rm ${GRAYLOG_PATH}/sources/binaries/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip
+    sudo unzip ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/Filebeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/Filebeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo rm -rf ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64
+    sudo rm ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip
 
-    sudo unzip ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
-    sudo rm -rf ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64
-    sudo rm ${GRAYLOG_PATH}/sources/binaries/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip
+    sudo unzip ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo rm -rf ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64
+    sudo rm ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip
 
 }
 
 function_downloadNxlogBinaries () {
 
     echo "[INFO] - PREPARE NXLOG COMMUNITY EDITION FOR WINDOWS README FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo touch ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt
-    echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
-    echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/binaries/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
+    sudo touch ${GRAYLOG_PATH}/sources/NXLog_CommunityEdition/README.txt
+    echo "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" | sudo tee -a ${GRAYLOG_PATH}/sources/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
+    echo "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" | sudo tee -a ${GRAYLOG_PATH}/sources/NXLog_CommunityEdition/README.txt 2>/dev/null >/dev/null
 
 }
 
 function_prepareSidecarConfiguration () {
     
     local SIDECAR_TOKEN=${1}
-    local SIDECAR_YML="${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar.yml"
+    local SIDECAR_YML="${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/sidecar.yml"
     local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
-    local SIDECAR_INSTALLER_CMD=$(ls "${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE" | grep cmd)
+    local SIDECAR_INSTALLER_CMD=$(ls "${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE" | grep cmd)
 
     echo "[INFO] - CONFIGURE GRAYLOG SIDECAR FOR WINDOWS (MSI)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo cp ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml ${SIDECAR_YML}
+    sudo cp ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml ${SIDECAR_YML}
 
     # Replace Graylog Host URL
     sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
@@ -547,8 +547,8 @@ function_prepareSidecarConfiguration () {
     echo "[INFO] - CONFIGURE GRAYLOG SIDECAR FOR WINDOWS (EXE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
     for SIDECAR_INSTALLER in ${SIDECAR_INSTALLER_CMD}
     do
-        sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
-        sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${GRAYLOG_PATH}/sources/binaries/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
+        sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"\g" ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
+        sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
     done
 }
 
