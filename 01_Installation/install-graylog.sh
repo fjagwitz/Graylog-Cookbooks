@@ -440,7 +440,7 @@ function_addScriptRepositoryToPathVariable () {
 
         echo "[INFO] - SET AUTOCOMPLETION TO CASE-INSENSITIVE " | logger -p user.info -e -t GRAYLOG-INSTALLER
         echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
-        echo "bind 'set completion-ignore-case on'" 
+        echo "bind 'set completion-ignore-case on'" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
     fi
 }
 
