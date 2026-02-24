@@ -21,18 +21,22 @@ then
   exit
 fi
 
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE STARTED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE STARTED BY ${USER^^}"
+
 sudo mkdir ${RESTORE_DIRECTORY}
 sudo tar -xzf "${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/${RESTORE_DUMP_FILE}" -C ${RESTORE_DIRECTORY}
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml exec mongodb1 mongorestore --host=localhost --port=27017 --dir ${RESTORE_DIRECTORY_CONTAINER} 
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml exec mongodb1 mongorestore --host=localhost --port=27017 --dir ${RESTORE_DIRECTORY_CONTAINER} --quiet
 sudo rm -rf ${RESTORE_DIRECTORY}
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart mongodb1 
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart mongodb1 >/dev/null 2>/dev/null
+wait
 
 if [[ ${USER} == "" ]]
 then
   USER="GRAYLOG SYSTEM"
 fi
 
-echo "[INFO] - GRAYLOG CONFIGURATION RESTORE SUCCESSFULLY FINISHED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
-echo "[INFO] - GRAYLOG CONFIGURATION RESTORE SUCCESSFULLY FINISHED BY ${USER^^}" 
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE FINISHED" | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE FINISHED" 
 
 exit
