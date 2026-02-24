@@ -18,7 +18,8 @@ fi
 
 if [[ ${GRAYLOG_PATH}  == "" ]]
 then
-    GRAYLOG_PATH=/opt/graylog
+    GRAYLOG_PATH="/opt/graylog"
+    BACKUP_SCRIPT="/etc/cron.daily/Create-ConfigurationDump"
 
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down 2>/dev/null >/dev/null
     wait
@@ -27,6 +28,8 @@ then
     wait
 
     sudo rm -rf ${GRAYLOG_PATH} >/dev/null
+    sudo rm ${BACKUP_SCRIPT}
+
     grep -vwE PATH /etc/bash.bashrc | sudo tee /etc/bash.bashrc 2>/dev/null >/dev/null
 
     echo "[INFO] - SYSTEM CAN BE USED FOR ANOTHER CLEAN GRAYLOG INSTALLATION" 

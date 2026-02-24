@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# This Script will restore the latest Configuration Backup from /opt/graylog/configuration_dump
+#
+# Usage: 
+# Restore-ConfigurationDump
+
+sudo date >/dev/null
+
+GRAYLOG_PATH="/opt/graylog"
+BACKUP_DIRECTORY="configuration_dump"
+RESTORE_DIRECTORY="${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/restore"
+RESTORE_DUMP_FILE=$(ls ${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/ | grep -i dump | sort -r | head -n1)
+RESTORE_DUMP_FOLDER=$(echo ${RESTORE_DIRECTORY}${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/${RESTORE_DUMP_FILE} | cut -d. -f1)
+RESTORE_DIRECTORY_CONTAINER=$(echo "/configuration_dump/restore${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/${RESTORE_DUMP_FILE}" | cut -d. -f1)
+
+if [[ ${RESTORE_DUMP_FILE} == "" ]]
+then
+  echo "[ERROR] - NO BACKUP AVAILABLE, EXIT" | logger -p user.info -e -t GRAYLOG-HELPER
+  echo "[ERROR] - NO BACKUP AVAILABLE, EXIT"
+  exit
+fi
+
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE STARTED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE STARTED BY ${USER^^}"
+
+sudo mkdir ${RESTORE_DIRECTORY}
+sudo tar -xzf "${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/${RESTORE_DUMP_FILE}" -C ${RESTORE_DIRECTORY}
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml exec mongodb1 mongorestore --host=localhost --port=27017 --dir ${RESTORE_DIRECTORY_CONTAINER} --quiet
+sudo rm -rf ${RESTORE_DIRECTORY}
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart mongodb1 >/dev/null 2>/dev/null
+wait
+
+if [[ ${USER} == "" ]]
+then
+  USER="GRAYLOG SYSTEM"
+fi
+
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE FINISHED" | logger -p user.info -e -t GRAYLOG-HELPER
+echo "[INFO] - GRAYLOG CONFIGURATION RESTORE FINISHED" 
+
+exit
