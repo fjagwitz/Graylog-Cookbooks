@@ -953,9 +953,7 @@ function_configureSecurityFeatures () {
 }
 
 function_restoreSystem () {
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down
-    sudo apt purge graylog-sidecar -y
-    grep -vwE PATH /etc/bash.bashrc | sudo tee /etc/bash.bashrc 2>/dev/null >/dev/null
+    exec /opt/graylog/scripts/Reset-GraylogInstallation
 }
 
 function_removeAdminToken () {
