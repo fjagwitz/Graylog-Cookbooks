@@ -278,7 +278,7 @@ services:
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
   grafana1:
-    image: "grafana/grafana-oss:latest"
+    image: "grafana/grafana-oss:12.0.2"
     hostname: "grafana1"
     depends_on:
       - "prometheus1"

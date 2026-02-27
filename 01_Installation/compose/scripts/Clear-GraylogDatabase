@@ -19,13 +19,26 @@ GRAYLOG_PATH="/opt/graylog"
 
 echo "[INFO] - GRAYLOG DATABASE BEING CLEARED RIGHT NOW, THIS TAKES SOME TIME... "
 echo "[INFO] - STOP GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-HELPER
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down nginx1 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml stop nginx1 2>/dev/null >/dev/null
+
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down datanode1 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down datanode2 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down datanode3 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down datanode9 2>/dev/null >/dev/null
 
 echo "[INFO] - DELETE ALL LOG MESSAGES FROM GRAYLOG DATABASE " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo rm -rf ${GRAYLOG_PATH}/database/datanode[1-3]/*
+sudo rm -rf ${GRAYLOG_PATH}/database/warm_tier
+
+echo "[INFO] - RESTART GRAYLOG DATABASE COMPONENTS" | logger -p user.info -e -t GRAYLOG-HELPER
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode1 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode2 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode3 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode9 2>/dev/null >/dev/null
+wait
 
 echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-HELPER
-sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d nginx1 2>/dev/null >/dev/null
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml start nginx1 2>/dev/null >/dev/null
 
 echo "[INFO] - GRAYLOG DATABASE COMPLETELY CLEARED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
 echo "[INFO] - GRAYLOG DATABASE COMPLETELY CLEARED BY ${USER^^}" 
