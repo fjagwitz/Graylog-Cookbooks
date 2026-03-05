@@ -472,7 +472,7 @@ function_enableGeoIpLocation () {
 
 function_downloadGraylogSidecarBinaries () {
 
-    local SIDECAR_VERSION="1.5.1"
+    local SIDECAR_VERSION="1.5.2"
     # https://github.com/Graylog2/collector-sidecar/releases/download/1.5.1/graylog-sidecar-1.5.1-1.msi
     local SIDECAR_MSI="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog-sidecar-${SIDECAR_VERSION}-1.msi"
     # https://github.com/Graylog2/collector-sidecar/releases/download/1.5.1/graylog_sidecar_installer_1.5.1-1.exe
@@ -487,7 +487,7 @@ function_downloadGraylogSidecarBinaries () {
 
 function_downloadBeatsBinaries () {
 
-    local BEATS_VERSION="8.19.10"
+    local BEATS_VERSION="8.19.12"
 
     local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.zip"
     local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.msi"

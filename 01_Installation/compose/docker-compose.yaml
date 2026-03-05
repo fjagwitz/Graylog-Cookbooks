@@ -57,7 +57,7 @@ services:
     restart: "always"
 
   mongodb1:
-    image: "mongo:7"
+    image: "mongo:8"
     hostname: "mongodb1"
     logging: 
       driver: "gelf"
