@@ -27,7 +27,6 @@ echo "[INFO] - GRAYLOG CONFIGURATION RESTORE STARTED BY ${USER^^}"
 
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down mongodb1 2>/dev/null >/dev/null
 sudo rm -rf ${CONFIGURATION_DIRECTORY}
-
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d mongodb1 2>/dev/null >/dev/null
 
 sudo mkdir ${RESTORE_DIRECTORY}
