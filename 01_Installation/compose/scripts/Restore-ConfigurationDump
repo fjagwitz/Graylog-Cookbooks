@@ -8,6 +8,7 @@
 sudo date >/dev/null
 
 GRAYLOG_PATH="/opt/graylog"
+CONFIGURATION_DIRECTORY="${GRAYLOG_PATH}/configuration"
 BACKUP_DIRECTORY="configuration_dump"
 RESTORE_DIRECTORY="${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/restore"
 RESTORE_DUMP_FILE=$(ls ${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/ | grep -i dump | sort -r | head -n1)
@@ -24,7 +25,13 @@ fi
 echo "[INFO] - GRAYLOG CONFIGURATION RESTORE STARTED BY ${USER^^}" | logger -p user.info -e -t GRAYLOG-HELPER
 echo "[INFO] - GRAYLOG CONFIGURATION RESTORE STARTED BY ${USER^^}"
 
+sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml down mongodb1 2>/dev/null >/dev/null
+wait
+
+sudo rm -rf ${CONFIGURATION_DIRECTORY}/*
+
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d mongodb1 2>/dev/null >/dev/null
+wait
 
 sudo mkdir ${RESTORE_DIRECTORY}
 sudo tar -xzf "${GRAYLOG_PATH}/${BACKUP_DIRECTORY}/${RESTORE_DUMP_FILE}" -C ${RESTORE_DIRECTORY}
