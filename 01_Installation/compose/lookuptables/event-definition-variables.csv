@@ -1,4 +1,8 @@
-"# Add the duration of an RDP session in minutes that you consider the maximum to be considered as usual behaviour",,
+# Add the duration of an RDP session in minutes that you consider the maximum to be considered as usual behaviour
 "long_session","240","minutes"
-"# Add the duration of an RDP session in seconds that you consider the minimum to be considered as usual behaviour",,
+# Add the duration of an RDP session in seconds that you consider the minimum to be considered as usual behaviour
 "short_session","60","seconds"
+# Start Business Hours
+"start_business_hours","8","hour on clock"
+# End Business Hours
+"end_business_hours","18","hour on clock"
