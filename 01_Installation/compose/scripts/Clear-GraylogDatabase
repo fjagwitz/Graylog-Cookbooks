@@ -38,11 +38,13 @@ sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode1 2>/de
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode2 2>/dev/null >/dev/null
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode3 2>/dev/null >/dev/null
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml up -d datanode9 2>/dev/null >/dev/null
-wait
+
+while [[ $(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml exec -it datanode1 curl -s http://localhost:9200/_cluster/health | jq -r .status) != "green" ]]; do sleep 2s; done
 
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml start graylog1 2>/dev/null >/dev/null
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml start graylog2 2>/dev/null >/dev/null
-wait
+
+while [[ $(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml exec -it graylog1 curl -s http://localhost:9000/api/system/lbstatus) != "ALIVE" ]]; do sleep 2s; done
 
 echo "[INFO] - START GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-HELPER
 sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml start nginx1 2>/dev/null >/dev/null

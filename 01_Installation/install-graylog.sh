@@ -365,8 +365,8 @@ function_installGraylogStack () {
 
     # Reformat all Windows files to DOS format
     echo "[INFO] - REFORMAT WINDOWS FILES TO DOS CRLF " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    find ${GRAYLOG_PATH}/sources/ -type f -print0 | xargs -0 unix2dos -- 2>/dev/null >/dev/null
-    find ${GRAYLOG_PATH}/lookuptables/ -type f -print0 | xargs -0 unix2dos -- 2>/dev/null >/dev/null
+    find ${GRAYLOG_PATH}/sources/ -type f -print0 | sudo xargs -0 unix2dos -- 2>/dev/null >/dev/null
+    find ${GRAYLOG_PATH}/lookuptables/ -type f -print0 | sudo xargs -0 unix2dos -- 2>/dev/null >/dev/null
 
     # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
     echo "[INFO] - SET PERMISSIONS FOR UID/GID 1000 (OPENSEARCH)" | logger -p user.info -e -t GRAYLOG-INSTALLER
