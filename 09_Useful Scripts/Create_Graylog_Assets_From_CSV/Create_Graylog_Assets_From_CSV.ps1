@@ -1,6 +1,13 @@
 ﻿ $assetFile = "asset_data.csv"
  $assetData = Import-Csv -Path $assetFile -Delimiter ";" -Encoding UTF8
- $targetSystem = "siem.fritzdata.de"
+ $targetSystem = ""
+
+ clear
+
+ if ($targetSystem -eq "") {
+    $targetSystem = Read-Host "Please add the FQDN of your Graylog Server"
+ }
+  
  $cred = Get-Credential
 
  foreach ($asset in $assetData) {
@@ -12,7 +19,7 @@
         details = @{
             type = "machine"
             owner = $asset.Owner
-            hostnames = @($asset.AssetName)
+            hostnames = @($asset.HostName)
             ip_addresses = @($asset.'IpAddress')
             description = "Letzter Scan: " + $asset.'LastScan'
             geo_info = @{
