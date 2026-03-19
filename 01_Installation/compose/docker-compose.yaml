@@ -69,7 +69,7 @@ services:
     restart: "always"
 
   datanode1:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:7.1.0-alpha.2-1"
     hostname: "datanode1"
     deploy:
       resources:
@@ -103,7 +103,7 @@ services:
     restart: "on-failure"
 
   datanode2:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:7.1.0-alpha.2-1"
     hostname: "datanode2"
     deploy:
       resources:
@@ -133,7 +133,7 @@ services:
     restart: "on-failure"
 
   datanode3:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:7.1.0-alpha.2-1"
     hostname: "datanode3"
     deploy:
       resources:
@@ -163,7 +163,7 @@ services:
     restart: "on-failure"
 
   datanode9:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:7.1.0-alpha.2-1"
     hostname: "datanode9"
     deploy:
       resources:
@@ -195,7 +195,7 @@ services:
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/graylog-enterprise:7.1"
+    image: "graylog/graylog-enterprise:7.1.0-alpha.2-1"
     hostname: "graylog1"
     deploy:
       resources:
@@ -239,7 +239,7 @@ services:
     restart: "on-failure"
 
   graylog2:
-    image: "graylog/graylog-enterprise:7.1"
+    image: "graylog/graylog-enterprise:7.1.0-alpha.2-1"
     hostname: "graylog2"
     deploy:
       resources:
