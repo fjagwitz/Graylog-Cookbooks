@@ -59,12 +59,6 @@ services:
   mongodb1:
     image: "mongo:7"
     hostname: "mongodb1"
-    deploy:
-      resources:
-        limits:
-          memory: 8g
-        reservations:
-          memory: 1g
     logging: 
       driver: "gelf"
       options: 
