@@ -561,6 +561,25 @@ function_checkSystemAvailability () {
 
 }
 
+function_addDataNodesToCluster () {
+    local TMP_ADMIN=$1
+    local TMP_PASSWORD=""
+
+    while [[ ${TMP_PASSWORD} == "" ]]
+    do
+        sleep 5s
+        local TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep password | cut -d"'" -f4)
+    done
+
+    echo "[INFO] - ACTIVATE LOCAL GRAYLOG CA FOR EVALUATION PURPOSES" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+    local ACTIVE_CA=$(curl -s http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{organization: "Evaluation CA"}')        
+    local CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}')        
+    local PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost")        
+    local FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost")
+
+}
+
 function_createUserToken () {
 
     echo "[INFO] - CREATE GRAYLOG API TOKEN FOR ACCOUNT ${1^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -996,6 +1015,7 @@ then
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
     function_startGraylogStack
+    function_addDataNodesToCluster ${GRAYLOG_ADMIN}
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
     function_downloadGraylogSidecarBinaries 
