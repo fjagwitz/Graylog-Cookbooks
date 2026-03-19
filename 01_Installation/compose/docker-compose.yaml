@@ -71,6 +71,12 @@ services:
   datanode1:
     image: "graylog/graylog-datanode:7.0"
     hostname: "datanode1"
+    deploy:
+      resources:
+        limits:
+          memory: 8gb
+        reservations:
+          memory: 1gb
     logging: 
       driver: "gelf"
       options: 
@@ -99,6 +105,12 @@ services:
   datanode2:
     image: "graylog/graylog-datanode:7.0"
     hostname: "datanode2"
+    deploy:
+      resources:
+        limits:
+          memory: 8gb
+        reservations:
+          memory: 1gb
     logging: 
       driver: "gelf"
       options: 
@@ -123,6 +135,12 @@ services:
   datanode3:
     image: "graylog/graylog-datanode:7.0"
     hostname: "datanode3"
+    deploy:
+      resources:
+        limits:
+          memory: 8gb
+        reservations:
+          memory: 1gb
     logging: 
       driver: "gelf"
       options: 
