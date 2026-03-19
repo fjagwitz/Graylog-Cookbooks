@@ -565,6 +565,8 @@ function_addDataNodesToCluster () {
     local TMP_ADMIN=$1
     local TMP_PASSWORD=""
 
+    echo "[INFO] - WAIT FOR GRAYLOG TO BECOME CONFIGURABLE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
     while [[ ${TMP_PASSWORD} == "" ]]
     do
         sleep 5s
@@ -572,18 +574,11 @@ function_addDataNodesToCluster () {
     done
 
     echo "[INFO] - ACTIVATE LOCAL GRAYLOG CA FOR EVALUATION PURPOSES" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "[INFO] - TMP_ADMIN: $TMP_ADMIN" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "[INFO] - TMP_PW: $TMP_PASSWORD" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
-    curl http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"organization": "Evaluation CA"}' | logger -p user.info -e -t GRAYLOG-INSTALLER
-
-    curl http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}' | logger -p user.info -e -t GRAYLOG-INSTALLER
-
-    curl http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER
-
-    curl http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER
-
-    sleep 30s
+    ACTIVATE_CA=$(curl -s http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"organization": "Evaluation CA"}' | logger -p user.info -e -t GRAYLOG-INSTALLER)
+    CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}' | logger -p user.info -e -t GRAYLOG-INSTALLER)
+    PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER)
+    FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER)
 
 }
 
