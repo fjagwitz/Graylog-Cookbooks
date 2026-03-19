@@ -133,7 +133,7 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: "graylog.env"
+    env_file: ".env"
     environment: 
       - "GRAYLOG_IS_LEADER=true"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
@@ -171,7 +171,7 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: "graylog.env"
+    env_file: ".env"
     environment: 
       - "GRAYLOG_IS_LEADER=false"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
