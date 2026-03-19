@@ -59,6 +59,12 @@ services:
   mongodb1:
     image: "mongo:7"
     hostname: "mongodb1"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -74,9 +80,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8gb
+          memory: 8g
         reservations:
-          memory: 1gb
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -108,9 +114,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8gb
+          memory: 8g
         reservations:
-          memory: 1gb
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -138,9 +144,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8gb
+          memory: 8g
         reservations:
-          memory: 1gb
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -165,6 +171,12 @@ services:
   datanode9:
     image: "graylog/graylog-datanode:7.0"
     hostname: "datanode9"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -191,6 +203,12 @@ services:
   graylog1:
     image: "graylog/graylog-enterprise:7.0"
     hostname: "graylog1"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -229,6 +247,12 @@ services:
   graylog2:
     image: "graylog/graylog-enterprise:7.0"
     hostname: "graylog2"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
