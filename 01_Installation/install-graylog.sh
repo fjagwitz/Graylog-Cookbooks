@@ -568,15 +568,17 @@ function_addDataNodesToCluster () {
     while [[ ${TMP_PASSWORD} == "" ]]
     do
         sleep 5s
-        local TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep password | cut -d"'" -f4)
+        TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep password | cut -d"'" -f4)
     done
 
     echo "[INFO] - ACTIVATE LOCAL GRAYLOG CA FOR EVALUATION PURPOSES" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - TMP_ADMIN: $TMP_ADMIN" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - TMP_PW: $TMP_PASSWORD" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
-    local ACTIVE_CA=$(curl -s http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{organization: "Evaluation CA"}')        
-    local CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}')        
-    local PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost")        
-    local FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost")
+    curl http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{organization: "Evaluation CA"}'
+    curl http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}'
+    curl http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost"
+    curl http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost"
 
 }
 
