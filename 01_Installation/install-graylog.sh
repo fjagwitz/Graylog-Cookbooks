@@ -575,7 +575,7 @@ function_addDataNodesToCluster () {
     echo "[INFO] - TMP_ADMIN: $TMP_ADMIN" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - TMP_PW: $TMP_PASSWORD" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
-    curl http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{organization: "Evaluation CA"}' | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"organization": "Evaluation CA"}' | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     curl http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}' | logger -p user.info -e -t GRAYLOG-INSTALLER
 
