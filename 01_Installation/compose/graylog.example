@@ -96,7 +96,6 @@ GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
 
 ## Graylog Datanode Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/data_node_configuration_file.htm)
 #
-GRAYLOG_DATANODE_NODE_SEARCH_CACHE_SIZE = 100gb
 GRAYLOG_DATANODE_PATH_REPO = "/var/lib/graylog/warm_tier"
 
 ## Adapt these variables to your environment, refer to "server.conf" documentation (see above)

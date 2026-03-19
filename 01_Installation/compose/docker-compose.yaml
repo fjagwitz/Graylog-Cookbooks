@@ -104,10 +104,12 @@ services:
         gelf-address: "udp://localhost:9900"
     depends_on:
       - "datanode1" 
+    env_file: ".env"
     environment:
       GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
       GRAYLOG_DATANODE_NODE_ROLES: "search"
+      GRAYLOG_DATANODE_NODE_SEARCH_CACHE_SIZE: "100gb"
     ulimits:
       memlock:
         soft: -1
