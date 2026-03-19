@@ -368,7 +368,7 @@ function_installGraylogStack () {
 
     # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
     echo "[INFO] - SET PERMISSIONS FOR UID/GID 1000 (OPENSEARCH)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo chown -R 1000:1000 ${GRAYLOG_PATH}/database
+    sudo chown -R 999:999 ${GRAYLOG_PATH}/database
     
     # Adapting Permissions for proper access by the Graylog Containers (1100:1100)
     echo "[INFO] - SET PERMISSIONS FOR UID/GID 1100 (GRAYLOG) " | logger -p user.info -e -t GRAYLOG-INSTALLER
