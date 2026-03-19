@@ -380,7 +380,7 @@ function_installGraylogStack () {
     done
     
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
+    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/.env
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${DATABASE_ENV} >/dev/null 

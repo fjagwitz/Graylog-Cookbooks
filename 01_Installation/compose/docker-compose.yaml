@@ -69,100 +69,34 @@ services:
     restart: "always"
 
   datanode1:
-    image: "opensearchproject/opensearch:2.19.3"
+    image: "graylog/graylog-datanode:7.0"
     hostname: "datanode1"
     logging: 
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: "opensearch.env"
     environment:
-      - "node.name=datanode1"
-      - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"      
-      - "discovery.seed_hosts=datanode2,datanode3"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
+      GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
+      GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
+      GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
       memlock:
-        soft: -1 
         hard: -1
+        soft: -1
       nofile:
-        soft: 262144 
-        hard: 262144
+        soft: 65536
+        hard: 65536
+    ports:
+      - "127.0.0.1:8999:8999/tcp"   # DataNode API
+      - "127.0.0.1:9200:9200/tcp"
+      - "127.0.0.1:9300:9300/tcp"
     volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "./database/datanode1:/usr/share/opensearch/data"    
-    restart: "on-failure"
-
-  datanode2:
-    image: "opensearchproject/opensearch:2.19.3"
-    hostname: "datanode2"
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
-    env_file: "opensearch.env"
-    environment:
-      - "node.name=datanode2"
-      - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
-      - "discovery.seed_hosts=datanode1,datanode3"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
-    ulimits:
-      memlock:
-        soft: -1 
-        hard: -1
-      nofile:
-        soft: 262144 
-        hard: 262144
-    volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "./database/datanode2:/usr/share/opensearch/data"
-    restart: "on-failure"
-
-  datanode3:
-    image: "opensearchproject/opensearch:2.19.3"
-    hostname: "datanode3"
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
-    env_file: "opensearch.env"
-    environment:
-      - "node.name=datanode3"
-      - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
-      - "discovery.seed_hosts=datanode1,datanode2"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
-    ulimits:
-      memlock:
-        soft: -1 
-        hard: -1
-      nofile:
-        soft: 262144 
-        hard: 262144
-    volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "./database/datanode3:/usr/share/opensearch/data"
+      - "./database/warm_tier:/var/lib/graylog/warm_tier"
+      - "./database/datanode1:/var/lib/graylog-datanode"    
     restart: "on-failure"
 
   datanode9:
-    image: "opensearchproject/opensearch:2.19.3"
+    image: "graylog/graylog-datanode:7.0"
     hostname: "datanode9"
     logging: 
       driver: "gelf"
@@ -171,20 +105,11 @@ services:
     depends_on:
       - "datanode1"
       - "datanode2"
-      - "datanode3"
-    env_file: "opensearch.env"
+      - "datanode3"    
     environment:
-      - "node.name=datanode9"
-      - "node.roles=search"
-      - "node.search.cache.size=10gb"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
-      - "discovery.seed_hosts=datanode1,datanode2,datanode3"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
+      GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
+      GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
+      GRAYLOG_DATANODE_NODE_ROLES: "search"
     ulimits:
       memlock:
         soft: -1
@@ -193,7 +118,7 @@ services:
         soft: 262144
         hard: 262144
     volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/warm_tier:/var/lib/graylog/warm_tier"
     restart: "on-failure"
 
   graylog1:
