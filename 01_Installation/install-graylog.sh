@@ -579,6 +579,7 @@ function_addDataNodesToCluster () {
     curl http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}'
     curl http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost"
     curl http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost"
+    sleep 30s
 
 }
 
