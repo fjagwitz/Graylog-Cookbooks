@@ -34,7 +34,7 @@ SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | 
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK="600"
+SYSTEM_REQUIREMENTS_DISK="550"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
@@ -368,8 +368,8 @@ function_installGraylogStack () {
     find ${GRAYLOG_PATH}/sources/ -type f -print0 | sudo xargs -0 unix2dos -- 2>/dev/null >/dev/null
     find ${GRAYLOG_PATH}/lookuptables/ -type f -print0 | sudo xargs -0 unix2dos -- 2>/dev/null >/dev/null
 
-    # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
-    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1000 (OPENSEARCH)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    # Adapting Permissions for proper access by the Datanode Containers (999:999)
+    echo "[INFO] - SET PERMISSIONS FOR UID/GID 999 (DATANODE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo chown -R 999:999 ${GRAYLOG_PATH}/database
     
     # Adapting Permissions for proper access by the Graylog Containers (1100:1100)

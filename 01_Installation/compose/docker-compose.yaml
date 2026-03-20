@@ -272,7 +272,8 @@ services:
       - "mongodb1"
       - "datanode1"
       - "datanode2"
-      - "datanode3"    entrypoint: "/docker-entrypoint.sh"
+      - "datanode3"    
+    entrypoint: "/docker-entrypoint.sh"
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
