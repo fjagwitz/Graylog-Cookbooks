@@ -19,7 +19,7 @@ GRAYLOG_SKIP_PREFLIGHT_CHECKS ="false"
 
 ## Set Graylog Java Heap Size
 #
-GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx4g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
+GRAYLOG_SERVER_JAVA_OPTS="-Xms2g -Xmx3g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
 
 ## Use custom Root Certificates from "/opt/graylog/rootcerts" on the Host
 #
@@ -108,4 +108,4 @@ GRAYLOG_DATANODE_MONGODB_URI = "mongodb://mongodb1:27017/graylog"
 
 ## Set Graylog Java Heap Size
 #
-GRAYLOG_DATANODE_OPENSEARCH_HEAP = "4g"
+GRAYLOG_DATANODE_OPENSEARCH_HEAP = "3g"
