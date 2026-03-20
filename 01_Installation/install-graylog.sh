@@ -334,6 +334,7 @@ function_installGraylogStack () {
     local INSTALLPATH="/tmp/graylog"
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
+    local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
@@ -379,7 +380,8 @@ function_installGraylogStack () {
     done
     
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}
+    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
+    sudo mv ${GRAYLOG_PATH}/datanode.example ${DATANODE_ENV}
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR GRAYLOG " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
@@ -390,6 +392,9 @@ function_installGraylogStack () {
     sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${SYSTEM_PASSWORD_SECRET}\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GRAYLOG_FQDN}/\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
+
+    sudo sed -i "s\GRAYLOG_DATANODE_PASSWORD_SECRET = \"\"\GRAYLOG_DATANODE_PASSWORD_SECRET = \"${SYSTEM_PASSWORD_SECRET}\"\g" ${DATANODE_ENV}
+
 
     if [ "${SYSTEM_PROXY}" != "" ]
     then

@@ -99,10 +99,10 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
+    depends_on:
+      - "mongodb1"
     env_file: "dataode.env"        
     environment:
-      GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
-      GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
       memlock:
@@ -129,10 +129,10 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
+    depends_on:
+      - "mongodb1"
     env_file: "datanode.env"        
     environment:
-      GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
-      GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
       memlock:
@@ -159,10 +159,10 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
+    depends_on:
+      - "mongodb1"
     env_file: "datanode.env"        
     environment:
-      GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
-      GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
       memlock:
@@ -190,13 +190,12 @@ services:
       options: 
         gelf-address: "udp://localhost:9900"
     depends_on:
+      - "mongodb1"
       - "datanode1" 
       - "datanode2" 
       - "datanode3" 
     env_file: "datanode.env"
     environment:
-      GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
-      GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
       GRAYLOG_DATANODE_NODE_ROLES: "search"
       GRAYLOG_DATANODE_NODE_SEARCH_CACHE_SIZE: "20gb"
     ulimits:
@@ -226,6 +225,8 @@ services:
     depends_on:
       - "mongodb1"
       - "datanode1"
+      - "datanode2"
+      - "datanode3"
     entrypoint: "/docker-entrypoint.sh"
     post_start:
       - command: /__cacert_entrypoint.sh
@@ -270,7 +271,8 @@ services:
     depends_on:
       - "mongodb1"
       - "datanode1"
-    entrypoint: "/docker-entrypoint.sh"
+      - "datanode2"
+      - "datanode3"    entrypoint: "/docker-entrypoint.sh"
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root

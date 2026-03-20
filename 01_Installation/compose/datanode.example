@@ -1,6 +1,6 @@
 ## Graylog Datanode Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/data_node_configuration_file.htm)
 #
-GRAYLOG_PASSWORD_SECRET = ""
+GRAYLOG_DATANODE_PASSWORD_SECRET = ""
 
 ## Configure Graylog Data Node warm tier repositories
 #
