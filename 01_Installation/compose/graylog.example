@@ -92,20 +92,3 @@ GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
 #
 # GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-events"
 # GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-system-events"
-
-
-## Graylog Datanode Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/data_node_configuration_file.htm)
-#
-GRAYLOG_DATANODE_PATH_REPO = "/var/lib/graylog/warm_tier"
-
-## Adapt these variables to your environment, refer to "server.conf" documentation (see above)
-#
-GRAYLOG_DATANODE_BIND_ADDRESS = "0.0.0.0"
-GRAYLOG_DATANODE_DATANODE_HTTP_PORT = "8999"
-GRAYLOG_DATANODE_HTTP_MAX_HEADER_SIZE = "8192"
-GRAYLOG_DATANODE_HTTP_THREAD_POOL_SIZE = "64"
-GRAYLOG_DATANODE_MONGODB_URI = "mongodb://mongodb1:27017/graylog"
-
-## Set Graylog Java Heap Size
-#
-GRAYLOG_DATANODE_OPENSEARCH_HEAP = "3g"

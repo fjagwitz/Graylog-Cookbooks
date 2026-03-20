@@ -17,7 +17,8 @@
 GRAYLOG_VERSION="7.1"
 GRAYLOG_PATH="/opt/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
-GRAYLOG_SERVER_ENV=".env"
+GRAYLOG_SERVER_ENV="graylog.env"
+GRAYLOG_DATANODE_ENV="datanode.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
@@ -27,7 +28,7 @@ GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(printenv | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | cut -d "=" -f 2 | tr -d '"')
 
 # Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
@@ -312,13 +313,13 @@ function_installGraylogSidecar () {
     then
 
         echo "[INFO] - ADD GRAYLOG SIDECAR REPOSITORY" | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
-        sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+        sudo curl --output-dir /tmp -LOs https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null           
+        sudo dpkg -i /tmp/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - INSTALL GRAYLOG SIDECAR " | logger -p user.info -e -t GRAYLOG-INSTALLER
         sudo apt -qq update -y 2>/dev/null >/dev/null
         sudo apt -qq install -y graylog-sidecar 2>/dev/null >/dev/null
-        sudo rm graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+        sudo rm /tmp/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - CONFIGURE GRAYLOG SIDECAR ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
         sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
