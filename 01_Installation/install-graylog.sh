@@ -592,6 +592,15 @@ function_addDataNodesToCluster () {
     PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER) >/dev/null
     FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER) >/dev/null
 
+    if [[ $(echo ${FINISH_CA} | jq .result) == "finished" ]]
+    then
+        echo "[INFO] - GRAYLOG DATANODES HAVE BEEN SUCCESSFULLY ENROLLED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    else
+        echo "[ERROR] - GRAYLOG DATANODES COULD NOT BE SUCCESSFULLY ENROLLED, EXIT" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[ERROR] - GRAYLOG DATANODES COULD NOT BE SUCCESSFULLY ENROLLED, EXIT"
+        exit
+    fi
+
 }
 
 function_createUserToken () {
