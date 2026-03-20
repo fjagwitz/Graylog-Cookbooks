@@ -587,10 +587,10 @@ function_addDataNodesToCluster () {
 
     echo "[INFO] - ACTIVATE LOCAL GRAYLOG CA FOR EVALUATION PURPOSES" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
-    ACTIVATE_CA=$(curl -s http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"organization": "Evaluation CA"}' | logger -p user.info -e -t GRAYLOG-INSTALLER)
-    CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}' | logger -p user.info -e -t GRAYLOG-INSTALLER)
-    PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER)
-    FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER)
+    ACTIVATE_CA=$(curl -s http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"organization": "Evaluation CA"}' | logger -p user.info -e -t GRAYLOG-INSTALLER) >/dev/null
+    CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}' | logger -p user.info -e -t GRAYLOG-INSTALLER) >/dev/null
+    PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER) >/dev/null
+    FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" | logger -p user.info -e -t GRAYLOG-INSTALLER) >/dev/null
 
 }
 
