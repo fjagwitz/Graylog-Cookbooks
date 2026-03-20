@@ -2,6 +2,12 @@ services:
   nginx1: 
     image: "nginx:latest"
     hostname: "nginx1"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     depends_on:
       - "graylog1"
       - "graylog2"
@@ -50,6 +56,12 @@ services:
   nginx2: 
     image: "nginx:latest"
     hostname: "lookuptables"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     volumes: 
       - "./nginx2/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "./nginx2/http.conf:/etc/nginx/conf.d/http.conf:ro"
@@ -59,6 +71,12 @@ services:
   mongodb1:
     image: "mongo:7"
     hostname: "mongodb1"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -81,7 +99,7 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: ".env"        
+    env_file: "dataode.env"        
     environment:
       GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
@@ -93,10 +111,6 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    ports:
-      - "127.0.0.1:8999:8999/tcp"   # DataNode API
-      - "127.0.0.1:9200:9200/tcp"
-      - "127.0.0.1:9300:9300/tcp"
     volumes:
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
       - "./database/datanode1:/var/lib/graylog-datanode"    
@@ -115,7 +129,7 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: ".env"        
+    env_file: "datanode.env"        
     environment:
       GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
@@ -145,7 +159,7 @@ services:
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
-    env_file: ".env"        
+    env_file: "datanode.env"        
     environment:
       GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
@@ -177,7 +191,9 @@ services:
         gelf-address: "udp://localhost:9900"
     depends_on:
       - "datanode1" 
-    env_file: ".env"
+      - "datanode2" 
+      - "datanode3" 
+    env_file: "datanode.env"
     environment:
       GRAYLOG_DATANODE_PASSWORD_SECRET: "${GRAYLOG_PASSWORD_SECRET}"
       GRAYLOG_DATANODE_MONGODB_URI: "${GRAYLOG_MONGODB_URI}"
@@ -214,7 +230,7 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: ".env"
+    env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=true"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
@@ -258,7 +274,7 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: ".env"
+    env_file: "graylog.env"
     environment: 
       - "GRAYLOG_IS_LEADER=false"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
@@ -286,6 +302,12 @@ services:
   grafana1:
     image: "grafana/grafana-oss:12.0.2"
     hostname: "grafana1"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     depends_on:
       - "prometheus1"
     environment:
@@ -299,8 +321,15 @@ services:
   prometheus1:
     image: "prom/prometheus:latest"
     hostname: "prometheus1"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     depends_on:
       - "graylog1"
+      - "graylog2"
     environment: 
       LISTEN_ADDRESS: "0.0.0.0"
       LISTEN_PORT: '9090'
@@ -318,6 +347,12 @@ services:
   samba1:
     image: "dockurr/samba:4.21"
     hostname: "samba1"
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -338,6 +373,12 @@ services:
   #  nessus1:
   #  image: tenable/nessus:latest-ubuntu
   #  hostname: nessus1
+  #  deploy:
+  #    resources:
+  #      limits:
+  #        memory: 8g
+  #      reservations:
+  #        memory: 1g
   #  ports:
   #    - "8834:8834"
   #  environment:
