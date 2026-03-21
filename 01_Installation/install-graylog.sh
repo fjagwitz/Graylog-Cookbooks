@@ -190,16 +190,16 @@ function_checkSystemRequirements () {
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
     local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
 
-    if [[ "${SYSTEM_PROXY}" != "http"* ]]
-    then 
-        SYSTEM_PROXY="https://${SYSTEM_PROXY}"
-        echo "[INFO] - SET SYSTEM PROXY TO ${SYSTEM_PROXY}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    fi
-
-    if [[ "${SYSTEM_PROXY}" == "https://" ]]
+    
+    if [[ "${SYSTEM_PROXY}" == "" ]]
     then
         local INTERNET_CONNECTIVITY_TYPE="direct (without Proxy)"
     else
+        if [[ "${SYSTEM_PROXY}" != "http"* ]]
+        then 
+            SYSTEM_PROXY="https://${SYSTEM_PROXY}"
+            echo "[INFO] - SET SYSTEM PROXY TO ${SYSTEM_PROXY}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        fi
         local INTERNET_CONNECTIVITY_TYPE="proxied: "
     fi 
 
