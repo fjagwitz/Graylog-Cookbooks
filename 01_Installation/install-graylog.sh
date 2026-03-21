@@ -196,7 +196,7 @@ function_checkSystemRequirements () {
         echo "[INFO] - SET SYSTEM PROXY TO ${SYSTEM_PROXY}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
 
-    if [[ "${SYSTEM_PROXY}" == "" ]]
+    if [[ "${SYSTEM_PROXY}" == "https://" ]]
     then
         local INTERNET_CONNECTIVITY_TYPE="direct (without Proxy)"
     else
