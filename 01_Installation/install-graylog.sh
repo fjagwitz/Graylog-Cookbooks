@@ -585,7 +585,7 @@ function_addDataNodesToCluster () {
         TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep password | cut -d"'" -f4)
     done
 
-    echo "[INFO] - TRY TO ACTIVATE LOCAL GRAYLOG CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - TRY TO ACTIVATE LOCAL EVALUATION CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     ACTIVATE_CA=$(curl -s http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"organization": "Evaluation CA"}') >/dev/null
     CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}') >/dev/null
