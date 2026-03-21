@@ -592,7 +592,7 @@ function_addDataNodesToCluster () {
     PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
     FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
 
-    if [[ $(echo ${FINISH_CA} | jq .result) == "finished" ]]
+    if [[ $(echo ${FINISH_CA} | jq -r .result) == "FINISHED" ]]
     then
         echo "[INFO] - SUCCESSFULLY ACTIVATED LOCAL GRAYLOG CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
@@ -1038,7 +1038,6 @@ then
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
     function_startGraylogStack
-    exit
     function_addDataNodesToCluster ${GRAYLOG_ADMIN}
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
