@@ -594,10 +594,10 @@ function_addDataNodesToCluster () {
 
     if [[ $(echo ${FINISH_CA} | jq -r .result) == "FINISHED" ]]
     then
-        echo "[INFO] - SUCCESSFULLY ACTIVATED LOCAL GRAYLOG CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - SUCCESSFULLY ACTIVATED LOCAL EVALUATION CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
-        echo "[ERROR] - FAILED TO ACTIVATE LOCAL GRAYLOG CA, EXIT" | logger -p user.info -e -t GRAYLOG-INSTALLER
-        echo "[ERROR] - FAILED TO ACTIVATE LOCAL GRAYLOG CA, EXIT"
+        echo "[ERROR] - FAILED TO ACTIVATE LOCAL EVALUATION CA, EXIT" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[ERROR] - FAILED TO ACTIVATE LOCAL EVALUATION CA, EXIT"
         exit
     fi
 
