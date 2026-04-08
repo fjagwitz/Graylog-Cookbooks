@@ -5,7 +5,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     depends_on:
@@ -59,7 +59,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     volumes: 
@@ -74,7 +74,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -92,7 +92,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -122,7 +122,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -152,7 +152,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -182,7 +182,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -215,7 +215,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -261,7 +261,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -308,7 +308,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     depends_on:
@@ -327,7 +327,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     depends_on:
@@ -353,7 +353,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 8g
+          memory: 6g
         reservations:
           memory: 1g
     logging: 
@@ -379,7 +379,7 @@ services:
   #  deploy:
   #    resources:
   #      limits:
-  #        memory: 8g
+  #        memory: 6g
   #      reservations:
   #        memory: 1g
   #  ports:
