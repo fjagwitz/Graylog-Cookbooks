@@ -966,16 +966,16 @@ function_configureSecurityFeatures () {
     
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
-        local ACTIVE_AI_REPORT=""
+        local ACTIVE_AI=""
         local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["core_anomaly_detection","05dc479f-9659-476b-b888-9fdaae3a7777"]'
         local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["5289b02d-ebb9-4c93-baf8-baf05e1c138b","10da1609-54b1-4e73-8757-a5326379ad26","85411e45-52b4-4a4c-8b03-a26be9900a28","759a0e52-e76a-4836-889a-1bab2fce65d3","6f6197cf-ee3f-453b-a248-c309ff91ed0a","019b5712-186d-440b-afd8-88386b1411f9","8f445386-5dfe-4d64-a790-f7a6527789b7"]'    
         
-        while [[ ${ACTIVE_AI_REPORT} == "true" ]] || [[ ${ACTIVE_AI_REPORT} == "" ]]
+        while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
         do 
             echo "[INFO] - DISABLE INVESTIGATION AI REPORTS " | logger -p user.info -e -t GRAYLOG-INSTALLER
             
-            curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
-            ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
+            curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/ai_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
+            ACTIVE_AI=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
         done
 
         echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
