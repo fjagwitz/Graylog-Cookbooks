@@ -968,7 +968,7 @@ function_configureSecurityFeatures () {
     then
         local ACTIVE_AI=""
         local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["core_anomaly_detection","05dc479f-9659-476b-b888-9fdaae3a7777"]'
-        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["5289b02d-ebb9-4c93-baf8-baf05e1c138b","10da1609-54b1-4e73-8757-a5326379ad26","85411e45-52b4-4a4c-8b03-a26be9900a28","759a0e52-e76a-4836-889a-1bab2fce65d3","6f6197cf-ee3f-453b-a248-c309ff91ed0a","019b5712-186d-440b-afd8-88386b1411f9","8f445386-5dfe-4d64-a790-f7a6527789b7"]'    
+        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["5289b02d-ebb9-4c93-baf8-baf05e1c138b","10da1609-54b1-4e73-8757-a5326379ad26","85411e45-52b4-4a4c-8b03-a26be9900a28","759a0e52-e76a-4836-889a-1bab2fce65d3","6f6197cf-ee3f-453b-a248-c309ff91ed0a","019b5712-186d-440b-afd8-88386b1411f9","8f445386-5dfe-4d64-a790-f7a6527789b7","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7"}"]'    
         
         while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
         do 
