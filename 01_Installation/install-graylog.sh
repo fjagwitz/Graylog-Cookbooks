@@ -337,7 +337,7 @@ function_installGraylogSidecar () {
 
 function_installGraylogStack () {
 
-    local INSTALLPATH="/tmp/graylog"
+    local INSTALLPATH=$(mktemp)
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
@@ -347,8 +347,6 @@ function_installGraylogStack () {
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
     echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf >/dev/null 
     sudo sysctl -p >/dev/null 
-
-    sudo mkdir -p ${INSTALLPATH}
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
