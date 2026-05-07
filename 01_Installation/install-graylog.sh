@@ -337,7 +337,7 @@ function_installGraylogSidecar () {
 
 function_installGraylogStack () {
 
-    local INSTALLPATH=$(mktemp)
+    local INSTALLPATH=$(mktemp -d)
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
