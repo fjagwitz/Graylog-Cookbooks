@@ -1102,12 +1102,12 @@ then
 
     function_createInputs ${GRAYLOG_ADMIN_TOKEN}    
     function_configureEvaluationSetup ${GRAYLOG_ADMIN_TOKEN}
-    function_configureEnterpriseFeatures ${GRAYLOG_ADMIN_TOKEN} 
+    #function_configureEnterpriseFeatures ${GRAYLOG_ADMIN_TOKEN} 
 
     echo "[INFO] - GRAYLOG ENTERPRISE INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
-    function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
+    #function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
 
     echo "[INFO] - GRAYLOG SECURITY INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
