@@ -17,3 +17,7 @@ GRAYLOG_DATANODE_MONGODB_URI = "mongodb://mongodb1:27017/graylog"
 ## Set Graylog Datanode Java Heap Size
 #
 GRAYLOG_DATANODE_OPENSEARCH_HEAP = "3g"
+
+## Configure Graylog Datanode Discovery Seed Hosts
+#
+GRAYLOG_DATANODE_OPENSEARCH_DISCOVERY_SEED_HOSTS = [ datanode1, datanode2, datanode3 ]
