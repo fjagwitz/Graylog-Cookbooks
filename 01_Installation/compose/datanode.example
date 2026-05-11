@@ -1,0 +1,23 @@
+## Graylog Datanode Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/data_node_configuration_file.htm)
+#
+GRAYLOG_DATANODE_PASSWORD_SECRET = ""
+
+## Configure Graylog Data Node warm tier repositories
+#
+GRAYLOG_DATANODE_PATH_REPO = "/var/lib/graylog/warm_tier"
+
+## Configure Graylog Datanode Connection Settings
+#
+GRAYLOG_DATANODE_BIND_ADDRESS = "0.0.0.0"
+GRAYLOG_DATANODE_DATANODE_HTTP_PORT = "8999"
+GRAYLOG_DATANODE_HTTP_MAX_HEADER_SIZE = "8192"
+GRAYLOG_DATANODE_HTTP_THREAD_POOL_SIZE = "64"
+GRAYLOG_DATANODE_MONGODB_URI = "mongodb://mongodb1:27017/graylog"
+
+## Set Graylog Datanode Java Heap Size
+#
+GRAYLOG_DATANODE_OPENSEARCH_HEAP = "3g"
+
+## Configure Graylog Datanode Discovery Seed Hosts
+#
+GRAYLOG_DATANODE_OPENSEARCH_DISCOVERY_SEED_HOSTS = [ datanode1, datanode2, datanode3 ]

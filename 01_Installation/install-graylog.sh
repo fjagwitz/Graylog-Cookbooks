@@ -4,8 +4,8 @@
 # description:       Installs a complete Graylog Cluster for testing purposes
 # author:            Friedrich von Jagwitz 
 # email:             fvj@graylog.com
-# date:              2025-11-11
-# version:           7.0
+# date:              2026-03-19
+# version:           7.1
 # usage:             bash install-graylog.sh
 # notes:             
 #==============================================================================
@@ -14,11 +14,11 @@
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.0"
+GRAYLOG_VERSION="7.1"
 GRAYLOG_PATH="/opt/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
-GRAYLOG_DATABASE_ENV="opensearch.env"
+GRAYLOG_DATANODE_ENV="datanode.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
@@ -28,13 +28,13 @@ GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(printenv | grep -iw http_proxy | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | tr -d '"')
 
 # Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK="600"
+SYSTEM_REQUIREMENTS_DISK="550"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
@@ -190,10 +190,16 @@ function_checkSystemRequirements () {
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
     local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
 
+    
     if [[ "${SYSTEM_PROXY}" == "" ]]
     then
         local INTERNET_CONNECTIVITY_TYPE="direct (without Proxy)"
     else
+        if [[ "${SYSTEM_PROXY}" != "http"* ]]
+        then 
+            SYSTEM_PROXY="https://${SYSTEM_PROXY}"
+            echo "[INFO] - SET SYSTEM PROXY TO ${SYSTEM_PROXY}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        fi
         local INTERNET_CONNECTIVITY_TYPE="proxied: "
     fi 
 
@@ -313,13 +319,13 @@ function_installGraylogSidecar () {
     then
 
         echo "[INFO] - ADD GRAYLOG SIDECAR REPOSITORY" | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sudo wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
-        sudo dpkg -i graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+        sudo curl --output-dir /tmp -LOs https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null           
+        sudo dpkg -i /tmp/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - INSTALL GRAYLOG SIDECAR " | logger -p user.info -e -t GRAYLOG-INSTALLER
         sudo apt -qq update -y 2>/dev/null >/dev/null
         sudo apt -qq install -y graylog-sidecar 2>/dev/null >/dev/null
-        sudo rm graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
+        sudo rm /tmp/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - CONFIGURE GRAYLOG SIDECAR ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
         sudo cp ${SIDECAR_YAML} ${SIDECAR_YAML}.bak
@@ -331,18 +337,16 @@ function_installGraylogSidecar () {
 
 function_installGraylogStack () {
 
-    local INSTALLPATH="/tmp/graylog"
+    local INSTALLPATH=$(mktemp -d)
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
-    local DATABASE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATABASE_ENV}"
+    local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
     echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf >/dev/null 
     sudo sysctl -p >/dev/null 
-
-    sudo mkdir -p ${INSTALLPATH}
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -368,9 +372,9 @@ function_installGraylogStack () {
     find ${GRAYLOG_PATH}/sources/ -type f -print0 | sudo xargs -0 unix2dos -- 2>/dev/null >/dev/null
     find ${GRAYLOG_PATH}/lookuptables/ -type f -print0 | sudo xargs -0 unix2dos -- 2>/dev/null >/dev/null
 
-    # Adapting Permissions for proper access by the Opensearch Containers (1000:1000)
-    echo "[INFO] - SET PERMISSIONS FOR UID/GID 1000 (OPENSEARCH)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo chown -R 1000:1000 ${GRAYLOG_PATH}/database
+    # Adapting Permissions for proper access by the Datanode Containers (999:999)
+    echo "[INFO] - SET PERMISSIONS FOR UID/GID 999 (DATANODE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo chown -R 999:999 ${GRAYLOG_PATH}/database
     
     # Adapting Permissions for proper access by the Graylog Containers (1100:1100)
     echo "[INFO] - SET PERMISSIONS FOR UID/GID 1100 (GRAYLOG) " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -380,11 +384,8 @@ function_installGraylogStack () {
     done
     
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_PATH}/graylog.env
-
-    echo "[INFO] - POPULATE ENVIRONMENT FILE FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD = \"$(pwgen -N 1 -s 48)\"" | sudo tee -a ${DATABASE_ENV} >/dev/null 
-    echo "OPENSEARCH_JAVA_OPTS = \"-Xms4096m -Xmx4096m\"" | sudo tee -a ${DATABASE_ENV} >/dev/null 
+    sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
+    sudo mv ${GRAYLOG_PATH}/datanode.example ${DATANODE_ENV}
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR GRAYLOG " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
@@ -395,6 +396,9 @@ function_installGraylogStack () {
     sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${SYSTEM_PASSWORD_SECRET}\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_HTTP_EXTERNAL_URI = \"\"\GRAYLOG_HTTP_EXTERNAL_URI = \"https://${GRAYLOG_FQDN}/\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
+
+    sudo sed -i "s\GRAYLOG_DATANODE_PASSWORD_SECRET = \"\"\GRAYLOG_DATANODE_PASSWORD_SECRET = \"${SYSTEM_PASSWORD_SECRET}\"\g" ${DATANODE_ENV}
+
 
     if [ "${SYSTEM_PROXY}" != "" ]
     then
@@ -567,6 +571,36 @@ function_checkSystemAvailability () {
 
 }
 
+function_addDataNodesToCluster () {
+    local TMP_ADMIN=$1
+    local TMP_PASSWORD=""
+
+    echo "[INFO] - WAIT FOR GRAYLOG TO BECOME CONFIGURABLE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+    while [[ ${TMP_PASSWORD} == "" ]]
+    do
+        sleep 5s
+        TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep password | cut -d"'" -f4)
+    done
+
+    echo "[INFO] - TRY TO ACTIVATE LOCAL EVALUATION CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+    ACTIVATE_CA=$(curl -s http://localhost/api/ca/create -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"organization": "Evaluation CA"}') >/dev/null
+    CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}') >/dev/null
+    PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
+    FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
+
+    if [[ $(echo ${FINISH_CA} | jq -r .result) == "FINISHED" ]]
+    then
+        echo "[INFO] - SUCCESSFULLY ACTIVATED LOCAL EVALUATION CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    else
+        echo "[ERROR] - FAILED TO ACTIVATE LOCAL EVALUATION CA, EXIT" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[ERROR] - FAILED TO ACTIVATE LOCAL EVALUATION CA, EXIT"
+        exit
+    fi
+
+}
+
 function_createUserToken () {
 
     echo "[INFO] - CREATE GRAYLOG API TOKEN FOR ACCOUNT ${1^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -694,7 +728,7 @@ function_displayClusterId () {
     echo -e "[INFO] - SYSTEM URL: \e[4;33mhttp(s)://${GRAYLOG_FQDN}\e[0m"
     echo -e "[INFO] - WINDOWS ACCESS: \e[1;32m\\\\\\\\${GRAYLOG_FQDN}\e[0m (SMB)"
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
-    echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/graylog.env\e[0m"
+    echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/${GRAYLOG_ENV}\e[0m"
     echo ""
     echo "       ******************************************************"
     echo "       *                                                    *"
@@ -832,7 +866,7 @@ function_configureEvaluationSetup () {
         curl -s http://localhost/api/plugins/org.graylog.plugins.archive/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"archive_path\": \"/usr/share/graylog/data/archives\",\"max_segment_size\": 524288000,\"segment_filename_prefix\": \"archive-segment\",\"segment_compression_type\": \"GZIP\",\"metadata_filename\": \"archive-metadata.json\",\"histogram_bucket_size\": 86400000,\"restore_index_batch_size\": 1000,\"excluded_streams\": [],\"segment_checksum_type\": \"CRC32\",\"backend_id\": \"${ARCHIVE_BACKEND}\",\"archive_failure_threshold\": 1,\"retention_time\": 30,\"restrict_to_leader\": true,\"parallelize_archive_creation\": true}" 2>/dev/null >/dev/null
 
         echo "[INFO] - ENABLE WARM TIER (LOCAL FILESTORE OR MOUNTPOINT) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        WARM_TIER_NAME=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datatiering/datatiering/repositories -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"fs","name":"warm_tier","location":"/usr/share/opensearch/warm_tier"}' | jq -r .name) 2>/dev/null >/dev/null
+        WARM_TIER_NAME=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datatiering/datatiering/repositories -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"fs","name":"warm_tier","location":"/var/lib/graylog/warm_tier"}' | jq -r .name) 2>/dev/null >/dev/null
 
         echo "[INFO] - CREATE INDEX SET TEMPLATE FOR EVALUATION (SHORT RETENTION) " | logger -p user.info -e -t GRAYLOG-INSTALLER
         INDEX_SET_TEMPLATE=$(curl -s http://localhost/api/system/indices/index_sets/templates -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"title\": \"Evaluation Storage\",\"description\": \"Use case: Graylog Product Evaluation\",\"index_set_config\": {\"shards\": 1,\"replicas\": 0,\"index_optimization_max_num_segments\": 1,\"index_optimization_disabled\": false,\"field_type_refresh_interval\": 5000,\"data_tiering\": {\"type\": \"hot_warm\",\"index_lifetime_min\": \"P10D\",\"index_lifetime_max\": \"P12D\",\"warm_tier_enabled\": true,\"index_hot_lifetime_min\": \"P8D\",\"warm_tier_repository_name\": \"${WARM_TIER_NAME}\",\"archive_before_deletion\": true},\"index_analyzer\": \"standard\",\"use_legacy_rotation\": false}}" | jq -r .id) 
@@ -909,8 +943,8 @@ function_enableGraylogSidecar () {
 function_configureEnterpriseFeatures () {
 
     local ADMIN_TOKEN=${1}
-    local ILLUMINATE_PROCESSING_PACK_IDS='["illuminate-linux-auditbeat","illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","73788c38-0b74-4c03-8b69-2fcb4e110a9b","659b983d-9654-4141-a672-87dee3ee8176","d1aea731-2b18-4e47-9366-c526641f6dbd","illuminate-sysmon","5551b8a8-6459-446f-9ea8-63368bb39414","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","3c5c2c47-18a5-4054-9f0e-2443f6d96d02","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement"]'
-    local ILLUMINATE_SPOTLIGHT_PACK_IDS='["f39f9b0d-c24b-42f2-982b-839441ef3c27","e1629dcb-6419-4d73-b4a8-577f01278f35","a60c3607-a25a-4b5c-a565-94b6944f850b","b95c89b7-36e1-43b6-9714-b6b25e7cec04e","61d75c3e-3551-4b97-bbb5-ea8181472cb0","a2750c63-fb7c-4ff6-b10b-32171a2c96e9","4e3ba1a6-7400-40d1-b7f8-efa44bc5bfeb","cbfc3ae6-6a59-4841-a691-ea6db41b62d0","d01d7647-99a5-4914-b417-ca5cd1e37196","085d8f0e-2bee-44b2-b040-d7a11a1da2fe","90e37be0-d112-44f8-afe7-eadcafbe4ba3","52391e38-df23-4953-86e5-44e2bc667b97","66e7f007-6f77-45dc-a6f3-94cb3745541e","237e73a4-678b-4b9a-87ac-ff2f86e34563","3e40d288-5794-44e9-88b4-b590de3514b8","9f195288-9709-4f87-b2ec-e53cf94965dd","a9463b48-f009-4641-84e8-4245d3dc6e89"]'
+    local ILLUMINATE_PROCESSING_PACK_IDS='["7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement","fortigate-content-pack","illuminate-linux-auditbeat","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","illuminate-o365","5551b8a8-6459-446f-9ea8-63368bb39414","illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","d1aea731-2b18-4e47-9366-c526641f6dbd"]'
+    local ILLUMINATE_SPOTLIGHT_PACK_IDS='["cbfc3ae6-6a59-4841-a691-ea6db41b62d0","d01d7647-99a5-4914-b417-ca5cd1e37196","085d8f0e-2bee-44b2-b040-d7a11a1da2fe","90e37be0-d112-44f8-afe7-eadcafbe4ba3","557d2945-8d6d-445b-ae5e-9388ee89f128","61d75c3e-3551-4b97-bbb5-ea8181472cb0","a2750c63-fb7c-4ff6-b10b-32171a2c96e9","4e3ba1a6-7400-40d1-b7f8-efa44bc5bfeb","3e40d288-5794-44e9-88b4-b590de3514b8","977b3617-be58-4f6c-9db6-06f72dbab306","e1629dcb-6419-4d73-b4a8-577f01278f35","f39f9b0d-c24b-42f2-982b-839441ef3c27","237e73a4-678b-4b9a-87ac-ff2f86e34563","a60c3607-a25a-4b5c-a565-94b6944f850b","b95c89b7-36e1-43b6-9714-b6b25e7cec04e","9f195288-9709-4f87-b2ec-e53cf94965dd"]'
 
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then
@@ -930,16 +964,16 @@ function_configureSecurityFeatures () {
     
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
-        local ACTIVE_AI_REPORT=""
-        local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["core_anomaly_detection","05dc479f-9659-476b-b888-9fdaae3a7777"]'
-        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["5289b02d-ebb9-4c93-baf8-baf05e1c138b","10da1609-54b1-4e73-8757-a5326379ad26","85411e45-52b4-4a4c-8b03-a26be9900a28","759a0e52-e76a-4836-889a-1bab2fce65d3","6f6197cf-ee3f-453b-a248-c309ff91ed0a","019b5712-186d-440b-afd8-88386b1411f9","8f445386-5dfe-4d64-a790-f7a6527789b7"]'    
+        local ACTIVE_AI=""
+        local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777"]'
+        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["spotlight_pack_ids":["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7"]'    
         
-        while [[ ${ACTIVE_AI_REPORT} == "true" ]] || [[ ${ACTIVE_AI_REPORT} == "" ]]
+        while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
         do 
             echo "[INFO] - DISABLE INVESTIGATION AI REPORTS " | logger -p user.info -e -t GRAYLOG-INSTALLER
             
-            curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/investigations_ai_reports_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
-            ACTIVE_AI_REPORT=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
+            curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config/ai_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
+            ACTIVE_AI=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
         done
 
         echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -1002,6 +1036,7 @@ then
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
     function_startGraylogStack
+    function_addDataNodesToCluster ${GRAYLOG_ADMIN}
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
     function_downloadGraylogSidecarBinaries 

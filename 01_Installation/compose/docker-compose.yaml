@@ -2,6 +2,12 @@ services:
   nginx1: 
     image: "nginx:latest"
     hostname: "nginx1"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     depends_on:
       - "graylog1"
       - "graylog2"
@@ -50,6 +56,12 @@ services:
   nginx2: 
     image: "nginx:latest"
     hostname: "lookuptables"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     volumes: 
       - "./nginx2/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "./nginx2/http.conf:/etc/nginx/conf.d/http.conf:ro"
@@ -59,6 +71,12 @@ services:
   mongodb1:
     image: "mongo:7"
     hostname: "mongodb1"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -69,122 +87,114 @@ services:
     restart: "always"
 
   datanode1:
-    image: "opensearchproject/opensearch:2.19.3"
+    image: "graylog/graylog-datanode:7.1"
     hostname: "datanode1"
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
-    env_file: "opensearch.env"
-    environment:
-      - "node.name=datanode1"
-      - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"      
-      - "discovery.seed_hosts=datanode2,datanode3"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
-    ulimits:
-      memlock:
-        soft: -1 
-        hard: -1
-      nofile:
-        soft: 262144 
-        hard: 262144
-    volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "./database/datanode1:/usr/share/opensearch/data"    
-    restart: "on-failure"
-
-  datanode2:
-    image: "opensearchproject/opensearch:2.19.3"
-    hostname: "datanode2"
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
-    env_file: "opensearch.env"
-    environment:
-      - "node.name=datanode2"
-      - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
-      - "discovery.seed_hosts=datanode1,datanode3"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
-    ulimits:
-      memlock:
-        soft: -1 
-        hard: -1
-      nofile:
-        soft: 262144 
-        hard: 262144
-    volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "./database/datanode2:/usr/share/opensearch/data"
-    restart: "on-failure"
-
-  datanode3:
-    image: "opensearchproject/opensearch:2.19.3"
-    hostname: "datanode3"
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
-    env_file: "opensearch.env"
-    environment:
-      - "node.name=datanode3"
-      - "node.roles=cluster_manager,data"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
-      - "discovery.seed_hosts=datanode1,datanode2"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
-    ulimits:
-      memlock:
-        soft: -1 
-        hard: -1
-      nofile:
-        soft: 262144 
-        hard: 262144
-    volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
-      - "./database/datanode3:/usr/share/opensearch/data"
-    restart: "on-failure"
-
-  datanode9:
-    image: "opensearchproject/opensearch:2.19.3"
-    hostname: "datanode9"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
         gelf-address: "udp://localhost:9900"
     depends_on:
-      - "datanode1"
-      - "datanode2"
-      - "datanode3"
-    env_file: "opensearch.env"
+      - "mongodb1"
+    env_file: "datanode.env"        
     environment:
-      - "node.name=datanode9"
-      - "node.roles=search"
-      - "node.search.cache.size=10gb"
-      - "path.repo=/usr/share/opensearch/warm_tier"
-      - "cluster.name=graylog-database"
-      - "cluster.initial_master_nodes=datanode1,datanode2,datanode3"
-      - "discovery.seed_hosts=datanode1,datanode2,datanode3"
-      - "bootstrap.memory_lock=false"
-      - "action.auto_create_index=false"
-      - "plugins.security.ssl.http.enabled=false"
-      - "plugins.security.disabled=true"
+      GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - "./database/warm_tier:/var/lib/graylog/warm_tier"
+      - "./database/datanode1:/var/lib/graylog-datanode"    
+    restart: "on-failure"
+
+  datanode2:
+    image: "graylog/graylog-datanode:7.1"
+    hostname: "datanode2"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: "udp://localhost:9900"
+    depends_on:
+      - "mongodb1"
+    env_file: "datanode.env"        
+    environment:
+      GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - "./database/warm_tier:/var/lib/graylog/warm_tier"
+      - "./database/datanode2:/var/lib/graylog-datanode"    
+    restart: "on-failure"
+
+  datanode3:
+    image: "graylog/graylog-datanode:7.1"
+    hostname: "datanode3"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: "udp://localhost:9900"
+    depends_on:
+      - "mongodb1"
+    env_file: "datanode.env"        
+    environment:
+      GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - "./database/warm_tier:/var/lib/graylog/warm_tier"
+      - "./database/datanode3:/var/lib/graylog-datanode"    
+    restart: "on-failure"
+
+  datanode9:
+    image: "graylog/graylog-datanode:7.1"
+    hostname: "datanode9"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
+    logging: 
+      driver: "gelf"
+      options: 
+        gelf-address: "udp://localhost:9900"
+    depends_on:
+      - "mongodb1"
+    env_file: "datanode.env"
+    environment:
+      GRAYLOG_DATANODE_NODE_ROLES: "search"
+      GRAYLOG_DATANODE_NODE_SEARCH_CACHE_SIZE: "20gb"
     ulimits:
       memlock:
         soft: -1
@@ -193,12 +203,18 @@ services:
         soft: 262144
         hard: 262144
     volumes:
-      - "./database/warm_tier:/usr/share/opensearch/warm_tier"
+      - "./database/warm_tier:/var/lib/graylog/warm_tier"
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/graylog-enterprise:7.0"
+    image: "graylog/graylog-enterprise:7.1"
     hostname: "graylog1"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -208,6 +224,7 @@ services:
       - "datanode1"
       - "datanode2"
       - "datanode3"
+      - "datanode9"
     entrypoint: "/docker-entrypoint.sh"
     post_start:
       - command: /__cacert_entrypoint.sh
@@ -237,8 +254,14 @@ services:
     restart: "on-failure"
 
   graylog2:
-    image: "graylog/graylog-enterprise:7.0"
+    image: "graylog/graylog-enterprise:7.1"
     hostname: "graylog2"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -248,6 +271,7 @@ services:
       - "datanode1"
       - "datanode2"
       - "datanode3"
+      - "datanode9"
     entrypoint: "/docker-entrypoint.sh"
     post_start:
       - command: /__cacert_entrypoint.sh
@@ -280,6 +304,12 @@ services:
   grafana1:
     image: "grafana/grafana-oss:12.0.2"
     hostname: "grafana1"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     depends_on:
       - "prometheus1"
     environment:
@@ -293,8 +323,15 @@ services:
   prometheus1:
     image: "prom/prometheus:latest"
     hostname: "prometheus1"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     depends_on:
       - "graylog1"
+      - "graylog2"
     environment: 
       LISTEN_ADDRESS: "0.0.0.0"
       LISTEN_PORT: '9090'
@@ -312,6 +349,12 @@ services:
   samba1:
     image: "dockurr/samba:4.21"
     hostname: "samba1"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 1g
     logging: 
       driver: "gelf"
       options: 
@@ -332,6 +375,12 @@ services:
   #  nessus1:
   #  image: tenable/nessus:latest-ubuntu
   #  hostname: nessus1
+  #  deploy:
+  #    resources:
+  #      limits:
+  #        memory: 6g
+  #      reservations:
+  #        memory: 1g
   #  ports:
   #    - "8834:8834"
   #  environment:

@@ -1,4 +1,4 @@
-## Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/server.conf.html)
+## Graylog Environment Variables (settings known from server.conf: https://go2docs.graylog.org/current/setting_up_graylog/server_configuration_settings_reference.htm)
 #
 GRAYLOG_PASSWORD_SECRET = ""
 GRAYLOG_ROOT_USERNAME = ""
@@ -15,13 +15,13 @@ GRAYLOG_ALLOW_LEADING_WILDCARD_SEARCHES = "true"
 
 ## Disable Preflight Checks (necessary for interaction with Graylog Data Node only)
 #
-GRAYLOG_SKIP_PREFLIGHT_CHECKS ="true"
+GRAYLOG_SKIP_PREFLIGHT_CHECKS ="false"
 
 ## Set Graylog Java Heap Size
 #
-GRAYLOG_SERVER_JAVA_OPTS="-Xms1g -Xmx4g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
+GRAYLOG_SERVER_JAVA_OPTS="-Xms2g -Xmx3g -server -XX:+UseG1GC -XX:-OmitStackTraceInFastThrow"
 
-## Use custom Root Certificates
+## Use custom Root Certificates from "/opt/graylog/rootcerts" on the Host
 #
 USE_SYSTEM_CA_CERTS = "true"
 
@@ -35,7 +35,6 @@ GRAYLOG_AUDITLOG_MESSAGE_SIGNING_ENABLED = true
 #
 GRAYLOG_HTTP_BIND_ADDRESS = "0.0.0.0:9000"
 GRAYLOG_MONGODB_URI = "mongodb://mongodb1:27017/graylog"
-GRAYLOG_ELASTICSEARCH_HOSTS = "http://datanode1:9200,http://datanode2:9200,http://datanode3:9200"
 GRAYLOG_TELEMETRY_ENABLED = "false"
 GRAYLOG_HTTP_EXTERNAL_URI = ""
 
@@ -93,3 +92,13 @@ GRAYLOG_PROMETHEUS_EXPORTER_BIND_ADDRESS = "0.0.0.0"
 #
 # GRAYLOG_DEFAULT_EVENTS_INDEX_PREFIX = "gl-events"
 # GRAYLOG_DEFAULT_SYSTEM_EVENTS_INDEX_PREFIX = "gl-system-events"
+
+## Feature Flag Activation
+#
+# GRAYLOG_FEATURE_ILLUMINATE_HUB_SHOW_PRERELEASE="on"
+# GRAYLOG_FEATURE_ENABLE_ILLUMINATE_HUB_DOWNLOAD_INSTALL_PAGE="on"
+
+## Graylog Enterprise Illuminate Handling
+#
+# GRAYLOG_ILLUMINATE_HUB_NEW_VERSION_CHECK_INTERVAL="0s"
+
