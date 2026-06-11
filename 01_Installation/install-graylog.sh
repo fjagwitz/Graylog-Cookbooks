@@ -485,6 +485,8 @@ function_downloadGraylogSidecarBinaries () {
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI -LOs ${SIDECAR_YML}
     sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE -LOs ${SIDECAR_EXE}
+
+    sudo mv ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml.template ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/sidecar.yml
 }
 
 function_downloadBeatsBinaries () {
