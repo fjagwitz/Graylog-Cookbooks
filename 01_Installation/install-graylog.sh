@@ -588,7 +588,7 @@ function_addDataNodesToCluster () {
     PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
     FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
 
-    echo "Finish-CA: ${FINISH_CA}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - FINISH-CA: ${FINISH_CA^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     if [[ $(echo ${FINISH_CA} | jq -r .result) == "FINISHED" ]]
     then
