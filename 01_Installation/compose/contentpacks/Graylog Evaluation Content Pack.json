@@ -1230,7 +1230,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule\"Evaluation: Graylog Monitoring - Self 001\"\n\nwhen\n    contains(to_string($message.image_name),\"opensearch\")\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\nend"
+          "@value": "rule\"Evaluation: Graylog Monitoring - Self 001\"\n\nwhen\n    contains(to_string($message.image_name),\"datanode\")\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\nend"
         }
       },
       "constraints": [
