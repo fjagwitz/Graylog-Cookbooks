@@ -945,8 +945,8 @@ function_enableGraylogSidecar () {
 function_configureEnterpriseFeatures () {
 
     local ADMIN_TOKEN=${1}
-    local ILLUMINATE_PROCESSING_PACK_IDS='["7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement","fortigate-content-pack","illuminate-linux-auditbeat","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","illuminate-o365","5551b8a8-6459-446f-9ea8-63368bb39414","illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","d1aea731-2b18-4e47-9366-c526641f6dbd","7b319ad0-352c-48b9-b7d9-877fc1720164"]'
-    local ILLUMINATE_SPOTLIGHT_PACK_IDS='["cbfc3ae6-6a59-4841-a691-ea6db41b62d0","d01d7647-99a5-4914-b417-ca5cd1e37196","085d8f0e-2bee-44b2-b040-d7a11a1da2fe","90e37be0-d112-44f8-afe7-eadcafbe4ba3","557d2945-8d6d-445b-ae5e-9388ee89f128","61d75c3e-3551-4b97-bbb5-ea8181472cb0","a2750c63-fb7c-4ff6-b10b-32171a2c96e9","4e3ba1a6-7400-40d1-b7f8-efa44bc5bfeb","3e40d288-5794-44e9-88b4-b590de3514b8","977b3617-be58-4f6c-9db6-06f72dbab306","e1629dcb-6419-4d73-b4a8-577f01278f35","f39f9b0d-c24b-42f2-982b-839441ef3c27","237e73a4-678b-4b9a-87ac-ff2f86e34563","a60c3607-a25a-4b5c-a565-94b6944f850b","b95c89b7-36e1-43b6-9714-b6b25e7cec04e","9f195288-9709-4f87-b2ec-e53cf94965dd","90e37be0-d112-44f8-afe7-eadcafbe4ba3"]'
+    local ILLUMINATE_PROCESSING_PACK_IDS='["7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement","fortigate-content-pack","illuminate-linux-auditbeat","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","illuminate-o365","5551b8a8-6459-446f-9ea8-63368bb39414","illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","d1aea731-2b18-4e47-9366-c526641f6dbd"]'
+    local ILLUMINATE_SPOTLIGHT_PACK_IDS='["cbfc3ae6-6a59-4841-a691-ea6db41b62d0","d01d7647-99a5-4914-b417-ca5cd1e37196","085d8f0e-2bee-44b2-b040-d7a11a1da2fe","90e37be0-d112-44f8-afe7-eadcafbe4ba3","557d2945-8d6d-445b-ae5e-9388ee89f128","61d75c3e-3551-4b97-bbb5-ea8181472cb0","a2750c63-fb7c-4ff6-b10b-32171a2c96e9","4e3ba1a6-7400-40d1-b7f8-efa44bc5bfeb","3e40d288-5794-44e9-88b4-b590de3514b8","977b3617-be58-4f6c-9db6-06f72dbab306","e1629dcb-6419-4d73-b4a8-577f01278f35","f39f9b0d-c24b-42f2-982b-839441ef3c27","237e73a4-678b-4b9a-87ac-ff2f86e34563","a60c3607-a25a-4b5c-a565-94b6944f850b","b95c89b7-36e1-43b6-9714-b6b25e7cec04e","9f195288-9709-4f87-b2ec-e53cf94965dd"]'
 
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then
@@ -966,9 +966,9 @@ function_configureSecurityFeatures () {
     
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
-        local ACTIVE_AI=""
-        local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777"]'
-        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7"]' 
+        local ACTIVE_AI="" 
+        local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777","7b319ad0-352c-48b9-b7d9-877fc1720164"]'
+        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7","90e37be0-d112-44f8-afe7-eadcafbe4ba3"]' 
         
         while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
         do 
