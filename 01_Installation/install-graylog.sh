@@ -476,7 +476,7 @@ function_enableGeoIpLocation () {
 
 function_downloadGraylogSidecarBinaries () {
 
-    local SIDECAR_VERSION="1.5.4"
+    local SIDECAR_VERSION="1.5.6ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
     local SIDECAR_MSI="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog-sidecar-${SIDECAR_VERSION}-1.msi"
     local SIDECAR_EXE="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog_sidecar_installer_${SIDECAR_VERSION}-1.exe"
     local SIDECAR_YML="https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml.template"
@@ -544,10 +544,12 @@ function_prepareSidecarConfiguration () {
     sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
     # Add Graylog Sidecar Token
     sudo sed -i "s\server_api_token: \"\"\server_api_token: \"${SIDECAR_TOKEN}\"\g" ${SIDECAR_YML}
+    # Add path for node-id file
+    sudo sed -i "s\%%BRAND_VENDOR_NAME%%\Graylog\g" ${SIDECAR_YML}
     # Disable TLS validation enforcement
     sudo sed -i "s\tls_skip_verify: false\tls_skip_verify: true\g" ${SIDECAR_YML}
     # Add Evaluation Tags
-    sudo sed -i 's/tags: [[]]/tags:\n  - evaluation\n  - windows\n  - applocker\n  - powershell\n  - defender\n  - rds\n  - forwarded\n  - sysmon\n  - ssh\n  - bpa\n  - bits\n  #- adds # Active Directory Domain Controller\n  #- dns # Domain Name Server/g' ${SIDECAR_YML}
+    sudo sed -i 's/tags: [[]]/tags:\n  - evaluation\n  - windows\n  - applocker\n  - powershell\n  - defender\n  - rds\n  - forwarded\n  - ssh\n  - bpa\n  - bits\n  #- sysmon # Sysmon from Sysinternals\n  #- nxlog # Use nxlog instead of Beats\n  #- adds # Active Directory Domain Controller\n  #- dns # Domain Name Server/g' ${SIDECAR_YML}
     # Change LF to CRLF as this is a Windows Configuration File
     sudo unix2dos ${SIDECAR_YML} 2>/dev/null >/dev/null
 
@@ -587,6 +589,8 @@ function_addDataNodesToCluster () {
     CONFIGURE_CA=$(curl -s http://localhost/api/renewal_policy -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"mode":"Automatic","certificate_lifetime":"P90D"}') >/dev/null
     PROVISION_CA=$(curl -s http://localhost/api/generate -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
     FINISH_CA=$(curl -s http://localhost/api/status/finish-config -u "${TMP_ADMIN}":"${TMP_PASSWORD}" -X POST -H "X-Requested-By: localhost") >/dev/null
+
+    # echo "[INFO] - FINISH-CA: ${FINISH_CA^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     if [[ $(echo ${FINISH_CA} | jq -r .result) == "FINISHED" ]]
     then
@@ -962,9 +966,9 @@ function_configureSecurityFeatures () {
     
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
-        local ACTIVE_AI=""
-        local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777"]'
-        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7"]' 
+        local ACTIVE_AI="" 
+        local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777","7b319ad0-352c-48b9-b7d9-877fc1720164"]'
+        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7","90e37be0-d112-44f8-afe7-eadcafbe4ba3"]' 
         
         while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
         do 

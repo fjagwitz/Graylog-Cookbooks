@@ -158,7 +158,7 @@
                 {
                   "query": {
                     "type": "elasticsearch",
-                    "query_string": "image_name:opensearchproject\\/opensearch\\:* AND event_severity:(ERROR OR WARN)"
+                    "query_string": "image_name:graylog\\/graylog\\-datanode\\:* AND event_severity:(ERROR OR WARN)"
                   },
                   "name": "chart",
                   "timerange": {
@@ -197,7 +197,7 @@
                 {
                   "query": {
                     "type": "elasticsearch",
-                    "query_string": "image_name:opensearchproject\\/opensearch\\:*"
+                    "query_string": "image_name:graylog\\/graylog\\-datanode\\:*"
                   },
                   "name": null,
                   "timerange": {
@@ -217,7 +217,7 @@
                 {
                   "query": {
                     "type": "elasticsearch",
-                    "query_string": "image_name:opensearchproject\\/opensearch\\:*"
+                    "query_string": "image_name:graylog\\/graylog\\-datanode\\:*"
                   },
                   "name": "chart",
                   "timerange": {
@@ -667,7 +667,7 @@
                 "7761b152-9033-4ac0-a29a-c45b64688634": "Overview - Complete"
               },
               "tab": {
-                "title": "Opensearch Overview"
+                "title": "Datanode Overview"
               }
             },
             "widgets": [
@@ -694,7 +694,7 @@
                 },
                 "query": {
                   "type": "elasticsearch",
-                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
+                  "query_string": "image_name:graylog\\/graylog\\-datanode\\:*"
                 },
                 "context": null,
                 "timerange": {
@@ -757,7 +757,7 @@
                 },
                 "query": {
                   "type": "elasticsearch",
-                  "query_string": "image_name:opensearchproject\\/opensearch\\:*"
+                  "query_string": "image_name:graylog\\/graylog\\-datanode\\:*"
                 },
                 "context": null,
                 "timerange": {
@@ -808,7 +808,7 @@
                 },
                 "query": {
                   "type": "elasticsearch",
-                  "query_string": "image_name:opensearchproject\\/opensearch\\:* AND event_severity:(ERROR OR WARN)"
+                  "query_string": "image_name:graylog\\/graylog\\-datanode\\:* AND event_severity:(ERROR OR WARN)"
                 },
                 "context": null,
                 "timerange": {
@@ -1226,11 +1226,11 @@
         },
         "description": {
           "@type": "string",
-          "@value": "Parser Opensearch"
+          "@value": "Parser Datanode"
         },
         "source": {
           "@type": "string",
-          "@value": "rule\"Evaluation: Graylog Monitoring - Self 001\"\n\nwhen\n    contains(to_string($message.image_name),\"opensearch\")\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\nend"
+          "@value": "rule\"Evaluation: Graylog Monitoring - Self 001\"\n\nwhen\n    contains(to_string($message.image_name),\"datanode\")\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{WORD:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{GREEDYDATA:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{SPACE}%{HOSTNAME:event_source}%{SPACE}\\\\]%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    \n    rename_field(\n        old_field: \"created\",\n        new_field: \"container_created\"\n    );\n    \n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\",\n        names: [\"container_id\",\"image_id\",\"tag\"]\n    );\nend"
         }
       },
       "constraints": [
@@ -1296,17 +1296,49 @@
         }
       ]
     },
+        {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "17ca904b-34d0-491a-9dd6-fef67295b446",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "36972d78-a138-4c8a-863d-4fafa765e897"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "evaluation-windows-filebeat"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#194d33"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\nfilebeat.inputs:\n- type: filestream\n  id: graylog-sidecar\n  enabled: true\n  tags: graylog-sidecar\n  paths:\n    - C:\\Program Files\\graylog\\sidecar\\logs\\*.log\n<#if sidecar.tags.dns??>\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
     {
       "v": "1",
       "type": {
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "3b8c1a2a-caf7-4ff4-b12a-e1ca943b5128",
+      "id": "ca9b28a2-ad5a-4ac2-a5f2-8aa7c7b7e5a9",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "9b4eb5a4-b31b-4d9b-90ef-166c054b7b8e"
+          "@value": "3c2c81f8-d5e2-4538-9b36-86c249dcc7aa"
         },
         "title": {
           "@type": "string",
@@ -1324,7 +1356,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.4+ac94792"
+          "version": ">=7.1.3+c34604d"
         }
       ]
     },
@@ -1334,11 +1366,43 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "59ecba1e-7fb0-417a-a15e-d169e95368dc",
+      "id": "3b3bcea2-4b60-4aff-9026-a3f8156e8401",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "a0871ef7-d0aa-414b-ba0d-e30e51d76860"
+          "@value": "ac3f3417-226f-4683-bf25-eb12e99de103"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "evaluation-windows-nxlog"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#33691e"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "define ROOT ${user.nxlog_path}\ndefine SYSTEMROOT C:\\Windows\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n\n<Extension logrotate>\n  Module  xm_fileop\n  <Schedule>\n    When    @daily\n    Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n  </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  ShortMessageLength 65536\n</Extension>\n\n\n<Extension json>\n  Module  xm_json\n</Extension>\n\n<#if sidecar.tags.nxlog??>\n<Input wineventlog>\n  # Send Windows Security Logs\n  Module im_msvistalog\n  PollInterval 5\n  SavePos True\n  ReadFromLast True\n\n <QueryXML>\n    <QueryList>\n      <Query Id=\"0\">\n        <!-- Windows Security Logging -->\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Security\">*</Select>\n        <Select Path=\"Microsoft-Windows-Security-Audit-Configuration-Client/Operational\">*</Select>\n        </#if>\n        <!-- Windows Operational Logging -->\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Application\">*</Select>\n        <Select Path=\"System\">*</Select>\n        <Select Path=\"Setup\">*</Select>\n        <Select Path=\"Microsoft-Windows-GroupPolicy/Operational\">*</Select>\n        </#if>\n        <!-- Forwarded Events Logging -->\n        <#if sidecar.tags.forwarded??>\n        <Select Path=\"ForwardedEvents\">*</Select>\n        </#if> \n        <!-- Active Directory Domain Services Logging -->\n        <#if sidecar.tags.adds??>   \n        <Select Path=\"Active Directory Web Services\">*</Select>\n        <Select Path=\"DFS Replication\">*</Select>\n        <Select Path=\"Directory Service\">*</Select>\n        </#if> \n        <!-- Microsoft DNS Loggging -->\n        <#if sidecar.tags.dns??>    \n        <Select Path=\"DNS Server\">*</Select>\n        <Select Path=\"Microsoft-Windows-DNSServer/Audit\">*</Select>\n        </#if>\n        <!-- OpenSSH Logging -->\n        <#if sidecar.tags.ssh??>      \n        <Select Path=\"OpenSSH/Operational\">*</Select>\n        </#if> \n        <!-- Microsoft Windows Best Practices Analyzer (BPA) Logging -->\n        <#if sidecar.tags.bpa??>      \n        <Select Path=\"Microsoft-Windows-BestPractices/Operational\">*</Select>\n        </#if> \n        <!-- BITS Transfer Logging -->\n        <#if sidecar.tags.bits??>    \n        <Select Path=\"Microsoft-Windows-Bits-Client/Operational\">*</Select>\n        </#if> \n        <!-- Sysmon Logging -->\n        <#if sidecar.tags.sysmon??>    \n        <Select Path=\"Microsoft-Windows-Sysmon/Operational\">*</Select>\n        </#if> \n        <!-- Remote Desktop Services (Terminalservices) Logging -->\n        <#if sidecar.tags.rds??>    \n        <Select Path=\"Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\">*</Select>\n        </#if>\n        <!-- Defender Logging -->\n        <#if sidecar.tags.defender??>    \n        <Select Path=\"Microsoft-Windows-Windows Defender/Operational\">*</Select>  \n        </#if> \n        <!-- Powershell Logging -->\n        <#if sidecar.tags.powershell??>     \n        <Select Path=\"Windows PowerShell\">*</Select>\n        <Select Path=\"Microsoft-Windows-PowerShell/Operational\">*</Select>\n        </#if>   \n        <!-- Applocker Logging -->\n        <#if sidecar.tags.applocker??>    \n        <Select Path=\"Microsoft-Windows-AppLocker/EXE and DLL\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/MSI and Script\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Deployment\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Execution\">*</Select>\n        </#if> \n      </Query>\n    </QueryList>\n  </QueryXML>\n</Input>\n</#if>\n\n\n<Input internal>\n  # Sending NXLog Logs\n  Module  im_internal\n  Exec      if ($raw_event =~ /EOF/) drop();\n</Input>\n\n\n<Input system-heartbeat>\n  # Send Heartbeat every 1 Minute\n  Module          im_mark\n  MarkInterval    1\n  Mark            -=| ALIVE |=-\n</Input>\n\n<#if sidecar.tags.nxlog??>\n<Input file>\n  # Send Graylog Sidecar logs\n  Module im_file\n  File \"C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\"\n  PollInterval 1\n  SavePos  True\n  ReadFromLast True\n  Recursive False\n  RenameCheck False\n  Exec $FileName = file_name();\n</Input>\n</#if>\n\n\n<Input windows-features>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n\n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n\n  ## Using the configuration from the following line will only send the installed Features to Graylog\n  #Arg     Get-WindowsFeature | Where-Object { $_.Installed -eq $true } | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600\n\n  ## Using the configuration from the following line will send an overview of all installed and available Features to Graylog\n  Arg     Get-WindowsFeature | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600\n\n  <Exec>\n    $nxlog_tag = 'Compliance_WindowsServerRoles'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n    if $raw_event =~ /\"DisplayName\":\"(.*?)\",\"Description\"\\:\"(.*?)\",\"(Installed)\"\\:(true|false),/\n        $short_message = $1 + \" - \" + $3 + \": \" + $4 + \" - \" + $2;\n    $full_message = $raw_event;\n  </Exec>\n\n</Input>\n\n<#if sidecar.tags.adds??>   \n<Input users-with-reversible-password-encryption>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n  \n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n  \n  ## Using the configuration from the following line will send an overview of all Users configured with reversible Password Encryption\n  Arg     if ((Get-ADDomain | Select-Object -expandProperty PDCEmulator).startswith(\"$env:COMPUTERNAME\")) { Get-ADUser -filter {AllowReversiblePasswordEncryption -eq $True} -Properties \"AllowReversiblePasswordEncryption\" | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600 }\n  <Exec>\n    $nxlog_tag = 'Compliance_UserProperties'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n    if $raw_event =~ /\"Name\":\"(.*?)\".*?\"PropertyNames\":\\[\"(.*?)\",.*?\\],/\n        $short_message = $1 + \" - \" + $2;\n    $full_message = $raw_event;\n  </Exec>\n</Input>\n</#if>\n\n\n<Output gelf>\n  Module om_tcp\n  Host ${user.graylog_host}\n  Port ${user.nxlog_port_windows}\n  OutputType GELF_TCP\n  <Exec>\n    # These fields are needed for Graylog\n    $gl2_source_collector = '${sidecar.nodeId}';\n    $collector_node_id = '${sidecar.nodeName}';\n    $agent_type = 'nxlog';\n  </Exec>\n</Output>\n\n\n<#if sidecar.tags.nxlog??>    \n<Route route-1>\n  Path wineventlog => gelf\n</Route>\n</#if>\n<#if sidecar.tags.nxlog??>    \n<Route route-2>\n  Path file => gelf\n</Route>\n</#if>\n<Route route-3>\n  Path internal => gelf\n</Route>\n<Route route-4>\n  Path system-heartbeat => gelf\n</Route>\n<Route route-5>\n  Path windows-features => gelf\n</Route>\n<#if sidecar.tags.adds??>   \n<Route route-6>\n  Path users-with-reversible-password-encryption => gelf\n</Route>\n</#if>\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+        {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "dbdfdd6a-7c48-40a0-9f85-6c833cc54b9a",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "05a84a20-cd64-4231-ab0a-3cf9cdc79e62"
         },
         "title": {
           "@type": "string",
@@ -1356,39 +1420,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.4+ac94792"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "89925155-b250-45d5-a9a0-dbe6fae7bb47",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "2ec47c37-6d79-4317-ba76-3ff15cd12085"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "evaluation-windows-filebeat"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#194d33"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\n\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\n\n\n<#if sidecar.tags.dns??>\nfilebeat.inputs:\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.4+ac94792"
+          "version": ">=7.1.3+c34604d"
         }
       ]
     },
@@ -1411,38 +1443,6 @@
         "source": {
           "@type": "string",
           "@value": "rule\"Evaluation: Graylog Monitoring - Self 003\"\n\nwhen\n    contains(to_string($message.message),\"GRAYLOG-\") \n    //true\n    \nthen\n    let mylog = grok(\n        value: to_string($message.message),\n        pattern: \"%{TIMESTAMP_ISO8601}%{SPACE}%{HOSTNAME:event_source}%{SPACE}%{DATA:application_component}:%{SPACE}\\\\[%{WORD:event_severity}\\\\]%{SPACE}-%{SPACE}%{GREEDYDATA:message}\"\n    );\n    \n    set_fields(mylog);\n    remove_multiple_fields(\n        pattern: \"[A-Z0-9_-]+\"\n    );\n    //set_field(\"touched\",true);\n\nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.4+ac94792"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "39f9accb-060d-4f79-849a-21b9cc96ad16",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "2832b888-f154-42d7-ad33-d90e15280767"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "evaluation-windows-nxlog"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#33691e"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "define ROOT ${user.nxlog_path}\ndefine SYSTEMROOT C:\\Windows\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n\n<Extension logrotate>\n  Module  xm_fileop\n  <Schedule>\n    When    @daily\n    Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n  </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  ShortMessageLength 65536\n</Extension>\n\n\n<Extension _json>\n  Module  xm_json\n</Extension>\n\n<#if sidecar.tags.nxlog??>\n<Input wineventlog>\n  # Send Windows Security Logs\n  Module im_msvistalog\n  PollInterval 5\n  SavePos True\n  ReadFromLast True\n\n  <QueryXML>\n    <QueryList>\n      <Query Id=\"0\">\n        # Windows Security Logging\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Security\">*</Select>\n        <Select Path=\"Microsoft-Windows-Security-Audit-Configuration-Client/Operational\">*</Select>\n        </#if>\n        # Windows Operational Logging\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Application\">*</Select>\n        <Select Path=\"System\">*</Select>\n        <Select Path=\"Setup\">*</Select>\n        <Select Path=\"Microsoft-Windows-GroupPolicy/Operational\">*</Select>\n        </#if>\n        # Forwarded Events Logging\n        <#if sidecar.tags.forwarded??>\n        <Select Path=\"ForwardedEvents\">*</Select>\n        </#if> \n        # Active Directory Domain Services Logging\n        <#if sidecar.tags.adds??>   \n        <Select Path=\"Active Directory Web Services\">*</Select>\n        <Select Path=\"DFS Replication\">*</Select>\n        <Select Path=\"Directory Service\">*</Select>\n        </#if> \n        # Microsoft DNS Loggging\n        <#if sidecar.tags.dns??>    \n        <Select Path=\"DNS Server\">*</Select>\n        <Select Path=\"Microsoft-Windows-DNSServer/Audit\">*</Select>\n        </#if>\n        # OpenSSH Logging\n        <#if sidecar.tags.ssh??>      \n        <Select Path=\"OpenSSH/Operational\">*</Select>\n        </#if> \n        # Microsoft Windows Best Practices Analyzer (BPA) Logging\n        <#if sidecar.tags.bpa??>      \n        <Select Path=\"Microsoft-Windows-BestPractices/Operational\">*</Select>\n        </#if> \n        # BITS Transfer Logging\n        <#if sidecar.tags.bits??>    \n        <Select Path=\"Microsoft-Windows-Bits-Client/Operational\">*</Select>\n        </#if> \n        # Sysmon Logging\n        <#if sidecar.tags.sysmon??>    \n        <Select Path=\"Microsoft-Windows-Sysmon/Operational\">*</Select>\n        </#if> \n        # Remote Desktop Services (Terminalservices) Logging\n        <#if sidecar.tags.rds??>    \n        <Select Path=\"Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\">*</Select>\n        </#if>\n        # Defender Logging\n        <#if sidecar.tags.defender??>    \n        <Select Path=\"Microsoft-Windows-Windows Defender/Operational\">*</Select>  \n        </#if> \n        # Powershell Logging\n        <#if sidecar.tags.powershell??>     \n        <Select Path=\"Windows PowerShell\">*</Select>\n        <Select Path=\"Microsoft-Windows-PowerShell/Operational\">*</Select>\n        </#if>   \n        # Applocker Logging\n        <#if sidecar.tags.applocker??>    \n        <Select Path=\"Microsoft-Windows-AppLocker/EXE and DLL\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/MSI and Script\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Deployment\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Execution\">*</Select>\n        </#if> \n      </Query>\n    </QueryList>\n  </QueryXML>\n</Input>\n</#if>\n\n\n<Input internal>\n  # Sending NXLog Logs\n  Module  im_internal\n</Input>\n\n\n<Input system-heartbeat>\n  # Send Heartbeat every 1 Minute\n  Module          im_mark\n  MarkInterval    1\n  Mark            -=| ALIVE |=-\n</Input>\n\n<#if sidecar.tags.nxlog??>\n<Input file>\n  # Send Graylog Sidecar logs\n  Module im_file\n  File \"C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\"\n  PollInterval 1\n  SavePos  True\n  ReadFromLast True\n  Recursive False\n  RenameCheck False\n  Exec $FileName = file_name();\n</Input>\n</#if>\n\n\n<Input windows-features>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n\n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n\n  ## Using the configuration from the following line will only send the installed Features to Graylog\n  #Arg     Get-WindowsFeature | Where-Object { $_.Installed -eq $true } | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n\n  ## Using the configuration from the following line will send an overview of all installed and available Features to Graylog\n  Arg     Get-WindowsFeature | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n\n  <Exec>\n    $nxlog_tag = 'Compliance_WindowsServerRoles'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n  </Exec>\n\n</Input>\n\n\n<Input users-with-reversible-password-encryption>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n  \n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n  \n  ## Using the configuration from the following line will send an overview of all Users configured with reversible Password Encryption\n  Arg     Get-ADUser -filter {AllowReversiblePasswordEncryption -eq $True} -Properties \"AllowReversiblePasswordEncryption\" | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 600\n  <Exec>\n    $nxlog_tag = 'Compliance_UserProperties'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n  </Exec>\n    \n</Input>\n\n\n<Output gelf>\n  Module om_tcp\n  Host ${user.graylog_host}\n  Port ${user.nxlog_port_windows}\n  OutputType GELF_TCP\n  <Exec>\n    # These fields are needed for Graylog\n    $gl2_source_collector = '${sidecar.nodeId}';\n    $collector_node_id = '${sidecar.nodeName}';\n    $agent_type = 'nxlog';\n  </Exec>\n</Output>\n\n\n<#if sidecar.tags.nxlog??>    \n<Route route-1>\n  Path wineventlog => gelf\n</Route>\n</#if>\n<#if sidecar.tags.nxlog??>    \n<Route route-2>\n  Path file => gelf\n</Route>\n</#if>\n<Route route-3>\n  Path internal => gelf\n</Route>\n<Route route-4>\n  Path system-heartbeat => gelf\n</Route>\n<Route route-5>\n  Path windows-features => gelf\n</Route>\n<Route route-6>\n  Path users-with-reversible-password-encryption => gelf\n</Route>\n"
         }
       },
       "constraints": [
@@ -1506,101 +1506,13 @@
         }
       ]
     },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "9b4eb5a4-b31b-4d9b-90ef-166c054b7b8e",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "filebeat"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "exec"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "linux"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "/usr/lib/graylog-sidecar/filebeat"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c  %s"
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "test config -c %s"
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
-        }
-      },
-      "constraints": [
         {
-          "type": "server-version",
-          "version": ">=7.0.4+ac94792"
-        }
-      ]
-    },
-    {
       "v": "1",
       "type": {
         "name": "sidecar_collector",
         "version": "1"
       },
-      "id": "a0871ef7-d0aa-414b-ba0d-e30e51d76860",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "winlogbeat"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "svc"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "windows"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "C:\\Program Files\\Graylog\\sidecar\\winlogbeat.exe"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c \"%s\""
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "test config -c \"%s\""
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n - windows\nwinlogbeat:\n  event_logs:\n   - name: Application\n     ignore_older: 96h\n   - name: System\n     ignore_older: 96h\n   - name: Security\n     ignore_older: 96h\n   - name: Setup\n     ignore_older: 96h\n   - name: ForwardedEvents\n     forwarded: true\n     ignore_older: 96h\n   - name: Microsoft-Windows-Windows Defender/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-Sysmon/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-PowerShell/Operational\n     ignore_older: 96h\n   - name: windows PowerShell\n     ignore_older: 96h"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.4+ac94792"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "2ec47c37-6d79-4317-ba76-3ff15cd12085",
+      "id": "36972d78-a138-4c8a-863d-4fafa765e897",
       "data": {
         "name": {
           "@type": "string",
@@ -1634,7 +1546,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.4+ac94792"
+          "version": ">=7.1.3+c34604d"
         }
       ]
     },
@@ -1644,7 +1556,7 @@
         "name": "sidecar_collector",
         "version": "1"
       },
-      "id": "2832b888-f154-42d7-ad33-d90e15280767",
+      "id": "ac3f3417-226f-4683-bf25-eb12e99de103",
       "data": {
         "name": {
           "@type": "string",
@@ -1678,7 +1590,1021 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.0.4+ac94792"
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "3c2c81f8-d5e2-4538-9b36-86c249dcc7aa",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "filebeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "exec"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "linux"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "/usr/lib/graylog-sidecar/filebeat"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c  %s"
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c %s"
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "05a84a20-cd64-4231-ab0a-3cf9cdc79e62",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "winlogbeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\Graylog\\sidecar\\winlogbeat.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n - windows\nwinlogbeat:\n  event_logs:\n   - name: Application\n     ignore_older: 96h\n   - name: System\n     ignore_older: 96h\n   - name: Security\n     ignore_older: 96h\n   - name: Setup\n     ignore_older: 96h\n   - name: ForwardedEvents\n     forwarded: true\n     ignore_older: 96h\n   - name: Microsoft-Windows-Windows Defender/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-Sysmon/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-PowerShell/Operational\n     ignore_older: 96h\n   - name: windows PowerShell\n     ignore_older: 96h"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "6abfdb28-41f2-4ad1-9686-d71afdad700e",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: DNS Enrichment"
+        },
+        "stream_rules": [
+          {
+            "type": {
+              "@type": "string",
+              "@value": "CONTAINS"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "gim_event_category"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "name resolution"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": ""
+            }
+          }
+        ],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "OR"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "favorite_fields": null,
+        "description": {
+          "@type": "string",
+          "@value": "Stream enriching messages related to dns logs"
+        },
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "17ef92da-12dd-4ac0-8975-dc76bdf322db",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: Network Enrichment"
+        },
+        "stream_rules": [
+          {
+            "type": {
+              "@type": "string",
+              "@value": "CONTAINS"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "gim_event_category"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "network"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": ""
+            }
+          }
+        ],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "OR"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "favorite_fields": [
+          "source",
+          "destination_ip",
+          "destination_hostname",
+          "source_hostname",
+          "destination_ip",
+          "destination_reference",
+          "destination_hostname"
+        ],
+        "description": {
+          "@type": "string",
+          "@value": "Stream enriching messages related to network logs"
+        },
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "e011f172-33aa-49c0-a917-953b8a30c326",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Network Enrichment"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation: Network Enrichment"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Evaluation: Network Enrichment\"\nstage 100 match either\nrule \"Evaluation: Forward Name Resolution - destination_hostname\"\nrule \"Evaluation: Forward Name Resolution - source_hostname\"\nrule \"Evaluation: Reverse Name Resolution - destination_ip\"\nrule \"Evaluation: Reverse Name Resolution - source_ip\"\nstage 101 match either\nrule \"Evaluation: Spamhaus Drop List - destination_ip\"\nrule \"Evaluation: Spamhaus Drop List - source_ip\"\nrule \"Evaluation: Tor Exit Nodes List - destination_ip\"\nrule \"Evaluation: Tor Exit Nodes List - source_ip\"\nrule \"Evaluation: Whois - destination_ip\"\nrule \"Evaluation: Whois - source_ip\"\nrule \"Evaluation: OTX Threat Intelligence - destination_ip\"\nrule \"Evaluation: OTX Threat Intelligence - source_ip\"\nstage 99 match all\nrule \"Evaluation: Remove Message from Stream Network Enrichment\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "17ef92da-12dd-4ac0-8975-dc76bdf322db"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_table",
+        "version": "1"
+      },
+      "id": "d5f8f4f6-05a7-4092-aa5b-33fc7967df1e",
+      "data": {
+        "default_single_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "cache_name": {
+          "@type": "string",
+          "@value": "6a12649d-e932-4c5a-bdf4-0abcbdcabb0e"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-reverse-name-resolution"
+        },
+        "default_multi_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "default_multi_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "data_adapter_name": {
+          "@type": "string",
+          "@value": "e532fae3-5a2d-4832-ba3f-0a340465eaa5"
+        },
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: Reverse Name Resolution"
+        },
+        "default_single_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Εvaluation: Reverse Name Resolution"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "79fe0a17-442b-4777-afcd-bedd1aff8022",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: DNS Enrichment"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation: DNS Enrichment"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Evaluation: DNS Enrichment\"\nstage 99 match all\nrule \"Evaluation: Remove Message from Stream DNS Enrichment\"\nstage 100 match pass\nstage 101 match either\nrule \"Evaluation: OTX Threat Intelligence - query_request\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "6abfdb28-41f2-4ad1-9686-d71afdad700e"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_table",
+        "version": "1"
+      },
+      "id": "894a2eed-787c-4723-920e-e0c817b4da27",
+      "data": {
+        "default_single_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "cache_name": {
+          "@type": "string",
+          "@value": "0eeb41e4-40ae-4315-a6b7-c38165aa20af"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-forward-name-resolution"
+        },
+        "default_multi_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "default_multi_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "data_adapter_name": {
+          "@type": "string",
+          "@value": "a12e23a1-ffaa-44a0-8049-6ea184569efe"
+        },
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: Forward Name Resolution"
+        },
+        "default_single_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Εvaluation: Forward Name Resolution"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "f671a324-da0a-4513-9c66-a07efbd4ffda",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Reverse Name Resolution - source_ip"
+        },
+        "description": {
+          "@type": "string",
+          "@value": ""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Reverse Name Resolution - source_ip\"\nwhen\n    has_field(\"source_ip\") \n    && ! has_field(\"source_hostname\")\n\nthen\n    let source_hostname = lookup_value(\n        lookup_table: \"evaluation-reverse-name-resolution\", \n        key: to_string($message.source_ip)\n        );\n\n    let source_hostname = regex_replace(\n        pattern: \"(.*?)\\\\.$\", \n        value: to_string(source_hostname),\n        replacement: \"$1\"\n        );\n        \n    set_field(\"source_hostname\", to_string(source_hostname));\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "433db039-ace7-4e6a-9b03-77b8b942ff32",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Remove Message from Stream Network Enrichment"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Remove Message from Stream Network Enrichment\"\nwhen\n    true\n\nthen\n    remove_from_stream(\n        name: \"Εvaluation: Network Enrichment\"\n    );\n        \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "4dadfdb8-d185-4f77-8b36-00342d5f0047",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Spamhaus Drop List - destination_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Spamhaus Drop List - destination_ip\"\nwhen\n    has_field(\"destination_ip\") \n    && ! contains(to_string($message.gim_tags), \"destination_is_internal\") \n    && lookup_value(\"spamhaus-drop\", to_string($message.destination_ip)).single_value == true\n\nthen\n    set_field(\"spamhaus_flag\", true);\n    \n    let lookup_result = lookup(\"spamhaus-drop\", to_string($message.destination_ip));\n    set_field(\"spamhaus_sbl_id\", lookup_result.multi_value.sbl_id);\n    set_field(\"spamhaus_subnet\", lookup_result.multi_value.subnet);\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "51531f58-3d1d-480f-96ce-bcad63489ab1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: OTX Threat Intelligence - destination_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: OTX Threat Intelligence - destination_ip\"\nwhen\n    has_field(\"destination_ip\") \n    && ! contains(to_string($message.gim_tags), \"destination_is_internal\") \n\nthen\n    let otx_ip = otx_lookup_ip(to_string($message.destination_ip));\n    set_fields(\n        fields: otx_ip,\n        prefix: \"destination_ip_\",\n        clean_fields: true\n        );\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "a01bf322-398e-4ea5-ac0f-501f72a5ae7c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Whois - source_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Whois - source_ip\"\nwhen\n    has_field(\"source_ip\") \n    && ! contains(to_string($message.gim_tags), \"source_is_internal\") \n    \nthen\n    let whois = whois_lookup_ip(to_string($message.source_ip), \"source_ip\");\n    set_fields(whois);\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "e621b330-c9bd-45a1-b078-585e2ed467f1",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Tor Exit Nodes List - source_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Tor Exit Nodes List - source_ip\"\nwhen\n    has_field(\"source_ip\") \n    && ! contains(to_string($message.gim_tags), \"source_is_internal\") \n    && lookup_value(\"tor-exit-node-list\", to_string($message.source_ip)).single_value == true\n\nthen\n    set_field(\"tor_exit_node\", true);\n    \n    let lookup_result = lookup(\"tor-exit-node-list\", to_string($message.source_ip));\n    set_field(\"tor_exit_node_details\", lookup_result.multi_value);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "a3406789-4ec7-4785-87e3-1c74075dbf68",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Forward Name Resolution - source_hostname"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Forward Name Resolution - source_hostname\"\nwhen\n    has_field(\"source_hostname\") \n    && ! has_field(\"source_ip\")\n\nthen\n    let source_ip = lookup_value(\n        lookup_table: \"evaluation-forward-name-resolution\", \n        key: to_string($message.source_hostname)\n        );\n        \n    set_field(\"source_ip\", to_ip(source_ip));\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "7cbfb365-a835-439d-bfe4-37cdb4d6089f",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Spamhaus Drop List - source_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Spamhaus Drop List - source_ip\"\nwhen\n    has_field(\"source_ip\") \n    && ! contains(to_string($message.gim_tags), \"source_is_internal\") \n    && lookup_value(\"spamhaus-drop\", to_string($message.source_ip)).single_value == true\n\nthen\n    set_field(\"spamhaus_flag\", true);\n    \n    let lookup_result = lookup(\"spamhaus-drop\", to_string($message.source_ip));\n    set_field(\"spamhaus_sbl_id\", lookup_result.multi_value.sbl_id);\n    set_field(\"spamhaus_subnet\", lookup_result.multi_value.subnet);\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "27caa1a2-3b86-4bf9-9648-32f2db995f90",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Tor Exit Nodes List - destination_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Tor Exit Nodes List - destination_ip\"\nwhen\n    has_field(\"destination_ip\") \n    && ! contains(to_string($message.gim_tags), \"destination_is_internal\") \n    && lookup_value(\"tor-exit-node-list\", to_string($message.destination_ip)).single_value == true\n\nthen\n    set_field(\"tor_exit_node\", true);\n    \n    let lookup_result = lookup(\"tor-exit-node-list\", to_string($message.destination_ip));\n    set_field(\"tor_exit_node_details\", lookup_result.multi_value);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "93c7b1fe-b45f-46c1-938c-a5e1907aa82d",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Forward Name Resolution - destination_hostname"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Forward Name Resolution - destination_hostname\"\nwhen\n    has_field(\"destination_hostname\") \n    && ! has_field(\"destination_ip\")\n\nthen\n    let destination_ip = lookup_value(\n        lookup_table: \"evaluation-forward-name-resolution\", \n        key: to_string($message.destination_hostname)\n        );\n        \n    set_field(\"destination_ip\", to_ip(destination_ip));\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "ec0eeb0f-bd9f-4e90-8b19-c9aaa5ba492b",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Whois - destination_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Whois - destination_ip\"\nwhen\n    has_field(\"destination_ip\") \n    && ! contains(to_string($message.gim_tags), \"destination_is_internal\") \n    && to_long($message.destination_port) != 43\n    \nthen\n    let whois = whois_lookup_ip(to_string($message.destination_ip), \"destination_ip\");\n    set_fields(whois);\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "2061a56f-e481-4a7e-92c0-05f53c4f3b75",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Reverse Name Resolution - destination_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Reverse Name Resolution - destination_ip\"\nwhen\n    has_field(\"destination_ip\") \n    && ! has_field(\"destination_hostname\")\n\nthen\n    let destination_hostname = lookup_value(\n        lookup_table: \"evaluation-reverse-name-resolution\", \n        key: to_string($message.destination_ip)\n        );\n        \n    let destination_hostname = regex_replace(\n        pattern: \"(.*?)\\\\.$\", \n        value: to_string(destination_hostname),\n        replacement: \"$1\"\n        );\n    \n        \n    set_field(\"destination_hostname\", to_string(destination_hostname));\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "59def35e-1c5a-4343-a671-b5f6c38e0f9b",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: OTX Threat Intelligence - source_ip"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: OTX Threat Intelligence - source_ip\"\nwhen\n    has_field(\"source_ip\") \n    && ! contains(to_string($message.gim_tags), \"source_is_internal\") \n\nthen\n    let otx_ip = otx_lookup_ip(to_string($message.source_ip));\n    set_fields(\n        fields: otx_ip,\n        prefix: \"source_ip_\",\n        clean_fields: true\n        );\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "e532fae3-5a2d-4832-ba3f-0a340465eaa5",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-reverse-name-resolution"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: Reverse Name Resolution"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Εvaluation: Reverse Name Resolution"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "dnslookup"
+          },
+          "lookup_type": {
+            "@type": "string",
+            "@value": "PTR"
+          },
+          "server_ips": {
+            "@type": "string",
+            "@value": ""
+          },
+          "request_timeout": {
+            "@type": "integer",
+            "@value": 10000
+          },
+          "cache_ttl_override_enabled": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_cache",
+        "version": "1"
+      },
+      "id": "6a12649d-e932-4c5a-bdf4-0abcbdcabb0e",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-reverse-name-resolution"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: Reverse Name Resolution"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Εvaluation: Reverse Name Resolution"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "guava_cache"
+          },
+          "max_size": {
+            "@type": "integer",
+            "@value": 100000
+          },
+          "expire_after_access": {
+            "@type": "long",
+            "@value": 5
+          },
+          "expire_after_access_unit": {
+            "@type": "string",
+            "@value": "MINUTES"
+          },
+          "expire_after_write": {
+            "@type": "long",
+            "@value": 0
+          },
+          "ignore_null": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "099d6b98-d9e9-469e-9b9d-2f2c8ce32f78",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: OTX Threat Intelligence - query_request"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: OTX Threat Intelligence - query_request\"\nwhen\n    has_field(\"query_request\") \n    && (to_string($message.query_record_type) == \"A\"\n    || to_string($message.query_record_type) == \"AAAA\"\n    || to_string($message.query_record_type) == \"CNAME\"\n    || to_string($message.query_record_type) == \"HTTPS\") \n    \nthen\n    let otx_domain = otx_lookup_domain(to_string($message.query_request));\n    set_fields(\n        fields: otx_domain,\n        prefix: \"query_request_\",\n        clean_fields: true\n        );\n        \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "ccc26321-dfa3-4124-a107-e5cc4af31750",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Remove Message from Stream DNS Enrichment"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Remove Message from Stream DNS Enrichment\"\nwhen\n    true\n\nthen\n    remove_from_stream(\n        name: \"Εvaluation: DNS Enrichment\"\n    );\n        \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "a12e23a1-ffaa-44a0-8049-6ea184569efe",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-forward-name-resolution"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: Forward Name Resolution"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Εvaluation: Forward Name Resolution"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "dnslookup"
+          },
+          "lookup_type": {
+            "@type": "string",
+            "@value": "A"
+          },
+          "server_ips": {
+            "@type": "string",
+            "@value": ""
+          },
+          "request_timeout": {
+            "@type": "integer",
+            "@value": 10000
+          },
+          "cache_ttl_override_enabled": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_cache",
+        "version": "1"
+      },
+      "id": "0eeb41e4-40ae-4315-a6b7-c38165aa20af",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "evaluation-forward-name-resolution"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Εvaluation: Forward Name Resolution"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Εvaluation: Forward Name Resolution"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "guava_cache"
+          },
+          "max_size": {
+            "@type": "integer",
+            "@value": 100000
+          },
+          "expire_after_access": {
+            "@type": "long",
+            "@value": 5
+          },
+          "expire_after_access_unit": {
+            "@type": "string",
+            "@value": "MINUTES"
+          },
+          "expire_after_write": {
+            "@type": "long",
+            "@value": 0
+          },
+          "ignore_null": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.3+c34604d"
         }
       ]
     }
