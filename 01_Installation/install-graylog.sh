@@ -476,7 +476,7 @@ function_enableGeoIpLocation () {
 
 function_downloadGraylogSidecarBinaries () {
 
-    local SIDECAR_VERSION="1.5.4"
+    local SIDECAR_VERSION="1.5.6ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
     local SIDECAR_MSI="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog-sidecar-${SIDECAR_VERSION}-1.msi"
     local SIDECAR_EXE="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog_sidecar_installer_${SIDECAR_VERSION}-1.exe"
     local SIDECAR_YML="https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml.template"
