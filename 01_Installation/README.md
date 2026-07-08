@@ -111,7 +111,7 @@ The installation script will create a few folders and populate these with helpfu
 - **/assetdata**: this folder is intended to store any type of Asset Collection you might have (e.g. Excel or CSV files). The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - **/configuration**: this folder contains Graylog's configuration in a MongoDB database.
 - [**/contentpacks**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/contentpacks): this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
-- **/database** _(must be owned by the user:group with the id 1000)_: this folder contains Graylog's log data in an Opensearch database.
+- **/database** _(must be owned by the user:group with the id 999)_: this folder contains Graylog's log data in an Opensearch database.
 - **/datalake** _(must be owned by the user:group with the id 1100)_: this folder contains data that is prepared for requirement-driven ingestion (Data Routing). You can mount any remote storage to that folder.
 - **/journal[12]** _(must be owned by the user:group with the id 1100)_: this folder is used for the Graylog Journal. It must provide at least 10GB of Storage. You can mount any remote storage to that folder.
 - [**/lookuptables**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/lookuptables): this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
