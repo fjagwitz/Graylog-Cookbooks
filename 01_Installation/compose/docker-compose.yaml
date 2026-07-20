@@ -112,6 +112,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
+      # must be owned by user:group 999:999
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
       - "./database/datanode1:/var/lib/graylog-datanode"    
     restart: "on-failure"
@@ -142,6 +143,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
+      # must be owned by user:group 999:999
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
       - "./database/datanode2:/var/lib/graylog-datanode"    
     restart: "on-failure"
@@ -172,6 +174,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
+      # must be owned by user:group 999:999
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
       - "./database/datanode3:/var/lib/graylog-datanode"    
     restart: "on-failure"
@@ -203,6 +206,7 @@ services:
         soft: 262144
         hard: 262144
     volumes:
+      # must be owned by user:group 999:999
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
     restart: "on-failure"
 
