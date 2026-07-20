@@ -77,10 +77,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     volumes:
       - "./configuration:/data/db"
       - "./configuration_dump:/configuration_dump"
@@ -95,10 +91,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
     env_file: "datanode.env"        
@@ -126,10 +118,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
     env_file: "datanode.env"        
@@ -157,10 +145,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
     env_file: "datanode.env"        
@@ -188,10 +172,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
     env_file: "datanode.env"
@@ -219,10 +199,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
       - "datanode1"
@@ -266,10 +242,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
       - "datanode1"
@@ -359,10 +331,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     ports:
       - "445:445"
     volumes:
