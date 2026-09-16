@@ -62,8 +62,6 @@ echo.
 
 ::
 :: enable and start graylog-sidecar as a system service
-
-"%PROGRAMFILES%\Graylog\sidecar\graylog-sidecar.exe" -service install
 "%PROGRAMFILES%\Graylog\sidecar\graylog-sidecar.exe" -service start
 
 SET SIDECAR="sc query graylog-sidecar | FIND /C "RUNNING""
