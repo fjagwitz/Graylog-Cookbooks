@@ -1,0 +1,2151 @@
+{
+  "v": 1,
+  "id": "36d84035-b7e7-4f6e-9823-36a723689fa4",
+  "rev": 1,
+  "name": "Professionals: Remote Desktop Session Monitoring",
+  "summary": "Professionals: Remote Desktop Session Monitoring",
+  "description": "Professionals: Remote Desktop Session Monitoring",
+  "vendor": "Graylog Community",
+  "url": "https://community.graylog.org",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_cache",
+        "version": "1"
+      },
+      "id": "60f24376-c568-4d53-ad8c-ff80360e77d3",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "none"
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_table",
+        "version": "1"
+      },
+      "id": "8bc8ae29-5fc8-4314-a018-0b80f219217b",
+      "data": {
+        "default_single_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "cache_name": {
+          "@type": "string",
+          "@value": "5113f5c7-9255-4b87-a609-bbce5d554d72"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "default_multi_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "default_multi_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "data_adapter_name": {
+          "@type": "string",
+          "@value": "5b3cc0e8-f2a1-4e12-bf6c-1a53ef74004e"
+        },
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "default_single_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "23fae45b-946e-4b48-ac2b-45de4d8031b7",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "mongodb"
+          },
+          "cidr_lookup": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "a0f7bf0a-5f53-4cf7-a33b-b565212cb9ef",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Desktop Processing Cleanup Rule"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Remote Desktop message processing cleanup"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Remote Desktop Processing Cleanup Rule\"\n\nwhen\n    has_field(\"application_name\") \n    AND has_field(\"event_code\")\n    AND (to_string($message.application_name) == \"windows_rdp\"\n    OR to_string($message.event_code) == \"4647\")\n    \nthen\n    remove_multiple_fields(pattern: \"^winlogbeat_.*\");\n    remove_from_stream(name: \"Remote Desktop Authentications\");\n\nend\n\n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "dashboard",
+        "version": "2"
+      },
+      "id": "d7113ba0-250e-4081-852e-95efbb8485a4",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": "Professionals: Remote Desktop Session Monitoring"
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "67b924dc-d190-4163-8a37-b77bda3e7362",
+              "timerange": {
+                "from": 300,
+                "type": "relative"
+              },
+              "filters": [],
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "user_session_id:$active_rdp_sessions$ AND _exists_:source_user_session_id"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "from": 604800,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "card",
+                      "id": "card(user_session_id)",
+                      "field": "user_session_id"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "eae68f01-9978-47ed-8a00-effef9a41aa8",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "\"Disconnected Remote Desktop Session\""
+                  },
+                  "name": null,
+                  "timerange": {
+                    "from": 2700,
+                    "type": "relative"
+                  },
+                  "streams": [],
+                  "filter": null,
+                  "type": "events",
+                  "stream_categories": [],
+                  "id": "f1343b38-764d-4acc-a1a5-f22f7e288843",
+                  "filters": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "_exists_:(user_session_duration_minutes AND user_name)"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "from": 604800,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "Session Duration",
+                      "field": "user_session_duration_minutes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "user_name"
+                      ],
+                      "limit": 25,
+                      "skip_empty_values": false
+                    }
+                  ],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "0ded4c18-657a-458d-bf3a-1a142a48909d",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(user_session_duration_minutes)",
+                      "direction": "Ascending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "user_session_id:$inactive_rdp_sessions$ AND gim_event_type:\"session disconnect\" AND _exists_:(user_session_id AND gim_event_type)"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "from": 604800,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "card",
+                      "id": "card(user_session_id)",
+                      "field": "user_session_id"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "1b9f88b0-8211-4385-9dba-fc6435cdf2f2",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "_exists_:(user_session_duration_minutes AND user_name)"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "from": 604800,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "Session Duration",
+                      "field": "user_session_duration_minutes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "user_name"
+                      ],
+                      "limit": 25,
+                      "skip_empty_values": false
+                    }
+                  ],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "ce911726-643c-4333-a04c-090a58c7d239",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(user_session_duration_minutes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "_exists_:(user_session_duration_minutes AND user_name AND event_source)"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "from": 2592000,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "Overall Session Duration (mins)",
+                      "field": "user_session_duration_minutes"
+                    },
+                    {
+                      "type": "avg",
+                      "id": "Avg Session Duration (mins)",
+                      "field": "user_session_duration_minutes",
+                      "whole_number": false
+                    },
+                    {
+                      "type": "card",
+                      "id": "Number of Sessions",
+                      "field": "user_session_id"
+                    },
+                    {
+                      "type": "latest",
+                      "id": "last_user_action",
+                      "field": "gim_event_type"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "user_name"
+                      ],
+                      "limit": 150,
+                      "skip_empty_values": false
+                    },
+                    {
+                      "type": "values",
+                      "fields": [
+                        "event_source"
+                      ],
+                      "limit": 150,
+                      "skip_empty_values": false
+                    }
+                  ],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "9f19f0b8-6ac3-4734-9066-3688b026395e",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "user_session_id:$active_rdp_sessions$ AND _exists_:(user_name AND event_source AND source_ip AND gim_event_type)"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "range": 0,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "latest",
+                      "id": "last_user_action",
+                      "field": "gim_event_type"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "user_name",
+                        "source_hostname",
+                        "destination_hostname"
+                      ],
+                      "limit": 25,
+                      "skip_empty_values": false
+                    }
+                  ],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "8354f36a-a91c-490d-ac21-e4cb7dc58a05",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "user_session_id:$inactive_rdp_sessions$ AND gim_event_type:\"session disconnect\" AND _exists_:(user_name AND event_source AND source_ip AND gim_event_type) "
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "range": 0,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "latest",
+                      "id": "last_user_action",
+                      "field": "gim_event_type"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "user_name",
+                        "source_hostname",
+                        "destination_hostname"
+                      ],
+                      "limit": 25,
+                      "skip_empty_values": false
+                    }
+                  ],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "40a43530-6b8b-4277-87c0-6d479587ca7a",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "_exists_:(user_session_duration_minutes AND user_name AND event_source)"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "from": 2592000,
+                    "type": "relative"
+                  },
+                  "column_limit": null,
+                  "streams": [],
+                  "row_limit": null,
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "Overall Session Duration (mins)",
+                      "field": "user_session_duration_minutes"
+                    },
+                    {
+                      "type": "avg",
+                      "id": "Avg Session Duration (mins)",
+                      "field": "user_session_duration_minutes",
+                      "whole_number": false
+                    },
+                    {
+                      "type": "card",
+                      "id": "Number of Sessions",
+                      "field": "user_session_id"
+                    },
+                    {
+                      "type": "latest",
+                      "id": "last_user_action",
+                      "field": "gim_event_type"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "fields": [
+                        "event_source"
+                      ],
+                      "limit": 150,
+                      "skip_empty_values": false
+                    },
+                    {
+                      "type": "values",
+                      "fields": [
+                        "user_name"
+                      ],
+                      "limit": 150,
+                      "skip_empty_values": false
+                    }
+                  ],
+                  "type": "pivot",
+                  "stream_categories": [],
+                  "id": "77c082a3-5e28-4e9e-bb17-e218493e7f79",
+                  "filters": [],
+                  "column_groups": [],
+                  "sort": []
+                }
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "optional": false,
+              "lookup_table": "remote-desktop-session-monitoring",
+              "name": "inactive_rdp_sessions",
+              "data_type": "any",
+              "default_value": "none",
+              "title": "inactive_rdp_sessions",
+              "type": "lut-parameter-v1",
+              "description": "inactive_rdp_sessions",
+              "key": "inactive_rdp_sessions"
+            },
+            {
+              "optional": false,
+              "lookup_table": "remote-desktop-session-monitoring",
+              "name": "active_rdp_sessions",
+              "data_type": "any",
+              "default_value": "none",
+              "title": "active_rdp_sessions",
+              "type": "lut-parameter-v1",
+              "description": "active_rdp_sessions",
+              "key": "active_rdp_sessions"
+            }
+          ],
+          "requires": {
+            "parameters": {
+              "name": "Graylog Enterprise",
+              "author": "Graylog, Inc.",
+              "url": "https://www.graylog.org/enterprise",
+              "version": "3.1.0",
+              "description": "Graylog Enterprise",
+              "unique_id": "org.graylog.plugins.enterprise.EnterprisePlugin"
+            }
+          },
+          "owner": "eval-admin",
+          "created_at": "2026-09-28T09:18:13.222Z"
+        },
+        "created_at": "2024-06-14T17:25:26.453Z",
+        "requires": {
+          "parameters": {
+            "name": "Graylog Enterprise",
+            "author": "Graylog, Inc.",
+            "url": "https://www.graylog.org/enterprise",
+            "version": "3.1.0",
+            "description": "Graylog Enterprise",
+            "unique_id": "org.graylog.plugins.enterprise.EnterprisePlugin"
+          }
+        },
+        "state": {
+          "67b924dc-d190-4163-8a37-b77bda3e7362": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "tab": {
+                "title": "Remote Desktop Session Overview"
+              },
+              "widget": {
+                "a2691484-fbb3-444a-a39f-f7ab24c84bd9": "Inactive Remote Desktop Sessions",
+                "05365196-8255-4f47-b011-6f0d75ef3f95": "Inactive Remote Desktop Sessions List",
+                "fe066d7c-3796-4e45-bebf-43ca6b9f3557": "Shortest Remote Desktop Sessions",
+                "a4d97060-cc95-4131-b81c-2f072dca2900": "Longest Remote Desktop Sessions",
+                "87295f08-f313-44a5-a1b4-914a389f30b3": "Messages for event_source:WIN198106.demo.io",
+                "16f96ef8-ed74-46a1-b944-aa9639db1dda": "Messages for user_name:\"james jackson\"",
+                "a4e98918-3925-41d3-9155-328f08d4236b": "Messages for user_name:administrator AND source_hostname:cirrus7.demo.io",
+                "49c73f29-3f79-4f5b-8cdd-c3b9301433a5": "Machines with inactive Remote Desktop Connections",
+                "a91a9a5b-63c7-4c7a-8f1c-a6bf6647acf3": "Messages for user_name:\"James Jackson\"",
+                "2f49c4b1-758f-468f-b943-da6ffab51d84": "Finished Remote Desktop Session Durations by User (detailed)",
+                "c78ceec3-02b5-4d41-b2c3-4b19654ea1a9": "Remote Desktop Events (New)",
+                "f8637d4b-34b9-470d-bbbc-ff28fdc03bf3": "Active Remote Desktop Sessions",
+                "b5d43b02-d732-4afe-80cb-4f24ef05f061": "Finished Remote Desktop Session Durations by Machine (detailed)",
+                "b822c593-4ada-40eb-acec-02cae947e9eb": "Messages for user_name:\"James Jackson\"",
+                "066903c2-8433-42d3-aa27-aa83301fe8d8": "Messages for event_source:WIN198104.demo.io AND user_name:\"James Jackson\"",
+                "d2a34c12-e881-4bf1-b111-b80d91e05721": "Messages for user_name:\"James Jackson\"",
+                "fd4dd9f6-a69b-4180-a8a5-9739a1b8c844": "Active Remote Desktop Sessions List",
+                "20b0ba28-f9af-44bd-8bbd-53a44e9c0bf7": "Messages for user_name:\"james martinez\" AND source_hostname:win198104",
+                "ce20688f-5df5-4115-92e1-44dd2ab1bbb4": "Messages for user_name:\"James Jackson\""
+              }
+            },
+            "widgets": [
+              {
+                "config": {
+                  "visualization": "table",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": 150,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "user_name"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 150,
+                        "skip_empty_values": false
+                      }
+                    },
+                    {
+                      "fields": [
+                        "event_source"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 150
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": "Overall Session Duration (mins)",
+                        "thresholds": []
+                      },
+                      "function": "sum(user_session_duration_minutes)"
+                    },
+                    {
+                      "config": {
+                        "name": "Avg Session Duration (mins)",
+                        "thresholds": []
+                      },
+                      "function": "avg(user_session_duration_minutes)"
+                    },
+                    {
+                      "config": {
+                        "name": "Number of Sessions",
+                        "thresholds": []
+                      },
+                      "function": "card(user_session_id)"
+                    },
+                    {
+                      "config": {
+                        "name": "last_user_action",
+                        "thresholds": []
+                      },
+                      "function": "latest(gim_event_type)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "pinned_columns": [],
+                    "show_row_numbers": true
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "_exists_:(user_session_duration_minutes AND user_name AND event_source)"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 2592000,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "2f49c4b1-758f-468f-b943-da6ffab51d84",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "visualization": "table",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": 150,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "event_source"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 150,
+                        "skip_empty_values": false
+                      }
+                    },
+                    {
+                      "fields": [
+                        "user_name"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 150
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": "Overall Session Duration (mins)",
+                        "thresholds": []
+                      },
+                      "function": "sum(user_session_duration_minutes)"
+                    },
+                    {
+                      "config": {
+                        "name": "Avg Session Duration (mins)",
+                        "thresholds": []
+                      },
+                      "function": "avg(user_session_duration_minutes)"
+                    },
+                    {
+                      "config": {
+                        "name": "Number of Sessions",
+                        "thresholds": []
+                      },
+                      "function": "card(user_session_id)"
+                    },
+                    {
+                      "config": {
+                        "name": "last_user_action",
+                        "thresholds": []
+                      },
+                      "function": "latest(gim_event_type)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "pinned_columns": [],
+                    "show_row_numbers": true
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "_exists_:(user_session_duration_minutes AND user_name AND event_source)"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 2592000,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "b5d43b02-d732-4afe-80cb-4f24ef05f061",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "visualization": "table",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": 25,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "user_name",
+                        "source_hostname",
+                        "destination_hostname"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 25
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": "last_user_action",
+                        "thresholds": []
+                      },
+                      "function": "latest(gim_event_type)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "pinned_columns": [],
+                    "show_row_numbers": true
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "user_session_id:$active_rdp_sessions$ AND _exists_:(user_name AND event_source AND source_ip AND gim_event_type)"
+                },
+                "context": null,
+                "timerange": {
+                  "range": 0,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "fd4dd9f6-a69b-4180-a8a5-9739a1b8c844",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "visualization": "table",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": 25,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "user_name",
+                        "source_hostname",
+                        "destination_hostname"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 25
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": "last_user_action",
+                        "thresholds": []
+                      },
+                      "function": "latest(gim_event_type)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "pinned_columns": [],
+                    "show_row_numbers": true
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "user_session_id:$inactive_rdp_sessions$ AND gim_event_type:\"session disconnect\" AND _exists_:(user_name AND event_source AND source_ip AND gim_event_type) "
+                },
+                "context": null,
+                "timerange": {
+                  "range": 0,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "05365196-8255-4f47-b011-6f0d75ef3f95",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "mode": "List",
+                  "fields": [
+                    "alert",
+                    "event_definition_id",
+                    "timestamp"
+                  ],
+                  "units": {},
+                  "filters": [
+                    {
+                      "field": "status",
+                      "value": [
+                        "NEW"
+                      ]
+                    }
+                  ],
+                  "sort": {
+                    "field": "timestamp",
+                    "direction": "Descending"
+                  }
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "\"Disconnected Remote Desktop Session\""
+                },
+                "context": null,
+                "timerange": {
+                  "from": 2700,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "events",
+                "stream_categories": [],
+                "id": "c78ceec3-02b5-4d41-b2c3-4b19654ea1a9",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "visualization": "numeric",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": null,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null,
+                        "thresholds": []
+                      },
+                      "function": "card(user_session_id)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "user_session_id:$active_rdp_sessions$ AND _exists_:source_user_session_id"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 604800,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "f8637d4b-34b9-470d-bbbc-ff28fdc03bf3",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "visualization": "bar",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": 25,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "user_name"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 25,
+                        "skip_empty_values": false
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": "Session Duration",
+                        "thresholds": []
+                      },
+                      "function": "sum(user_session_duration_minutes)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "barmode": "group",
+                    "axis_type": "linear",
+                    "axis_config": null
+                  },
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(user_session_duration_minutes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "_exists_:(user_session_duration_minutes AND user_name)"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 604800,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "a4d97060-cc95-4131-b81c-2f072dca2900",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "visualization": "numeric",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": null,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null,
+                        "thresholds": []
+                      },
+                      "function": "card(user_session_id)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "user_session_id:$inactive_rdp_sessions$ AND gim_event_type:\"session disconnect\" AND _exists_:(user_session_id AND gim_event_type)"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 604800,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "a2691484-fbb3-444a-a39f-f7ab24c84bd9",
+                "filters": [],
+                "description": null
+              },
+              {
+                "config": {
+                  "visualization": "bar",
+                  "units": {},
+                  "column_limit": null,
+                  "event_annotation": false,
+                  "row_limit": 25,
+                  "row_pivots": [
+                    {
+                      "fields": [
+                        "user_name"
+                      ],
+                      "type": "values",
+                      "config": {
+                        "limit": 25,
+                        "skip_empty_values": false
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": "Session Duration",
+                        "thresholds": []
+                      },
+                      "function": "sum(user_session_duration_minutes)"
+                    }
+                  ],
+                  "rollup": false,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "barmode": "group",
+                    "axis_type": "linear",
+                    "axis_config": null
+                  },
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(user_session_duration_minutes)",
+                      "direction": "Ascending"
+                    }
+                  ]
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "_exists_:(user_session_duration_minutes AND user_name)"
+                },
+                "context": null,
+                "timerange": {
+                  "from": 604800,
+                  "type": "relative"
+                },
+                "streams": [],
+                "filter": null,
+                "type": "aggregation",
+                "stream_categories": [],
+                "id": "fe066d7c-3796-4e45-bebf-43ca6b9f3557",
+                "filters": [],
+                "description": null
+              }
+            ],
+            "widget_mapping": {
+              "a2691484-fbb3-444a-a39f-f7ab24c84bd9": [
+                "1b9f88b0-8211-4385-9dba-fc6435cdf2f2"
+              ],
+              "05365196-8255-4f47-b011-6f0d75ef3f95": [
+                "40a43530-6b8b-4277-87c0-6d479587ca7a"
+              ],
+              "fe066d7c-3796-4e45-bebf-43ca6b9f3557": [
+                "0ded4c18-657a-458d-bf3a-1a142a48909d"
+              ],
+              "a4d97060-cc95-4131-b81c-2f072dca2900": [
+                "ce911726-643c-4333-a04c-090a58c7d239"
+              ],
+              "2f49c4b1-758f-468f-b943-da6ffab51d84": [
+                "9f19f0b8-6ac3-4734-9066-3688b026395e"
+              ],
+              "c78ceec3-02b5-4d41-b2c3-4b19654ea1a9": [
+                "f1343b38-764d-4acc-a1a5-f22f7e288843"
+              ],
+              "f8637d4b-34b9-470d-bbbc-ff28fdc03bf3": [
+                "eae68f01-9978-47ed-8a00-effef9a41aa8"
+              ],
+              "b5d43b02-d732-4afe-80cb-4f24ef05f061": [
+                "77c082a3-5e28-4e9e-bb17-e218493e7f79"
+              ],
+              "fd4dd9f6-a69b-4180-a8a5-9739a1b8c844": [
+                "8354f36a-a91c-490d-ac21-e4cb7dc58a05"
+              ]
+            },
+            "positions": {
+              "a2691484-fbb3-444a-a39f-f7ab24c84bd9": {
+                "col": 1,
+                "row": 4,
+                "height": 3,
+                "width": 3
+              },
+              "05365196-8255-4f47-b011-6f0d75ef3f95": {
+                "col": 4,
+                "row": 4,
+                "height": 3,
+                "width": 5
+              },
+              "fe066d7c-3796-4e45-bebf-43ca6b9f3557": {
+                "col": 7,
+                "row": 7,
+                "height": 4,
+                "width": 6
+              },
+              "a4d97060-cc95-4131-b81c-2f072dca2900": {
+                "col": 1,
+                "row": 7,
+                "height": 4,
+                "width": 6
+              },
+              "2f49c4b1-758f-468f-b943-da6ffab51d84": {
+                "col": 1,
+                "row": 11,
+                "height": 4,
+                "width": "Infinity"
+              },
+              "c78ceec3-02b5-4d41-b2c3-4b19654ea1a9": {
+                "col": 9,
+                "row": 1,
+                "height": 6,
+                "width": 4
+              },
+              "f8637d4b-34b9-470d-bbbc-ff28fdc03bf3": {
+                "col": 1,
+                "row": 1,
+                "height": 3,
+                "width": 3
+              },
+              "b5d43b02-d732-4afe-80cb-4f24ef05f061": {
+                "col": 1,
+                "row": 15,
+                "height": 4,
+                "width": "Infinity"
+              },
+              "fd4dd9f6-a69b-4180-a8a5-9739a1b8c844": {
+                "col": 4,
+                "row": 1,
+                "height": 3,
+                "width": 5
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "Professionals",
+        "title": {
+          "@type": "string",
+          "@value": "Professionals: Remote Desktop Session Monitoring"
+        },
+        "type": "DASHBOARD",
+        "description": {
+          "@type": "string",
+          "@value": "Professionals: Remote Desktop Session Monitoring"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "190a8ee3-0e32-4642-9675-55edb2e31df7",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Desktop Logon Messages"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Processes messages documenting a successful Remote Desktop Session logon"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Remote Desktop Logon Messages\"\n\nwhen\n    has_field(\"gim_event_type\")\n    AND to_string($message.event_outcome) == \"success\"\n    AND contains(to_string($message.gim_event_type), \"logon\")\n    AND NOT contains(to_string($message.gim_event_type), \"special logon\")\n    \nthen\n    let rdp_user = lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string($message.user_session_id),\n        value: [to_string($message.timestamp)]\n    );\n    \n    \n    let rdp_user = lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string($message.user_session_id),\n        value: [to_string($message.source_hostname)]\n    );\n    \n    let rdp_user = lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string($message.user_session_id),\n        value: [to_string($message.destination_hostname)]\n    );\n    \n    let rdp_user = lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string($message.user_session_id),\n        value: [to_string($message.source_ip)]\n    );\n    \n    let rdp_user = lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string($message.user_session_id),\n        value: [to_string($message.destination_ip)]\n    );\n    \n    let rdp_user = lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string(\"active_rdp_sessions\"),\n        value: [to_string($message.user_session_id)]\n    );\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "63839705-4d5e-4e0d-a27a-95208b03f01c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Session Disconnect Messages"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Processes messages documenting a successful Remote Desktop Session disconnect"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Remote Session Disconnect Messages\"\n\nwhen\n    has_field(\"gim_event_type\")\n    AND to_string($message.event_outcome) == \"success\"\n    AND contains(to_string($message.gim_event_type), \"session disconnect\")\n    AND lookup_has_value(\"remote-desktop-session-monitoring\", to_string($message.user_session_id))\n    \nthen\n    lookup_remove_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string(\"active_rdp_sessions\"),\n        value: [to_string($message.user_session_id)]\n    );\n    \n    lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string(\"inactive_rdp_sessions\"),\n        value: [to_string($message.user_session_id)]\n    );\n        \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "513f27d1-fa71-44f4-be5d-cff6de5de5aa",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Remote Desktop Authentications"
+        },
+        "stream_rules": [
+          {
+            "type": {
+              "@type": "string",
+              "@value": "EXACT"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "application_name"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "windows_rdp"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": ""
+            }
+          },
+          {
+            "type": {
+              "@type": "string",
+              "@value": "EXACT"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "event_code"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "4647"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": ""
+            }
+          }
+        ],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "OR"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "favorite_fields": [
+          "destination_hostname",
+          "source_hostname",
+          "source_ip",
+          "event_outcome",
+          "gim_event_type"
+        ],
+        "description": null,
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "a8bf90a6-c495-4ee3-b00c-27b220da4918",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Desktop Logon Messages - Replace source_hostname"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Enriches messages documenting a successful Remote Desktop Session logon with correct source_hostname"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Remote Desktop Logon Messages - Replace source_hostname\"\n\nwhen\n    has_field(\"gim_event_type\")\n    AND has_field(\"source_ip\")\n    AND to_string($message.event_outcome) == \"success\"\n    AND (contains(to_string($message.gim_event_type), \"logon\")\n    AND NOT contains(to_string($message.gim_event_type), \"special logon\")\n    OR (contains(to_string($message.gim_event_type), \"session disconnect\") \n    OR contains(to_string($message.gim_event_type), \"session reconnect\")))\n    \nthen\n    let source_hostname = lookup_value(\n        lookup_table: \"remote-desktop-session-monitoring-reverse-dns\", \n        key: to_string($message.source_ip)\n        );\n\n    let source_hostname = regex_replace(\n        pattern: \"(.*?)\\\\.$\", \n        value: to_string(source_hostname),\n        replacement: \"$1\"\n        );\n        \n    set_field(\"source_hostname\", to_string(source_hostname));\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_table",
+        "version": "1"
+      },
+      "id": "e3581848-133a-4032-a0e2-e3c394c031eb",
+      "data": {
+        "default_single_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "cache_name": {
+          "@type": "string",
+          "@value": "60f24376-c568-4d53-ad8c-ff80360e77d3"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "default_multi_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "default_multi_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "data_adapter_name": {
+          "@type": "string",
+          "@value": "23fae45b-946e-4b48-ac2b-45de4d8031b7"
+        },
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        },
+        "default_single_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_table",
+        "version": "1"
+      },
+      "id": "881b421b-cbb7-40b7-ab43-9c11bb2e74df",
+      "data": {
+        "default_single_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "cache_name": {
+          "@type": "string",
+          "@value": "2d03f4f1-97ff-48c3-bcc0-84bdc98ad0a0"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "default_multi_value_type": {
+          "@type": "string",
+          "@value": "NULL"
+        },
+        "default_multi_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "data_adapter_name": {
+          "@type": "string",
+          "@value": "675ceaf0-3552-446e-9e96-ae5d71e74d8e"
+        },
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "default_single_value": {
+          "@type": "string",
+          "@value": ""
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "675ceaf0-3552-446e-9e96-ae5d71e74d8e",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "dnslookup"
+          },
+          "lookup_type": {
+            "@type": "string",
+            "@value": "PTR"
+          },
+          "server_ips": {
+            "@type": "string",
+            "@value": ""
+          },
+          "request_timeout": {
+            "@type": "integer",
+            "@value": 10000
+          },
+          "cache_ttl_override_enabled": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_cache",
+        "version": "1"
+      },
+      "id": "2d03f4f1-97ff-48c3-bcc0-84bdc98ad0a0",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-reverse-dns"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "guava_cache"
+          },
+          "max_size": {
+            "@type": "integer",
+            "@value": 1000
+          },
+          "expire_after_access": {
+            "@type": "long",
+            "@value": 60
+          },
+          "expire_after_access_unit": {
+            "@type": "string",
+            "@value": "SECONDS"
+          },
+          "expire_after_write": {
+            "@type": "long",
+            "@value": 0
+          },
+          "ignore_null": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "id": "ed0553b8-9ec6-4e88-a494-cf257d3facff",
+      "data": {
+        "field_spec": {},
+        "config": {
+          "query_parameters": [],
+          "search_within_ms": 1860000,
+          "query": {
+            "@type": "string",
+            "@value": "_exists_:application_name"
+          },
+          "cron_expression": null,
+          "cron_timezone": null,
+          "use_cron_scheduling": false,
+          "streams": [
+            "513f27d1-fa71-44f4-be5d-cff6de5de5aa"
+          ],
+          "execute_every_ms": 1800000,
+          "event_limit": 100,
+          "group_by": [],
+          "series": [],
+          "conditions": {
+            "expression": null
+          },
+          "type": "aggregation-v1",
+          "stream_categories": [],
+          "filters": []
+        },
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "notifications": [],
+        "remediation_steps": null,
+        "matched_at": null,
+        "event_procedure": null,
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 0
+        },
+        "updated_at": "2026-09-28T10:31:55.290Z",
+        "title": {
+          "@type": "string",
+          "@value": "Professionals: Remote Desktop Session Logs Issue"
+        },
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_summary_template": null,
+        "key_spec": [],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "alert": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "description": {
+          "@type": "string",
+          "@value": ""
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_adapter",
+        "version": "1"
+      },
+      "id": "5b3cc0e8-f2a1-4e12-bf6c-1a53ef74004e",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "dnslookup"
+          },
+          "lookup_type": {
+            "@type": "string",
+            "@value": "A"
+          },
+          "server_ips": {
+            "@type": "string",
+            "@value": ""
+          },
+          "request_timeout": {
+            "@type": "integer",
+            "@value": 10000
+          },
+          "cache_ttl_override_enabled": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "lookup_cache",
+        "version": "1"
+      },
+      "id": "5113f5c7-9255-4b87-a609-bbce5d554d72",
+      "data": {
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "name": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "remote-desktop-session-monitoring-dns"
+        },
+        "configuration": {
+          "type": {
+            "@type": "string",
+            "@value": "guava_cache"
+          },
+          "max_size": {
+            "@type": "integer",
+            "@value": 1000
+          },
+          "expire_after_access": {
+            "@type": "long",
+            "@value": 60
+          },
+          "expire_after_access_unit": {
+            "@type": "string",
+            "@value": "SECONDS"
+          },
+          "expire_after_write": {
+            "@type": "long",
+            "@value": 0
+          },
+          "ignore_null": {
+            "@type": "boolean",
+            "@value": false
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "d0b68fa0-fe62-4ad0-84b2-f748bc0018d2",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Desktop Logoff Messages"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Processes messages documenting a successful Remote Desktop Session logoff"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Remote Desktop Logoff Messages\"\n\nwhen    \n    has_field(\"gim_event_type\")\n    AND to_string($message.event_outcome) == \"success\"\n    AND contains(to_string($message.gim_event_type), \"logoff\")\n    AND lookup_has_value(\"remote-desktop-session-monitoring\", to_string($message.user_session_id))\n    \nthen\n    // Calculate session duration data\n    let session_login_time = list_get(lookup_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string($message.user_session_id)\n    ),0);\n    \n    let login_time = to_long(parse_date(\n        value: to_string(session_login_time),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n        \n    let current_time = to_long(parse_date(\n        value: to_string($message.timestamp),\n        pattern: \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\",\n        locale: \"de_DE\").millis);\n    \n    let user_session_duration = current_time - login_time;\n    \n    // Enrich logoff message with session duration data\n    set_field(\"user_session_duration_milliseconds\", to_long(user_session_duration));\n    set_field(\"user_session_duration_seconds\", to_long(user_session_duration/1000));\n    set_field(\"user_session_duration_minutes\", to_long(user_session_duration/1000/60));\n    set_field(\"user_session_duration_hours\", to_long(user_session_duration/1000/60/60)); \n    set_field(\"user_session_duration\", string_array_add([], [to_long(user_session_duration), to_long(user_session_duration/1000), to_long(user_session_duration/1000/60), to_long(user_session_duration/1000/60/60)], false));\n    \n    \n    // Flag logoff message as windows_rdp related\n    set_field(\"application_name\", \"windows_rdp\");\n    \n    // Enrich logoff message with information from Database\n    set_field(\"source_hostname\", list_get(lookup_string_list(\"remote-desktop-session-monitoring\", to_string($message.user_session_id)),1));\n    set_field(\"destination_hostname\", list_get(lookup_string_list(\"remote-desktop-session-monitoring\", to_string($message.user_session_id)),2));\n    set_field(\"source_ip\", list_get(lookup_string_list(\"remote-desktop-session-monitoring\", to_string($message.user_session_id)),3));\n    set_field(\"destination_ip\", list_get(lookup_string_list(\"remote-desktop-session-monitoring\", to_string($message.user_session_id)),4));\n\n    // Cleanup login session data from Database (Lookup Table)\n    let rdp_user = lookup_clear_key(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string($message.user_session_id)\n    );\n\n    // Cleanup session data from Database (Lookup Table)\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: \"active_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \n    // Cleanup session data from Database (Lookup Table)\n    let rdp_user_collection = lookup_remove_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: \"inactive_rdp_sessions\", \n        value: [to_string($message.user_session_id)]\n    );\n    \n    \nend\n\n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "022d79b6-a0af-4cb3-9c90-a860952b28de",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Desktop Logon Messages - Add destination_ip"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Enriches messages documenting a successful Remote Desktop Session logon with correct destination_ip"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Remote Desktop Logon Messages - Add destination_ip\"\n\nwhen\n    has_field(\"gim_event_type\")\n    AND has_field(\"destination_hostname\")\n    AND to_string($message.event_outcome) == \"success\"\n    \n    AND ((contains(to_string($message.gim_event_type), \"logon\")\n    AND NOT contains(to_string($message.gim_event_type), \"special logon\"))\n    \n    OR (contains(to_string($message.gim_event_type), \"session disconnect\") \n    OR contains(to_string($message.gim_event_type), \"session reconnect\")))\n\nthen\n let destination_ip = lookup_value(\n        lookup_table: \"remote-desktop-session-monitoring-dns\", \n        key: to_string($message.destination_hostname)\n        );\n    \n    set_field(\"destination_ip\", to_string(destination_ip));\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "1af5d445-2f2a-4d26-94cb-e8f163598efc",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Desktop Authentications"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Remote Desktop Authentications"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Remote Desktop Authentications\"\nstage 2 match pass\nrule \"Remote Desktop Logon Messages - Add destination_ip\"\nrule \"Remote Desktop Logon Messages - Replace source_hostname\"\nstage 9 match either\nrule \"Remote Desktop Processing Cleanup Rule\"\nstage 3 match pass\nrule \"Remote Desktop Logoff Messages\"\nrule \"Remote Desktop Logon Messages\"\nrule \"Remote Session Disconnect Messages\"\nrule \"Remote Session Reconnect Messages\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "513f27d1-fa71-44f4-be5d-cff6de5de5aa"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "4d5589a2-f4b5-49ce-9594-522b949c44a7",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Remote Session Reconnect Messages"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Processes messages documenting a successful Remote Desktop Session reconnect"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Remote Session Reconnect Messages\"\n\nwhen\n    has_field(\"gim_event_type\")\n    AND to_string($message.event_outcome) == \"success\"\n    AND contains(to_string($message.gim_event_type), \"session reconnect\")\n    AND lookup_has_value(\"remote-desktop-session-monitoring\", to_string($message.user_session_id))\n    \nthen\n    lookup_remove_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string(\"inactive_rdp_sessions\"),\n        value: [to_string($message.user_session_id)]\n    );\n    \n    lookup_add_string_list(\n        lookup_table: \"remote-desktop-session-monitoring\",\n        key: to_string(\"active_rdp_sessions\"),\n        value: [to_string($message.user_session_id)]\n    );\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "event_definition",
+        "version": "1"
+      },
+      "id": "c45dee82-309b-4050-90e6-c93d290f2018",
+      "data": {
+        "field_spec": {
+          "user_name": {
+            "data_type": "string",
+            "providers": [
+              {
+                "type": "template-v1",
+                "template": "${source.user_name}",
+                "require_values": false
+              }
+            ]
+          }
+        },
+        "config": {
+          "query_parameters": [],
+          "search_within_ms": 960000,
+          "query": {
+            "@type": "string",
+            "@value": "_exists_:(application_name AND gim_event_type ) AND application_name:windows_rdp AND gim_event_type:\"session disconnect\""
+          },
+          "cron_expression": null,
+          "cron_timezone": null,
+          "use_cron_scheduling": false,
+          "streams": [],
+          "execute_every_ms": 900000,
+          "event_limit": 100,
+          "group_by": [],
+          "series": [],
+          "conditions": {
+            "expression": null
+          },
+          "type": "aggregation-v1",
+          "stream_categories": [],
+          "filters": []
+        },
+        "priority": {
+          "@type": "integer",
+          "@value": 2
+        },
+        "notifications": [],
+        "remediation_steps": {
+          "@type": "string",
+          "@value": "Configure Group Policy to automatically close idle Remote Desktop Sessions \n\nFind more context here: https://learn.microsoft.com/en-us/answers/questions/376150/windows-server-2019-remote-desktop-services-change"
+        },
+        "matched_at": "2026-09-28T09:56:58.239Z",
+        "event_procedure": null,
+        "_scope": {
+          "@type": "string",
+          "@value": "DEFAULT"
+        },
+        "notification_settings": {
+          "grace_period_ms": 300000,
+          "backlog_size": 0
+        },
+        "updated_at": "2026-09-28T09:29:44.917Z",
+        "title": {
+          "@type": "string",
+          "@value": "Professionals: Disconnected Remote Desktop Session"
+        },
+        "is_scheduled": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "event_summary_template": null,
+        "key_spec": [
+          "user_name"
+        ],
+        "storage": [
+          {
+            "type": "persist-to-streams-v1",
+            "streams": [
+              "000000000000000000000002"
+            ]
+          }
+        ],
+        "alert": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Remote Desktop Session Disconnected"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream_title",
+        "version": "1"
+      },
+      "id": "000000000000000000000002",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "All events"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream_title",
+        "version": "1"
+      },
+      "id": "000000000000000000000003",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "All system events"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.1.9+002c047"
+        }
+      ]
+    }
+  ]
+}

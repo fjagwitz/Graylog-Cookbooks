@@ -1,10 +1,10 @@
-# Graylog Professionals: Windows - RDP Monitoring
+# Professionals: Remote Desktop Session Monitoring
 
 ## Requirements
 
-- Graylog 6.0.2 or higher
+- Graylog 7.1.9 or higher
 - Graylog Enterprise or Security License
-- Illuminate 5.1 or higher
+- Illuminate Content Pack "Microsoft Windows Security (2026.4.27)"
 
 ## How to install
 
@@ -15,7 +15,7 @@
 - Go to _"SYSTEM" / "PIPELINES"_, filter for "pro" and klick on "Edit":
 
   ![2](./images/2.png)
-- Klick on "Edit connections":
+- Go to _"STREAMS" / "PIPELINES"_, filter for "pro" and klick on "Edit":
   
   ![3](./images/3.png)
 - Choose "Illuminate: Windows Security Event Log Messages" and "Update connections":

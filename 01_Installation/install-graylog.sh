@@ -21,7 +21,7 @@ GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
-GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
+GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.../.admintoken 2>/dev/null)"
 GRAYLOG_FQDN=""
 GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
@@ -1076,7 +1076,7 @@ then
     echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
     
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null 
+    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.../.admintoken 2>/dev/null >/dev/null 
 
     sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
     sudo cp $0 /etc/cron.hourly/install-graylog
@@ -1097,7 +1097,7 @@ then
     echo "continued" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null 
 
     sudo rm -- ${0}
-    sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.admintoken
+    sudo rm ${GRAYLOG_PATH}/.installation ${GRAYLOG_PATH}/.../.admintoken
 
     GRAYLOG_LICENSE_ENTERPRISE=$(function_checkEnterpriseLicense ${GRAYLOG_ADMIN_TOKEN}) 
 
