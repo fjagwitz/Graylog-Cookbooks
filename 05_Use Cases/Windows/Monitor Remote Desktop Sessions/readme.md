@@ -9,25 +9,18 @@
 ## How to install
 
 - Upload and [Install](https://graylog.org/videos/content-packs/) the Content Pack in Graylog (the video is for Graylog v3.0 but it does still work the same way)
-- Go to _"SYSTEM" / "CONTENT PACKS"_, filter for "pro" and klick on "Install":
+- Go to _"SYSTEM" / "CONTENT PACKS"_, filter for _"pro"_ and klick on **"Install"**:
   
   ![1](./images/1.png)
-- Go to _"SYSTEM" / "PIPELINES"_, filter for "pro" and klick on "Edit":
+- Go to _"STREAMS"_, filter for _"Remote Desktop Authentications"_ and klick on **"Paused"** to start the Stream:
 
   ![2](./images/2.png)
-- Go to _"STREAMS" / "PIPELINES"_, filter for "pro" and klick on "Edit":
-  
+
+- Go to _"DASHBOARDS"_, filter for _"pro"_ and klick on "Professionals: Remote Desktop Session Monitoring" to choose the Dashboard:
   ![3](./images/3.png)
-- Choose "Illuminate: Windows Security Event Log Messages" and "Update connections":
 
+- Review Dashboard
   ![4](./images/4.png)
-- Validate your settings and ensure the UI shows "This pipeline is processing messages from the stream "Illuminate:Windows Security Event Log Messages":
-  
-  ![5](./images/5.png)
-- Go to _"DASHBOARDS"_, filter for "pro" and choose __"Graylog Professionals: Windows - RDP Monitoring"__:
 
-  ![6](./images/6.png)
-- Review your Dashboard for RDP Monitoring:
-  
-  ![7](./images/7.png)
-  
+- Review Alerts
+  ![5](./images/5.png)
