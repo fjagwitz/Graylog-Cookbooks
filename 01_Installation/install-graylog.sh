@@ -1061,39 +1061,38 @@ then
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
     echo ${GRAYLOG_ADMIN_TOKEN}
-    pause
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
-    echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
-    function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
-    function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
-    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
-    function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    #echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
+    #function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
+    #function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
+    #function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    #function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
-    function_restartGraylogContainer "graylog1"
-    function_checkSystemAvailability
-    function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
-    function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
-    function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
-    function_enableGraylogSidecar
-    function_addScriptRepositoryToPathVariable
+    #function_restartGraylogContainer "graylog1"
+    #function_checkSystemAvailability
+    #function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
+    #function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    #function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    #function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
+    #function_enableGraylogSidecar
+    #function_addScriptRepositoryToPathVariable
 
-    function_displayClusterId
+    #function_displayClusterId
 
-    echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
+    #echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
     
-    echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.../.admintoken 2>/dev/null >/dev/null 
+    #echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
+    #echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.../.admintoken 2>/dev/null >/dev/null 
 
-    sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
-    sudo cp $0 /etc/cron.hourly/install-graylog
-    sudo rm -- $0
+    #sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
+    #sudo cp $0 /etc/cron.hourly/install-graylog
+    #sudo rm -- $0
 
-    echo "[INFO] - BASE INSTALLATION SUCCESSFULLY FINISHED, WAITING FOR LICENSE" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    #echo "[INFO] - BASE INSTALLATION SUCCESSFULLY FINISHED, WAITING FOR LICENSE" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     exit
 fi
