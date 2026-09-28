@@ -1066,7 +1066,7 @@ then
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
-    #echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
+    echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     #function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
     #function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
     #function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
