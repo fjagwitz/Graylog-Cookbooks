@@ -1061,7 +1061,7 @@ then
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
     echo "AT: $GRAYLOG_ADMIN_TOKEN"
-    echo "ST: $GRAYLOG_SIDECAR"
+    echo "ST: $GRAYLOG_SIDECAR_TOKEN"
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
