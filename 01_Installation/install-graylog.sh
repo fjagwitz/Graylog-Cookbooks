@@ -1060,6 +1060,9 @@ then
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
+    echo ${GRAYLOG_ADMIN_TOKEN}
+    pause
+
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
