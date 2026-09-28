@@ -15,7 +15,8 @@
 # Static Variables Definition
 
 GRAYLOG_VERSION="7.1"
-GRAYLOG_PATH="/opt/graylog"
+GRAYLOG_HOME_FOLDER="/opt"
+GRAYLOG_PATH="${GRAYLOG_HOME_FOLDER}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
@@ -34,7 +35,8 @@ SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | 
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK="550"
+SYSTEM_REQUIREMENTS_ROOT="150"
+SYSTEM_REQUIREMENTS_OPT="550"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
@@ -188,7 +190,8 @@ function_checkSystemRequirements () {
     local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
-    local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
+    local OPT_DISK_SPACE=$(df -k -h ${GRAYLOG_HOME_FOLDER} --output=avail | tail -n1 | grep -oE [0-9]*)
+    local ROOT_DISK_SPACE=$(df -k -h / --output=avail | tail -n1 | grep -oE [0-9]*)
 
     
     if [[ "${SYSTEM_PROXY}" == "" ]]
@@ -203,12 +206,13 @@ function_checkSystemRequirements () {
         local INTERNET_CONNECTIVITY_TYPE="proxied: "
     fi 
 
-    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${TOTAL_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_DISK} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
+    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${OPT_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_OPT} ] && [ ${ROOT_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_ROOT} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
         
          Operating System: ${OPERATING_SYSTEM} 
-         Storage         : ${TOTAL_DISK_SPACE} GB 
+         Storage '/'     : ${ROOT_DISK_SPACE} GB
+         Storage '/opt'  : ${OPT_DISK_SPACE} GB 
          Memory          : ${RANDOM_ACCESS_MEMORY} GB 
          CPU Cores       : ${CPU_CORES_NUMBER} vCPU 
          CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available 
@@ -235,9 +239,13 @@ function_checkSystemRequirements () {
         then
             echo "[ERROR] - THE CPU MUST SUPPORT THE ${SYSTEM_REQUIREMENTS_CPU_FLAGS^^} FLAG(S), BUT DOES NOT" 
         fi
-        if [ ${TOTAL_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_DISK} ]
+        if [ ${OPT_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_OPT} ]
         then
-            echo "[ERROR] - THE /opt FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
+            echo "[ERROR] - THE ${GRAYLOG_HOME_FOLDER} FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_OPT} GB STORAGE, BUT HAS ONLY ${OPT_DISK_SPACE} GB"
+        fi
+        if [ ${ROOT_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_ROOT} ]
+        then
+            echo "[ERROR] - THE ROOT FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_ROOT} GB STORAGE, BUT HAS ONLY ${ROOT_DISK_SPACE} GB"
         fi
         exit
     fi
@@ -349,7 +357,7 @@ function_installGraylogStack () {
     sudo sysctl -p >/dev/null 
 
     # Create required Folders in the Filesystem
-    echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN ${GRAYLOG_HOME_FOLDER} " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Collector,Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -992,7 +1000,7 @@ function_configureSecurityFeatures () {
 }
 
 function_restoreSystem () {
-    exec /opt/graylog/scripts/Reset-GraylogInstallation
+    exec ${GRAYLOG_PATH}/scripts/Reset-GraylogInstallation
 }
 
 function_removeAdminToken () {
