@@ -43,6 +43,7 @@ SYSTEM_REQUIREMENTS_OS="Ubuntu"
 SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dnsutils dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
 
 
+
 ###############################################################################
 #
 # Functions Definition
