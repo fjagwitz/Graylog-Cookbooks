@@ -339,7 +339,7 @@ function_installGraylogSidecar () {
 function_installGraylogStack () {
 
     local INSTALLPATH=$(mktemp -d)
-    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
+    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
@@ -351,7 +351,7 @@ function_installGraylogStack () {
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN ${GRAYLOG_HOME^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
+    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
