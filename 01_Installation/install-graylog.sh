@@ -4,8 +4,8 @@
 # description:       Installs a complete Graylog Cluster for testing purposes
 # author:            Friedrich von Jagwitz 
 # email:             fvj@graylog.com
-# date:              2026-09-28
-# version:           7.2
+# date:              2026-03-19
+# version:           7.1
 # usage:             bash install-graylog.sh
 # notes:             
 #==============================================================================
@@ -14,9 +14,8 @@
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.2"
-GRAYLOG_HOME="/opt"
-GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
+GRAYLOG_VERSION="7.1"
+GRAYLOG_PATH="/opt/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
@@ -35,13 +34,11 @@ SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | 
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK_OS="100"
-SYSTEM_REQUIREMENTS_DISK_GL="550"
+SYSTEM_REQUIREMENTS_DISK="550"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
 SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dnsutils dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
-
 
 
 ###############################################################################
