@@ -16,7 +16,7 @@
 
 GRAYLOG_VERSION="7.2"
 GRAYLOG_HOME="/opt"
-GRAYLOG_PATH="/${GRAYLOG_HOME}/graylog"
+GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
