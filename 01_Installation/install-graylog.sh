@@ -14,8 +14,9 @@
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.1"
-GRAYLOG_PATH="/opt/graylog"
+GRAYLOG_VERSION="7.2"
+GRAYLOG_HOME="/opt"
+GRAYLOG_PATH="/${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
@@ -34,7 +35,8 @@ SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | 
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK="550"
+SYSTEM_REQUIREMENTS_DISK_OS="100"
+SYSTEM_REQUIREMENTS_DISK_GL="550"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
