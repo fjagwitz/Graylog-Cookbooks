@@ -4,7 +4,8 @@ Create a virtual machine:
 
 - CPU Cores: at least 8
 - Memory: at least 32 GB
-- Storage: at least 600 GB in **/opt** (depending on the amount of data you plan to Ingest over a defined timeframe)
+- OS Storage: at least 300 GB available in **/** as Docker Containers and Volumes usually require a significant amount of available space
+- OPT Storage: at least 600 GB in **/opt** (depending on the amount of data you plan to Ingest over a defined timeframe)
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 - Have an SSL certificate handy for the Web UI
@@ -47,7 +48,7 @@ The installation script will create a few folders and populate these with helpfu
                 |--opensearch.env
                 |--your_graylog_credentials.txt
                 |
-                |--/archives
+                |--/archives -- (chown -R 1100:1100)
                 |
                 |--/assetdata
                 |
@@ -55,7 +56,7 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/contentpacks
                 |
-                |--/database
+                |--/database -- (chown -R 999:999)
                 |       |
                 |       |--/datanode1
                 |       |
@@ -65,13 +66,13 @@ The installation script will create a few folders and populate these with helpfu
                 |       |
                 |       |--/warm_tier
                 |
-                |--/datalake
+                |--/datalake -- (chown -R 1100:1100)
                 |
                 |--/input_tls
                 |
-                |--/journal1
+                |--/journal1 -- (chown -R 1100:1100)
                 |
-                |--/journal2
+                |--/journal2 -- (chown -R 1100:1100)
                 |
                 |--/logsamples
                 |
@@ -94,7 +95,7 @@ The installation script will create a few folders and populate these with helpfu
                 |     |--http.conf
                 |     |--nginx.conf
                 |
-                |--/notifications
+                |--/notifications -- (chown -R 1100:1100)
                 |
                 |--/prometheus
                 |
