@@ -4,8 +4,8 @@
 # description:       Installs a complete Graylog Cluster for testing purposes
 # author:            Friedrich von Jagwitz 
 # email:             fvj@graylog.com
-# date:              2026-03-19
-# version:           7.1
+# date:              2026-09-28
+# version:           7.2
 # usage:             bash install-graylog.sh
 # notes:             
 #==============================================================================
@@ -14,7 +14,7 @@
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.1"
+GRAYLOG_VERSION="7.2"
 GRAYLOG_PATH="/opt/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
