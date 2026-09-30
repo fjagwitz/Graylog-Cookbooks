@@ -15,7 +15,8 @@
 # Static Variables Definition
 
 GRAYLOG_VERSION="7.2"
-GRAYLOG_PATH="/opt/graylog"
+GRAYLOG_HOME="/opt"
+GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
@@ -188,7 +189,7 @@ function_checkSystemRequirements () {
     local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
-    local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
+    local TOTAL_DISK_SPACE=$(df -hP ${GRAYLOG_HOME} | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
 
     
     if [[ "${SYSTEM_PROXY}" == "" ]]
@@ -237,7 +238,7 @@ function_checkSystemRequirements () {
         fi
         if [ ${TOTAL_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_DISK} ]
         then
-            echo "[ERROR] - THE /opt FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
+            echo "[ERROR] - THE ${GRAYLOG_HOME^^} FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
         fi
         exit
     fi
@@ -349,7 +350,7 @@ function_installGraylogStack () {
     sudo sysctl -p >/dev/null 
 
     # Create required Folders in the Filesystem
-    echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN ${GRAYLOG_HOME} " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -989,7 +990,7 @@ function_configureSecurityFeatures () {
 }
 
 function_restoreSystem () {
-    exec /opt/graylog/scripts/Reset-GraylogInstallation
+    exec ${GRAYLOG_HOME}/graylog/scripts/Reset-GraylogInstallation
 }
 
 function_removeAdminToken () {
