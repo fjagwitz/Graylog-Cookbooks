@@ -350,7 +350,7 @@ function_installGraylogStack () {
     sudo sysctl -p >/dev/null 
 
     # Create required Folders in the Filesystem
-    echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN ${GRAYLOG_HOME} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN ${GRAYLOG_HOME^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
