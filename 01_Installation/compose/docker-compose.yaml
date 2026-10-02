@@ -44,7 +44,7 @@ services:
       - 13301:13301
       - 13302:13302
       # Additional Input Ports
-    env_file: "nginx.env"
+    env_file: "reverseproxy.env"
     volumes:
       - "./nginx1/conf.d:/etc/nginx/conf.d:ro"
       - "./nginx1/templates:/etc/nginx/templates:ro"
