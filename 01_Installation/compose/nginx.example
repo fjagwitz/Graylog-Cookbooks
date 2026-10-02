@@ -1,1 +1,2 @@
-GRAYLOG_FQDN = ""
+# GRAYLOG API TOKEN | echo -n "<YOUR_API_TOKEN>:token" | base64 -w0
+#
