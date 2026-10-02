@@ -20,6 +20,7 @@ GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
+GRAYLOG_REVERSEPROXY_ENV="reverseproxy.env"
 GRAYLOG_ADMIN=""
 GRAYLOG_PASSWORD=""
 GRAYLOG_ADMIN_TOKEN="$(cat ${GRAYLOG_PATH}/.admintoken 2>/dev/null)"
@@ -40,6 +41,9 @@ SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Define required dependencies to run the script as well as the Graylog Stack
 SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dnsutils dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
+
+# Define MCP Server Connection Credential for Open WebUI
+GRAYLOG_MCP_SHARED_SECRET="$(openssl rand -hex 32)"
 
 
 ###############################################################################
@@ -342,6 +346,7 @@ function_installGraylogStack () {
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
+    local NGINX_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV}"
     local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/conf.d/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
@@ -387,6 +392,7 @@ function_installGraylogStack () {
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
     sudo mv ${GRAYLOG_PATH}/datanode.example ${DATANODE_ENV}
+    sudo mv ${GRAYLOG_PATH}/nginx.example ${NGINX_ENV}
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR GRAYLOG " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
@@ -406,6 +412,10 @@ function_installGraylogStack () {
         sudo sed -i "s\# GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"${SYSTEM_PROXY}\"\g" ${GRAYLOG_ENV}
         sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g" ${GRAYLOG_ENV}
     fi
+
+    # Add variables for NGINX reverse proxy
+    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${NGINX_ENV}
+    echo "MCP_SHARED_SECRET = ${GRAYLOG_MCP_SHARED_SECRET}" | sudo tee -a ${NGINX_ENV}
 
     # sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
     # sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
@@ -1047,7 +1057,7 @@ then
     function_downloadNxlogBinaries 
     function_checkSystemAvailability
 
-    GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 14)
+    GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 30)
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
@@ -1074,7 +1084,7 @@ then
     echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
     
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null 
+    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken ${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV} 2>/dev/null >/dev/null
 
     sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
     sudo cp $0 /etc/cron.hourly/install-graylog
