@@ -1086,6 +1086,10 @@ then
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken ${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV} 2>/dev/null >/dev/null
 
+    # enable authorization for MCP Server
+    sudo sed -i "s\#proxy_set_header\proxy_set_header\g" ${SIDECAR_YAML}
+
+
     sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
     sudo cp $0 /etc/cron.hourly/install-graylog
     sudo rm -- $0
