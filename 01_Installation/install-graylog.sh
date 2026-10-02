@@ -342,7 +342,7 @@ function_installGraylogStack () {
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
-    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
+    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/conf.d/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
@@ -407,8 +407,8 @@ function_installGraylogStack () {
         sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g" ${GRAYLOG_ENV}
     fi
 
-    sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
-    sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
+    # sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
+    # sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
 
     sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
 
