@@ -46,7 +46,7 @@ services:
       # Additional Input Ports
     env_file: "nginx.env"
     volumes:
-      - "./nginx1/conf.d/nginx.conf:/etc/nginx/conf.d:ro"
+      - "./nginx1/conf.d:/etc/nginx/conf.d:ro"
       - "./nginx1/templates:/etc/nginx/templates:ro"
       - "./nginx1/ssl:/etc/nginx/ssl:ro"
     restart: "always"
