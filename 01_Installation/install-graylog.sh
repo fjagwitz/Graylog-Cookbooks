@@ -414,8 +414,8 @@ function_installGraylogStack () {
     fi
 
     # Add variables for NGINX reverse proxy
-    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${NGINX_ENV}
-    echo "MCP_SHARED_SECRET = ${GRAYLOG_MCP_SHARED_SECRET}" | sudo tee -a ${NGINX_ENV}
+    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${NGINX_ENV} >/dev/null
+    echo "MCP_SHARED_SECRET = ${GRAYLOG_MCP_SHARED_SECRET}" | sudo tee -a ${NGINX_ENV} >/dev/null
 
     # sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
     # sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
