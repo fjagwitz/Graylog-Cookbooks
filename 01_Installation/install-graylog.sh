@@ -399,7 +399,7 @@ function_installGraylogStack () {
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
     sudo mv ${GRAYLOG_PATH}/datanode.example ${DATANODE_ENV}
-    sudo mv ${GRAYLOG_PATH}/nginx.example ${NGINX_ENV}
+    sudo mv ${GRAYLOG_PATH}/reverseproxy.example ${NGINX_ENV}
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR GRAYLOG " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\GRAYLOG_ROOT_USERNAME = \"${GRAYLOG_ADMIN}\"\g" ${GRAYLOG_ENV}
