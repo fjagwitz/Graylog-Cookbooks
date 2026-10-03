@@ -370,7 +370,8 @@ function_installGraylogStack () {
     done
 
     # Initially populate .env-file for the Stack 
-    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${STACK_ENV}
+    echo "[INFO] - SYSTEM FQDN IS ${GRAYLOG_FQDN^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${STACK_ENV} >/dev/null
 
     # Start pulling Containers
     echo "[INFO] - PULL CONTAINERS FOR GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -405,7 +406,6 @@ function_installGraylogStack () {
     sudo sed -i "s\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"\"\GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = \"https://${GRAYLOG_FQDN}\"\g" ${GRAYLOG_ENV}
 
     sudo sed -i "s\GRAYLOG_DATANODE_PASSWORD_SECRET = \"\"\GRAYLOG_DATANODE_PASSWORD_SECRET = \"${SYSTEM_PASSWORD_SECRET}\"\g" ${DATANODE_ENV}
-
 
     if [ "${SYSTEM_PROXY}" != "" ]
     then
