@@ -14,7 +14,7 @@
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.2"
+GRAYLOG_VERSION="7.2.0-rc.1-1"
 GRAYLOG_HOME="/opt"
 GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
