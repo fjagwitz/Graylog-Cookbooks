@@ -375,6 +375,8 @@ function_installGraylogStack () {
     echo "GRAYLOG_VERSION = ${GRAYLOG_VERSION}" | sudo tee -a ${STACK_ENV} >/dev/null
     echo "[INFO] - SYSTEM FQDN IS ${GRAYLOG_FQDN^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${STACK_ENV} >/dev/null
+    echo "GRAYLOG_BASIC_AUTH = 4c856ae3d621abc4bf894719fc3bbcc3805249643e11d2e24dcec216e6e9a7a0bfee80e10ce90c4c2a46c019d9ac1620" | sudo tee -a ${STACK_ENV} >/dev/null
+    echo "MCP_SHARED_SECRET = f62c6231c81c6fd8f477f60fa1e2565695021d533e8950eba270516e8557008e" | sudo tee -a ${STACK_ENV} >/dev/null
 
     # Start pulling Containers
     echo "[INFO] - PULL CONTAINERS FOR GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
