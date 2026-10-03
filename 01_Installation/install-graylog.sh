@@ -370,6 +370,8 @@ function_installGraylogStack () {
     done
 
     # Initially populate .env-file for the Stack 
+    echo "[INFO] - SYSTEM VERSION IS ${GRAYLOG_VERSION^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "GRAYLOG_VERSION = ${GRAYLOG_VERSION}" | sudo tee -a ${STACK_ENV} >/dev/null
     echo "[INFO] - SYSTEM FQDN IS ${GRAYLOG_FQDN^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${STACK_ENV} >/dev/null
 
