@@ -345,7 +345,9 @@ function_installGraylogStack () {
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
-    local ENV = "$GRAYLOG_PATH/.env}"
+    local STACK_ENV = "${GRAYLOG_PATH}/.env"
+    local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
+    local SYSTEM_ROOT_PASSWORD_SHA2=$(echo ${GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
@@ -368,7 +370,7 @@ function_installGraylogStack () {
     done
 
     # Initially populate .env-file for the Stack 
-    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${ENV}
+    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${STACK_ENV}
 
     # Start pulling Containers
     echo "[INFO] - PULL CONTAINERS FOR GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -396,9 +398,6 @@ function_installGraylogStack () {
     sudo mv ${GRAYLOG_PATH}/nginx.example ${NGINX_ENV}
 
     echo "[INFO] - POPULATE ENVIRONMENT FILE FOR GRAYLOG " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
-    local SYSTEM_ROOT_PASSWORD_SHA2=$(echo ${GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
-
     sudo sed -i "s\GRAYLOG_ROOT_USERNAME = \"\"\GRAYLOG_ROOT_USERNAME = \"${GRAYLOG_ADMIN}\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_ROOT_PASSWORD_SHA2 = \"\"\GRAYLOG_ROOT_PASSWORD_SHA2 = \"${SYSTEM_ROOT_PASSWORD_SHA2}\"\g" ${GRAYLOG_ENV}
     sudo sed -i "s\GRAYLOG_PASSWORD_SECRET = \"\"\GRAYLOG_PASSWORD_SECRET = \"${SYSTEM_PASSWORD_SECRET}\"\g" ${GRAYLOG_ENV}
