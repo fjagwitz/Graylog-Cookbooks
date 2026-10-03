@@ -360,7 +360,7 @@ function_installGraylogStack () {
     sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
+    sudo git clone -q --single-branch --branch Graylog-7.2 https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
 
     echo "[INFO] - COPY CLONED CONTENT TO FOLDERS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local ITEMS=$(ls ${INSTALLPATH}/01_Installation/compose | xargs)
