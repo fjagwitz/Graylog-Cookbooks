@@ -345,7 +345,7 @@ function_installGraylogStack () {
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
-    local NGINX_ENV="${GRAYLOG_REVERSEPROXY_ENV}"
+    local NGINX_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV}"
     local STACK_ENV="${GRAYLOG_PATH}/.env"
     local SYSTEM_PASSWORD_SECRET=$(pwgen -N 1 -s 96)
     local SYSTEM_ROOT_PASSWORD_SHA2=$(echo ${GRAYLOG_PASSWORD} | head -c -1 | shasum -a 256 | cut -d" " -f1)
