@@ -869,7 +869,7 @@ function_configureMcpAccess () {
     curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
 
     # activate MCP 
-    echo "[WARN] - CONNECTION WILL BE INTERRUPTED FOR ABOUT 10 SECONDS, HANG ON"
+    echo "[WARN] - RESTART NGINX" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
 
 }
