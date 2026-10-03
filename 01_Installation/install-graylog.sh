@@ -146,7 +146,6 @@ function_getSystemFqdn () {
 
     # Set global Variable for Graylog FQDN
     GRAYLOG_FQDN=${SYSTEM_FQDN}
-
 }
 
 function_checkInternetConnectivity () {
@@ -346,8 +345,7 @@ function_installGraylogStack () {
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
-    local NGINX_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV}"
-    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/conf.d/http.conf"
+    local ENV = "$GRAYLOG_PATH/.env}"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
@@ -368,6 +366,9 @@ function_installGraylogStack () {
     do
         sudo cp -R ${INSTALLPATH}/01_Installation/compose/${ITEM} ${GRAYLOG_PATH}
     done
+
+    # Initially populate .env-file for the Stack 
+    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${ENV}
 
     # Start pulling Containers
     echo "[INFO] - PULL CONTAINERS FOR GRAYLOG STACK " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -412,13 +413,6 @@ function_installGraylogStack () {
         sudo sed -i "s\# GRAYLOG_HTTP_PROXY_URI = \"\"\GRAYLOG_HTTP_PROXY_URI = \"${SYSTEM_PROXY}\"\g" ${GRAYLOG_ENV}
         sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g" ${GRAYLOG_ENV}
     fi
-
-    # Add variables for NGINX reverse proxy
-    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${NGINX_ENV} >/dev/null
-    echo "MCP_SHARED_SECRET = ${GRAYLOG_MCP_SHARED_SECRET}" | sudo tee -a ${NGINX_ENV} >/dev/null
-
-    # sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
-    # sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
 
     sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
 
@@ -500,7 +494,7 @@ function_downloadGraylogSidecarBinaries () {
 
 function_downloadBeatsBinaries () {
 
-    local BEATS_VERSION="8.19.16"
+    local BEATS_VERSION="8.19.22"
 
     local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.zip"
     local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.msi"
@@ -857,6 +851,25 @@ function_createInputs () {
     fi
 }
 
+function_configureMcpAccess () {
+    local ADMIN_TOKEN=${1}
+    local NGINX_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV}"
+    local GRAYLOG_PATH="/opt/graylog"
+    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/templates/http.conf.template"
+
+    # Add variables for NGINX reverse proxy
+    echo "MCP_SHARED_SECRET = ${GRAYLOG_MCP_SHARED_SECRET}" | sudo tee -a ${NGINX_ENV} >/dev/null
+    echo "GRAYLOG_BASIC_AUTH = ${ADMIN_TOKEN}" | sudo tee -a ${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV} 2>/dev/null >/dev/null    
+
+    # enable MCP Server in Graylog
+    curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
+
+    # activate MCP 
+    echo "[WARN] - CONNECTION WILL BE INTERRUPTED FOR ABOUT 10 SECONDS, HANG ON"
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
+
+}
+
 function_configureEvaluationSetup () {
 
     local ADMIN_TOKEN=${1}
@@ -1060,6 +1073,9 @@ then
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken $GRAYLOG_ADMIN 30)
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
+    echo "[INFO] - ACTIVATE MCP SERVER"
+    function_configureMcpAccess $GRAYLOG_ADMIN
+
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
 
@@ -1084,11 +1100,7 @@ then
     echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
     
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken ${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV} 2>/dev/null >/dev/null
-
-    # enable authorization for MCP Server
-    sudo sed -i "s\#proxy_set_header\proxy_set_header\g" ${SIDECAR_YAML}
-
+    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 
 
     sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
     sudo cp $0 /etc/cron.hourly/install-graylog

@@ -65,7 +65,7 @@ server {
 
     proxy_pass http://graylog-default/api/mcp;
     # Replace the incoming Bearer header with Graylog's Basic credential
-    #proxy_set_header Authorization  "Basic ${GRAYLOG_BASIC_AUTH}";
+    proxy_set_header Authorization  "Basic ${GRAYLOG_BASIC_AUTH}";
     # Graylog uses this header as CSRF protection on POST requests
     proxy_set_header X-Requested-By "open-webui";
     # Streamable HTTP needs streaming-friendly proxy settings
