@@ -512,7 +512,7 @@ function_downloadNxlogBinaries () {
 
 }
 
-function_prepareSidecarConfiguration () {
+function_prepareWindowsSidecarConfiguration () {
     
     local SIDECAR_TOKEN=${1}
     local SIDECAR_YML="${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/sidecar.yml"
@@ -1024,17 +1024,17 @@ then
     function_configureMcpAccess $GRAYLOG_ADMIN
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
-    function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
-    function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
-    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}    
+    function_prepareWindowsSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
     function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer "graylog1"
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
-    function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    #function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    #function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
     function_addScriptRepositoryToPathVariable
