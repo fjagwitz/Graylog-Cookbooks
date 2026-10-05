@@ -21,7 +21,7 @@ fi
 
 GRAYLOG_PATH="/opt/graylog"
 COMPOSE_FILE=${GRAYLOG_PATH}/docker-compose.yaml
-STREAM_CONF=${GRAYLOG_PATH}/nginx1/stream.conf
+STREAM_CONF=${GRAYLOG_PATH}/nginx1/templates/stream.conf.template
 INPUT_PORT="${1}"
 
 while [[ (${INPUT_PORT} == "") ]]
