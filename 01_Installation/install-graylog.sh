@@ -14,7 +14,7 @@
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.2.0-rc.1-1"
+GRAYLOG_VERSION="7.2.0-rc.2-1"
 GRAYLOG_HOME="/opt"
 GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
@@ -787,21 +787,18 @@ function_createInputs () {
 function_configureSelfMonitoring () {
     local ADMIN_TOKEN=$1
     #local SELF_MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"org.graylog.collectors.input.CollectorIngestHttpInput","configuration":{"bind_address":"0.0.0.0","port":14401,"recv_buffer_size":1048576,"number_worker_threads":4,"tcp_keepalive":true,"max_chunk_size":4194304},"title":"Graylog Collector Input","global":true}')
-    echo "[INFO] - PRECONFIGURE GRAYLOG COLLECTOR " | logger -p user.info -e -t GRAYLOG-INSTALLER
     
-     local SELF_MONITORING_FLEET=$(curl -s http://localhost/api/collectors/fleets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"Self-Monitoring","description":"Fleet Containing Graylog Server"}' | jq -r .id)
-    local SELF_MONITORING_FLEET_SOURCE=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"name":"System Journal","description":"Collects system journal logs via journald","enabled":true,"config":{"type":"journald","priority":"info","read_mode":"end"}}' | jq -r .id)
-    local SELF_MONITORING_FLEET_SOURCE=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"name":"Docker Container Logs","description":"Collects Logs from all Docker Containers on the System","enabled":true,"config":{"type":"file","paths":["/var/lib/docker/containers/*/*-json.log"],"read_mode":"end"}}' | jq -r .id)
+    echo "[INFO] - PRECONFIGURE GRAYLOG COLLECTOR " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    local SELF_MONITORING_FLEET=$(curl -s http://localhost/api/collectors/fleets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"Self-Monitoring","description":"Fleet Containing Graylog Server"}' | jq -r .id)
+    local SELF_MONITORING_FLEET_SOURCE1=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"name":"System Journal","description":"Collects system journal logs via journald","enabled":true,"config":{"type":"journald","priority":"info","read_mode":"end"}}' | jq -r .id)
+    local SELF_MONITORING_FLEET_SOURCE2=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"name":"Docker Container Logs","description":"Collects Logs from all Docker Containers on the System","enabled":true,"config":{"type":"file","paths":["/var/lib/docker/containers/*/*-json.log"],"read_mode":"end"}}' | jq -r .id)
     local SELF_MONITORING_COLLECTOR=$(curl -s http://localhost/api/collectors/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"http\":{\"hostname\":\"${GRAYLOG_FQDN}\",\"port\":${GRAYLOG_COLLECTOR_PORT}},\"collector_offline_threshold\":\"PT5M\",\"collector_default_visibility_threshold\":\"P1D\",\"collector_expiration_threshold\":\"P7D\",\"create_input\":true}")
     local SELF_MONITORING_ENROLLMENT_TOKEN=$(curl -s http://localhost/api/opamp/enrollment-tokens -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"name\":\"onboarding\",\"fleet_id\":\"${SELF_MONITORING_FLEET}\",\"expires_in\":\"P1D\"}" | jq -r .token)
 
     echo "[INFO] - DOWNLOAD AND INSTALL GRAYLOG COLLECTOR " | logger -p user.info -e -t GRAYLOG-INSTALLER
-
-
     curl -fsSL https://downloads.graylog.org/repo/scripts/collector/install-linux.sh | sudo sh -s -- --endpoint http://localhost --token "${SELF_MONITORING_ENROLLMENT_TOKEN}" 2>/dev/null >/dev/null
 
     echo "[INFO] - START GRAYLOG COLLECTOR " | logger -p user.info -e -t GRAYLOG-INSTALLER
-
     sudo systemctl enable graylog-collector.service 2>/dev/null >/dev/null
     sudo systemctl start graylog-collector.service 2>/dev/null >/dev/null
 }
