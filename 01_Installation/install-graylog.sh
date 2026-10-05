@@ -790,7 +790,7 @@ function_configureSelfMonitoring () {
     local SELF_MONITORING_FLEET_SOURCE=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"System Journal","description":"Collects system journal logs via journald","enabled":true,"config":{"type":"journald","priority":"info","read_mode":"end"}}' | jq -r .id)
     local SELF_MONITORING_ENROLLMENT_TOKEN=$(curl -s http://localhost/api/opamp/enrollment-tokens -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"name\":\"onboarding\",\"fleet_id\":\"${SELF_MONITORING_FLEET}\",\"expires_in\":\"P1D\"}" | jq -r .token)
 
-    curl -fsSL https://downloads.graylog.org/repo/scripts/collector/install-linux.sh | sudo sh -s -- --endpoint http://localhost --token "${SELF_MONITORING_ENROLLMENT_TOKEN}"
+    curl -fsSL https://downloads.graylog.org/repo/scripts/collector/install-linux.sh | sudo sh -s -- --endpoint http://localhost --token "${SELF_MONITORING_ENROLLMENT_TOKEN}" 2>/dev/null >/dev/null
 
     sudo systemctl enable graylog-collector.service
     sudo systemctl start graylog-collector.service
