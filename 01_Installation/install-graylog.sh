@@ -745,7 +745,7 @@ function_startGraylogStack () {
 function_createInputs () {
 
     local ADMIN_TOKEN=${1}
-    curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==14401)' | jq -r .id )
+    curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==14401)' | jq -r .id
     
 
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
