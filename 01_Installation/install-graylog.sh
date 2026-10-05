@@ -744,9 +744,7 @@ function_startGraylogStack () {
 
 function_createInputs () {
 
-    local ADMIN_TOKEN=${1}
-    curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==14401)' | jq -r .id
-    
+    local ADMIN_TOKEN=${1}    
 
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then    
@@ -787,6 +785,7 @@ function_createInputs () {
 
 function_configureSelfMonitoring () {
     local ADMIN_TOKEN=$1
+    local SELF_MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .inputs | jq '.[] | select(.attributes.port==14401)' | jq -r .id)
     local SELF_MONITORING_FLEET=$(curl -s http://localhost/api/collectors/fleets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"Self-Monitoring","description":"Fleet Containing Graylog Server"}' | jq -r .id)
     local SELF_MONITORING_FLEET_SOURCE=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"System Journal","description":"Collects system journal logs via journald","enabled":true,"config":{"type":"journald","priority":"info","read_mode":"end"}}' | jq -r .id)
     local SELF_MONITORING_ENROLLMENT_TOKEN=$(curl -s http://localhost/api/opamp/enrollment-tokens -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"name\":\"onboarding\",\"fleet_id\":\"${SELF_MONITORING_FLEET}\",\"expires_in\":\"P1D\"}")
