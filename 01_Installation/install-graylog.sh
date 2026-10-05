@@ -790,6 +790,9 @@ function_configureSelfMonitoring () {
     local SELF_MONITORING_FLEET=$(curl -s http://localhost/api/collectors/fleets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"Self-Monitoring","description":"Fleet Containing Graylog Server"}' | jq -r .id)
     local SELF_MONITORING_FLEET_SOURCE=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"System Journal","description":"Collects system journal logs via journald","enabled":true,"config":{"type":"journald","priority":"info","read_mode":"end"}}' | jq -r .id)
     local SELF_MONITORING_ENROLLMENT_TOKEN=$(curl -s http://localhost/api/opamp/enrollment-tokens -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"name\":\"onboarding\",\"fleet_id\":\"${SELF_MONITORING_FLEET}\",\"expires_in\":\"P1D\"}")
+
+
+    curl -fsSL https://downloads.graylog.org/repo/scripts/collector/install-linux.sh | sudo sh -s -- --endpoint http://localhost --token ${SELF_MONITORING_ENROLLMENT_TOKEN}
 }
 
 function_configureMcpAccess () {
