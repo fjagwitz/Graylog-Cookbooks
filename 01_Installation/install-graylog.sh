@@ -787,7 +787,7 @@ function_createInputs () {
 function_configureSelfMonitoring () {
     local ADMIN_TOKEN=$1
     #local SELF_MONITORING_INPUT=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"org.graylog.collectors.input.CollectorIngestHttpInput","configuration":{"bind_address":"0.0.0.0","port":14401,"recv_buffer_size":1048576,"number_worker_threads":4,"tcp_keepalive":true,"max_chunk_size":4194304},"title":"Graylog Collector Input","global":true}')
-    local SELF_MONITORING_COLLECTOR=$(curl -s http://localhost/api/collectors/config -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"http\":{\"hostname\":\"${GRAYLOG_FQDN}\",\"port\":${GRAYLOG_COLLECTOR_PORT}},\"collector_offline_threshold\":\"PT5M\",\"collector_default_visibility_threshold\":\"P1D\",\"collector_expiration_threshold\":\"P7D\",\"create_input\":true}")
+    local SELF_MONITORING_COLLECTOR=$(curl -s http://localhost/api/collectors/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{\"http\":{\"hostname\":\"${GRAYLOG_FQDN}\",\"port\":${GRAYLOG_COLLECTOR_PORT}},\"collector_offline_threshold\":\"PT5M\",\"collector_default_visibility_threshold\":\"P1D\",\"collector_expiration_threshold\":\"P7D\",\"create_input\":true}")
     local SELF_MONITORING_FLEET=$(curl -s http://localhost/api/collectors/fleets -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"Self-Monitoring","description":"Fleet Containing Graylog Server"}' | jq -r .id)
     local SELF_MONITORING_FLEET_SOURCE=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"System Journal","description":"Collects system journal logs via journald","enabled":true,"config":{"type":"journald","priority":"info","read_mode":"end"}}' | jq -r .id)
     local SELF_MONITORING_FLEET_SOURCE=$(curl -s http://localhost/api/collectors/fleets/${SELF_MONITORING_FLEET}/sources -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{"name":"Docker Container Logs","description":"Collects Logs from all Docker Containers on the System","enabled":true,"config":{"type":"file","paths":["/var/lib/docker/containers/*/*-json.log"],"read_mode":"end"}}' | jq -r .id)
@@ -1038,7 +1038,6 @@ then
     #function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     #function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
-    function_enableGraylogSidecar
     function_addScriptRepositoryToPathVariable
 
     function_displayClusterId
@@ -1046,7 +1045,7 @@ then
     echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
     
     echo "completed" | sudo tee ${GRAYLOG_PATH}/.installation 2>/dev/null >/dev/null
-    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 
+    echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null
 
     sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
     sudo cp $0 /etc/cron.hourly/install-graylog
