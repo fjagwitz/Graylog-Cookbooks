@@ -46,6 +46,7 @@ The installation script will create a few folders and populate these with helpfu
                 |--docker-compose.yaml
                 |--graylog.env
                 |--opensearch.env
+                |--reverseproxy.env
                 |--your_graylog_credentials.txt
                 |
                 |--/archives -- (chown -R 1100:1100)
@@ -78,16 +79,18 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/nginx1
                 |     |
-                |     |--http.conf
                 |     |--nginx.conf
-                |     |--stream.conf
+                |     |
+                |     |--/templates
+                |     |       |--http.conf.template
+                |     |       |--stream.conf.template
                 |     |
                 |     |--ssl
                 |         |--cert.crt
                 |         |--cert.key
+                |         |--cert.txt
                 |
                 |--/nginx2
-                |     |
                 |     |--http.conf
                 |     |--nginx.conf
                 |
