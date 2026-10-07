@@ -31,7 +31,7 @@ GRAYLOG_COLLECTOR_PORT="14401"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(printenv | grep -iwE https?_proxy | head -n1 | cut -d "=" -f 2 | tr -d '"')
 
 # Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
@@ -190,7 +190,7 @@ function_checkSystemRequirements () {
 
     local INTERNET_CONNECTIVITY=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 | cut -d " " -f2)
     local OPERATING_SYSTEM=$(hostnamectl | grep -i "operating system" | cut -d " " -f3)
-    local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
+    local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep -i "total memory" | grep -oE '[0-9]*'| awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
     local TOTAL_DISK_SPACE=$(df -hP ${GRAYLOG_HOME} | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
@@ -563,7 +563,7 @@ function_addDataNodesToCluster () {
     while [[ ${TMP_PASSWORD} == "" ]]
     do
         sleep 5s
-        TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep password | cut -d"'" -f4)
+        TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep clicking | cut -d ":" -f3 | cut -d "@" -f1
     done
 
     echo "[INFO] - TRY TO ACTIVATE LOCAL EVALUATION CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
