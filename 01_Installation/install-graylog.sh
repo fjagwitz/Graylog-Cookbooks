@@ -563,7 +563,7 @@ function_addDataNodesToCluster () {
     while [[ ${TMP_PASSWORD} == "" ]]
     do
         sleep 5s
-        TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep clicking | cut -d ":" -f3 | cut -d "@" -f1
+        TMP_PASSWORD=$(sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml logs graylog1 | tail -n15 | grep clicking | cut -d ":" -f3 | cut -d "@" -f1)
     done
 
     echo "[INFO] - TRY TO ACTIVATE LOCAL EVALUATION CA FOR DATANODE" | logger -p user.info -e -t GRAYLOG-INSTALLER
