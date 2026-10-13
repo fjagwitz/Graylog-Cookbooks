@@ -667,8 +667,8 @@ function_configureSelfMonitoring () {
     local LOG_ITEM="evaluation-self-monitoring"
     local ITEM_TITLE="Evaluation: Self Monitoring Logs"
 
-    echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF UDP 9900)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 9900 UDP GELF | ${ITEM_TITLE}\", \"type\": \"org.graylog2.inputs.gelf.udp.GELFUDPInput\", \"configuration\": { \"port\": 9900, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id') 
+    # echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF UDP 9900)" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    # local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 9900 UDP GELF | ${ITEM_TITLE}\", \"type\": \"org.graylog2.inputs.gelf.udp.GELFUDPInput\", \"configuration\": { \"port\": 9900, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id') 
 
     echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (BEATS TCP 5054)" | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_INPUT_BEATS=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 5054 Beats | ${ITEM_TITLE}\", \"type\": \"org.graylog.plugins.beats.Beats2Input\", \"configuration\": { \"port\": 5054, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id')  
@@ -682,8 +682,8 @@ function_configureSelfMonitoring () {
     echo "[INFO] - CREATE STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing messages created by Graylog Stack\", \"title\": \"${ITEM_TITLE}\", \"remove_matches_from_default_stream\": true, \"matching_type\": \"OR\", \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
 
-    echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-docker\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
+    # echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    # curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-docker\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
 
     echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-beats\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
