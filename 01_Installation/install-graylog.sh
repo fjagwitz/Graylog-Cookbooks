@@ -51,7 +51,7 @@ SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dn
 function_checkInstallUser () {
     local INSTALLUSER=$(whoami)
 
-    if [ ${INSTALLUSER} -eq "root" ]
+    if [[ ${INSTALLUSER} == "root" ]]
     then
         echo "[INFO] - THIS SCRIPT CANNOT BE EXECUTED AS ROOT. EXIT."
         exit
@@ -402,9 +402,9 @@ function_installGraylogStack () {
     
     # Initially populate .env-file for the Stack 
     echo "[INFO] - SYSTEM VERSION IS ${GRAYLOG_VERSION^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "GRAYLOG_VERSION = ${GRAYLOG_VERSION}" | sudo tee -a ${STACK_ENV} >/dev/null
+    echo "GRAYLOG_VERSION = \"${GRAYLOG_VERSION}\"" | sudo tee -a ${STACK_ENV} >/dev/null
     echo "[INFO] - SYSTEM FQDN IS ${GRAYLOG_FQDN^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${STACK_ENV} >/dev/null
+    echo "GRAYLOG_FQDN = "\${GRAYLOG_FQDN}\"" | sudo tee -a ${STACK_ENV} >/dev/null
     
     # Initially populate reverseproxy.env-file for the Reverse Proxy 
     echo "GRAYLOG_BASIC_AUTH = 4c856ae3d621abc4bf894719fc3bbcc3805249643e11d2e24dcec216e6e9a7a0bfee80e10ce90c4c2a46c019d9ac1620" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
