@@ -31,7 +31,7 @@ GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(printenv | grep -iwE https?_proxy | head -n1 | cut -d "=" -f 2 | tr -d '"')
 
 # Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
@@ -367,7 +367,7 @@ function_installGraylogStack () {
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
+    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,backup/mongodb,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 

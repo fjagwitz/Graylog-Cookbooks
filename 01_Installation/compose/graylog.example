@@ -78,10 +78,10 @@ GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = ""
 
 ## Journal Configurations - System is intended to process 10GB logs per day
 GRAYLOG_MESSAGE_JOURNAL_MAX_AGE = 24h
-GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 10gb
+GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 5gb
 
 ## Datalake Journal Configurations
-GRAYLOG_DATA_LAKE_JOURNAL_MAX_SIZE = 10gb
+GRAYLOG_DATA_LAKE_JOURNAL_MAX_SIZE = 5gb
 
 ## Grafana Metrics Monitoring
 #

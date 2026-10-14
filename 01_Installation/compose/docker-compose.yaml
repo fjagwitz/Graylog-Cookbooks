@@ -80,8 +80,8 @@ services:
         reservations:
           memory: 1g
     volumes:
-      - "./configuration:/data/db"
-      - "./configuration_dump:/configuration_dump"
+      - "mongo-db-01:/data/db"
+      - "./backup/mongodb:/configuration_dump"
     restart: "always"
 
   datanode1:
@@ -226,7 +226,7 @@ services:
       - "GRAYLOG_IS_LEADER=true"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
     volumes:
-      - "./journal1:/usr/share/graylog/data/journal"
+      - "graylog-journal-01:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
@@ -271,7 +271,7 @@ services:
       - "GRAYLOG_IS_LEADER=false"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
     volumes:
-      - "./journal2:/usr/share/graylog/data/journal"
+      - "graylog-journal-02:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
       # only required if you want to use predefined content packs
@@ -351,7 +351,7 @@ services:
       - ./samba/smb.conf:/etc/samba/smb.conf:ro
       - ./samba/users.conf:/etc/samba/users.conf:ro
       - ./assetdata:/storage/assetdata
-      - ./configuration_dump:/storage/configuration_dump      
+      - ./backup/mongodb:/storage/configuration_dump
       - ./logsamples:/storage/logsamples
       - ./lookuptables:/storage/lookuptables
       - ./sources:/storage/sources
@@ -384,5 +384,8 @@ services:
   #    - ./rootcerts/my-root-ca.crt:/opt/nessus/com/nessus/CA/cacert.pem:ro
 
 volumes:
+  mongo-db-01:
+  graylog-journal-01:
+  graylog-journal-02:
   grafana-data-01:
   prometheus-data-01:
