@@ -4,8 +4,8 @@
 # description:       Installs a complete Graylog Cluster for testing purposes
 # author:            Friedrich von Jagwitz 
 # email:             fvj@graylog.com
-# date:              2026-03-19
-# version:           7.1
+# date:              2026-10-14
+# version:           7.2
 # usage:             bash install-graylog.sh
 # notes:             
 #==============================================================================
@@ -433,8 +433,8 @@ function_installGraylogStack () {
         sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g" ${GRAYLOG_ENV}
     fi
 
-    sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
-    sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
+    # sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
+    # sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
 
     sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
 
