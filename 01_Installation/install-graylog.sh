@@ -652,6 +652,25 @@ function_addSidecarConfigurationVariables () {
     
 }
 
+function_configureMcpAccess () {
+    local ADMIN_TOKEN=${1}
+    local REVERSEPROXY_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSE_PROXY_ENV}"
+    local GRAYLOG_PATH="/opt/graylog"
+    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/templates/http.conf.template"
+
+    # Add variables for NGINX reverse proxy
+    echo "MCP_SHARED_SECRET = ${GRAYLOG_MCP_SHARED_SECRET}" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
+    echo "GRAYLOG_BASIC_AUTH = ${ADMIN_TOKEN}" | sudo tee -a ${GRAYLOG_PATH}/${REVERSEPROXY_ENV} 2>/dev/null >/dev/null    
+
+    # enable MCP Server in Graylog
+    curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
+
+    # activate MCP 
+    echo "[WARN] - RESTART REVERSEPROXY" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
+
+}
+
 function_configurePlugins () {
     
     local ADMIN_TOKEN=${1}
@@ -1083,11 +1102,14 @@ then
     echo "[INFO] - INSTALL SIDECAR ON HOST"
     function_installGraylogSidecarOnEvaluationHost ${GRAYLOG_SIDECAR_TOKEN}
 
+
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
     function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
     function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
     function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    function_configureMcpAccess ${GRAYLOG_ADMIN_TOKEN}
+
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer "graylog1"

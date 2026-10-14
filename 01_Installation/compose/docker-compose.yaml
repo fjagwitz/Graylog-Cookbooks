@@ -12,7 +12,7 @@ services:
       - "graylog1"
       - "graylog2"
     env_file: 
-      - "stack.env"
+      - ".env"
       - "reverseproxy.env"
     ports:       
       # WebUI
@@ -97,7 +97,7 @@ services:
     depends_on:
       - "mongodb1"
     env_file: 
-      - "stack.env"
+      - ".env"
       - "datanode.env"        
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
@@ -126,7 +126,7 @@ services:
     depends_on:
       - "mongodb1"
     env_file: 
-      - "stack.env"
+      - ".env"
       - "datanode.env"     
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
@@ -155,7 +155,7 @@ services:
     depends_on:
       - "mongodb1"
     env_file: 
-      - "stack.env"
+      - ".env"
       - "datanode.env"  
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
@@ -184,7 +184,7 @@ services:
     depends_on:
       - "mongodb1"
     env_file: 
-      - "stack.env"
+      - ".env"
       - "datanode.env" 
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "search"
@@ -221,7 +221,7 @@ services:
       - command: /__cacert_entrypoint.sh
         user: root
     env_file: 
-      - "stack.env"
+      - ".env"
       - "graylog.env" 
     environment: 
       - "GRAYLOG_IS_LEADER=true"
@@ -266,7 +266,7 @@ services:
       - command: /__cacert_entrypoint.sh
         user: root
     env_file: 
-      - "stack.env"
+      - ".env"
       - "graylog.env" 
     environment: 
       - "GRAYLOG_IS_LEADER=false"
