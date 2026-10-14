@@ -1017,7 +1017,7 @@ function_configureSecurityFeatures () {
     then
         local ACTIVE_AI="" 
         local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777","7b319ad0-352c-48b9-b7d9-877fc1720164"]'
-        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7","90e37be0-d112-44f8-afe7-eadcafbe4ba3"]' 
+        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7","90e37be0-d112-44f8-afe7-eadcafbe4ba3","fd45efec-c972-4616-a9e2-d68930ce9478"]'
         
         while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
         do 
