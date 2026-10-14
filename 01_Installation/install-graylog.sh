@@ -312,7 +312,7 @@ function_installDocker () {
 }
 
 # following https://go2docs.graylog.org/current/getting_in_log_data/set_up_sidecar_collectors.htm
-function_installGraylogSidecar () {
+function_installGraylogSidecarOnEvaluationHost () {
     
     local SIDECAR_INSTALLED=$(dpkg -l | grep -E "(^| )graylog-sidecar($| )" | cut -d" " -f3)
     local SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
@@ -825,7 +825,10 @@ function_createInputs () {
         # Port 5140 Syslog TCP Input for Network Devices
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5140 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "port": 5140, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-        # Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
+        # Port 5044 Beats Input for Windows - Winlogbeat, Filebeat
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5044, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        
+        # Port 5045 Beats Input for Linux - Auditbeat, Filebeat
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5044, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
         
         # Port 5555 RAW TCP Input
@@ -906,7 +909,7 @@ function_configureEvaluationSetup () {
     
 }
 
-function_addHostSidecarConfigurationTags () {
+function_addEvaluationHostSidecarConfigurationTags () {
     # needs to run after configuration variables have been created
     local ADMIN_TOKEN=${1}
     # identify Filebeat Collector for Linux
@@ -1065,7 +1068,7 @@ then
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
-    function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
+    function_installGraylogSidecarOnEvaluationHost ${GRAYLOG_SIDECAR_TOKEN}
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
@@ -1077,7 +1080,7 @@ then
     function_restartGraylogContainer "graylog1"
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    function_addEvaluationHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
@@ -1130,7 +1133,7 @@ then
 
     function_removeAdminToken ${GRAYLOG_ADMIN_TOKEN}
 
-    echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - GRAYLOG INSTALLATION COMPLETELY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 else
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - DELETING TRACES" | logger -p user.info -e -t GRAYLOG-INSTALLER
