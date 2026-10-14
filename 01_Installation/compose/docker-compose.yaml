@@ -11,6 +11,9 @@ services:
     depends_on:
       - "graylog1"
       - "graylog2"
+    env_file: 
+      - "stack.env"
+      - "reverseproxy.env"
     ports:       
       # WebUI
       - 443:443
@@ -93,7 +96,9 @@ services:
           memory: 1g
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"        
+    env_file: 
+      - "stack.env"
+      - "datanode.env"        
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
@@ -120,7 +125,9 @@ services:
           memory: 1g
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"        
+    env_file: 
+      - "stack.env"
+      - "datanode.env"     
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
@@ -147,7 +154,9 @@ services:
           memory: 1g
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"        
+    env_file: 
+      - "stack.env"
+      - "datanode.env"  
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
@@ -174,7 +183,9 @@ services:
           memory: 1g
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"
+    env_file: 
+      - "stack.env"
+      - "datanode.env" 
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "search"
       GRAYLOG_DATANODE_NODE_SEARCH_CACHE_SIZE: "20gb"
@@ -209,7 +220,9 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: "graylog.env"
+    env_file: 
+      - "stack.env"
+      - "graylog.env" 
     environment: 
       - "GRAYLOG_IS_LEADER=true"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
@@ -252,7 +265,9 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: "graylog.env"
+    env_file: 
+      - "stack.env"
+      - "graylog.env" 
     environment: 
       - "GRAYLOG_IS_LEADER=false"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
