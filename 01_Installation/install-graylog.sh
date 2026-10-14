@@ -353,7 +353,7 @@ function_installGraylogSidecarOnEvaluationHost () {
 function_installGraylogStack () {
 
     local INSTALLPATH=$(mktemp -d)
-    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
+    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives certs datalake notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local STACK_ENV="${GRAYLOG_PATH}/${GRAYLOG_STACK_ENV}"
