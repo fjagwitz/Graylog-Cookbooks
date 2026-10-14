@@ -19,6 +19,11 @@ upstream prometheus-default {
    server prometheus1:9090;
 }
 
+map $http_authorization $mcp_auth_ok {
+  default 0;
+  "Bearer ${MCP_SHARED_SECRET}" 1;
+}
+
 map $http_upgrade $connection_upgrade {
   default upgrade;
   '' close;
@@ -30,24 +35,19 @@ server {
 
   # change servername and Certificate Path based on mountpoint in docker-compose.yml
   # /opt/graylog/nginx1/ssl:/etc/nginx/ssl
-  server_name webserver.graylog.test localhost default_server;
+  server_name ${GRAYLOG_FQDN} localhost default_server;
 
   ssl_certificate    /etc/nginx/ssl/cert.crt;
   ssl_certificate_key  /etc/nginx/ssl/cert.key;
+
+  # add this file if you are using a private key requiring a password or use more secure mechanisms to allow access
+  # ssl_password_file /etc/nginx/ssl/cert.txt;
 
   # define the maximum file upload size; relevant here for uploadable csv files and potentially manual Illuminate Bundles
   client_max_body_size 32M;
 
   # change based on your individual needs, e.g. you may remove locations for prometheus and grafana 
   ssl_protocols TLSv1.2 TLSv1.3;
-  add_header Strict-Transport-Security max-age=15768000;
-  add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block";
-  add_header X-Permitted-Cross-Domain-Policies none;
-  add_header X-Frame-Options "SAMEORIGIN" always;
-  add_header Referrer-Policy "no-referrer";
-  server_tokens off;
-  fastcgi_hide_header X-Powered-By;
 
   location / {
     proxy_pass http://graylog-default; 
@@ -58,14 +58,25 @@ server {
     proxy_set_header X-Graylog-Server-URL https://$server_name/;
   }
 
-  location /api {
-    proxy_pass http://graylog-default;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_send_timeout 1200;
-    proxy_read_timeout 1200;
+  location /api/mcp {
+	if ($mcp_auth_ok = 0) {
+		return 401;
+	}
+
+    proxy_pass http://graylog-default/api/mcp;
+    # Replace the incoming Bearer header with Graylog's Basic credential
+    proxy_set_header Authorization  "Basic ${GRAYLOG_BASIC_AUTH}";
+    # Graylog uses this header as CSRF protection on POST requests
+    proxy_set_header X-Requested-By "open-webui";
+    # Streamable HTTP needs streaming-friendly proxy settings
+    proxy_http_version 1.1;
+    proxy_set_header   Connection "";
+    proxy_buffering    off;
+    proxy_cache    off;
+    proxy_read_timeout 3600s;
+    proxy_send_timeout 3600s;
   }
+
 
   location /grafana {
     proxy_pass http://grafana-default;
@@ -93,20 +104,12 @@ server {
 
   # change servername and Certificate Path based on mountpoint in docker-compose.yml
   # /opt/graylog/nginx1/ssl:/etc/nginx/ssl
-  server_name sidecar.graylog.test;
+  server_name sidecar.siem.demo.io;
 
   ssl_certificate    /etc/nginx/ssl/cert.crt;
   ssl_certificate_key  /etc/nginx/ssl/cert.key;
 
   ssl_protocols TLSv1.2 TLSv1.3;
-  add_header Strict-Transport-Security max-age=15768000;
-  add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection "1; mode=block";
-  add_header X-Permitted-Cross-Domain-Policies none;
-  add_header X-Frame-Options "SAMEORIGIN" always;
-  add_header Referrer-Policy "no-referrer";
-  server_tokens off;
-  fastcgi_hide_header X-Powered-By;
 
   location /api {
     proxy_pass http://graylog-default;
