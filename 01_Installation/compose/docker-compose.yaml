@@ -81,7 +81,7 @@ services:
           memory: 1g
     volumes:
       - "mongo-db-01:/data/db"
-      - "./backup/mongodb:/configuration_dump"
+      - "./backup:/backup"
     restart: "always"
 
   datanode1:
@@ -198,6 +198,7 @@ services:
     volumes:
       # must be owned by user:group 999:999
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
+      - "./database/cache:/var/lib/graylog-datanode/opensearch/data/nodes/0/cache"
     restart: "on-failure"
 
   graylog1:
@@ -229,20 +230,20 @@ services:
       - "graylog-journal-01:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
+      # only required if you want to use encrypted Syslog (stores the required certificates)
+      - "./certs/input_tls:/etc/graylog/server/input_tls:ro"
+      # only required if you want to add your own self-signed root certificate
+      - "./certs/root_ca:/certificates"
       # only required if you want to use predefined content packs
       - "./contentpacks:/etc/graylog/server/contentpacks:ro"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./datalake:/usr/share/graylog/data/datalake"
-      # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
       - "./lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
       - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
-      # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/certificates"
     restart: "on-failure"
 
   graylog2:
@@ -274,20 +275,20 @@ services:
       - "graylog-journal-02:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
+      # only required if you want to use encrypted Syslog (stores the required certificates)
+      - "./certs/input_tls:/etc/graylog/server/input_tls:ro"
+      # only required if you want to add your own self-signed root certificate
+      - "./certs/root_ca:/certificates"
       # only required if you want to use predefined content packs
       - "./contentpacks:/etc/graylog/server/contentpacks:ro"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./datalake:/usr/share/graylog/data/datalake"
-      # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
       - "./lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
       - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
-      # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/certificates"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
@@ -351,7 +352,7 @@ services:
       - ./samba/smb.conf:/etc/samba/smb.conf:ro
       - ./samba/users.conf:/etc/samba/users.conf:ro
       - ./assetdata:/storage/assetdata
-      - ./backup/mongodb:/storage/configuration_dump
+      - ./backup:/storage/backup
       - ./logsamples:/storage/logsamples
       - ./lookuptables:/storage/lookuptables
       - ./sources:/storage/sources

@@ -353,7 +353,7 @@ function_installGraylogSidecarOnEvaluationHost () {
 function_installGraylogStack () {
 
     local INSTALLPATH=$(mktemp -d)
-    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
+    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local STACK_ENV="${GRAYLOG_PATH}/${GRAYLOG_STACK_ENV}"
@@ -779,9 +779,9 @@ function_displayClusterId () {
     echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/${GRAYLOG_ENV}\e[0m"
     echo ""
     echo "       ********************************************************"
-    echo "       *                                                      *"
+    echo "       *                                                    *"
     echo -e "       * CLUSTER-ID: \e[1;31m$(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
-    echo "       *                                                      *"
+    echo "       *                                                    *"
     echo "       ********************************************************"
     echo ""
     echo "[INFO] - CLUSTER-ID: $(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )" | logger -p user.info -e -t GRAYLOG-INSTALLER

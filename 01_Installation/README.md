@@ -53,7 +53,13 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/assetdata
                 |
-                |--/configuration
+                |--/backup
+                |
+                |--/certs
+                |       |
+                |       |--/root_ca
+                |       |
+                |       |--/input_tls -- (chown -R 1100:1100)
                 |
                 |--/contentpacks
                 |
@@ -68,8 +74,6 @@ The installation script will create a few folders and populate these with helpfu
                 |       |--/warm_tier
                 |
                 |--/datalake -- (chown -R 1100:1100)
-                |
-                |--/input_tls -- (chown -R 1100:1100)
                 |
                 |--/logsamples
                 |
@@ -98,8 +102,6 @@ The installation script will create a few folders and populate these with helpfu
                 |
                 |--/prometheus
                 |
-                |--/rootcerts
-                |
                 |--/samba
                 |
                 |--/sources
@@ -109,11 +111,12 @@ The installation script will create a few folders and populate these with helpfu
 
 - **/archives** _(must be owned by the user:group with the id 1100)_: this folder is used when the "ARCHIVE" feature (Enterprise) is tested. You can mount any remote storage to that folder.
 - **/assetdata**: this folder is intended to store any type of Asset Collection you might have (e.g. Excel or CSV files). The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
-- **/configuration**: this folder contains Graylog's configuration in a MongoDB database.
+- **/backup**: this folder contains Graylog's configuration in a MongoDB database.
+- **/certs/input_tls**: _(must be owned by the user:group with the id 1100)_: this folder contains the certificates that may be used for securing Inputs with TLS
+- **/certs/root_ca**: in case you are working with self-signed Certificates, this folder should contain your Trusted Root Certificate; it will be picked up and made available to Graylog
 - [**/contentpacks**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/contentpacks): this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
 - **/database** _(must be owned by the user:group with the id 999)_: this folder contains Graylog's log data in an Opensearch database.
 - **/datalake** _(must be owned by the user:group with the id 1100)_: this folder contains data that is prepared for requirement-driven ingestion (Data Routing). You can mount any remote storage to that folder.
-- **/input_tls** _(must be owned by the user:group with the id 1100)_: this folder contains the certificates that may be used for securing Inputs with TLS
 -**/logsamples**: this folder is shared via Samba and can be used to drop any file with log information; it will be automatically read and sent to Graylog
 - [**/lookuptables**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/lookuptables): this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - **/maxmind**: this folder contains the GeoIP databases to be used by the Graylog Geo-Location Processor.
@@ -122,6 +125,5 @@ The installation script will create a few folders and populate these with helpfu
 - [**/nginx2**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/nginx2): this folder contains the nginx configuration files for the internal nginx container within the Graylog Stack. It stores and provides lookup tables used with Graylog's _"DSV File from HTTP"_ adapter.
 - **/notifications** _(must be owned by the user:group with the id 1100)_: this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
 - [**/prometheus**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/prometheus): this folder contains configuration data to get metrics from Graylog to Grafana.
-- **/rootcerts**: in case you are working with Self-Signed Certificates, this folder should contain your Trusted Root Certificate; it will be picked up and made available to Graylog
 - **/samba**: this folder contains the configuration data for Samba, giving access to Graylog via SMB/CIFS
 - [**/sources**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/sources): this folder contains sources that help you getting started with Graylog
