@@ -344,6 +344,8 @@ function_installGraylogStack () {
     local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
+    local STACK_ENV="${GRAYLOG_PATH}/${GRAYLOG_STACK_ENV}"
+    local REVERSEPROXY_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV}"
     local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
@@ -386,6 +388,16 @@ function_installGraylogStack () {
         sudo chown -R 1100:1100 ${GRAYLOG_PATH}/${FOLDER}
     done
     
+    # Initially populate .env-file for the Stack 
+    echo "[INFO] - SYSTEM VERSION IS ${GRAYLOG_VERSION^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "GRAYLOG_VERSION = ${GRAYLOG_VERSION}" | sudo tee -a ${STACK_ENV} >/dev/null
+    echo "[INFO] - SYSTEM FQDN IS ${GRAYLOG_FQDN^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "GRAYLOG_FQDN = ${GRAYLOG_FQDN}" | sudo tee -a ${STACK_ENV} >/dev/null
+    
+    # Initially populate reverseproxy.env-file for the Reverse Proxy 
+    echo "GRAYLOG_BASIC_AUTH = 4c856ae3d621abc4bf894719fc3bbcc3805249643e11d2e24dcec216e6e9a7a0bfee80e10ce90c4c2a46c019d9ac1620" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
+    echo "MCP_SHARED_SECRET = f62c6231c81c6fd8f477f60fa1e2565695021d533e8950eba270516e8557008e" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
+
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
     sudo mv ${GRAYLOG_PATH}/datanode.example ${DATANODE_ENV}
