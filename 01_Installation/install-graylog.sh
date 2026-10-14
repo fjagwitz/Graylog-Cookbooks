@@ -357,8 +357,8 @@ function_installGraylogStack () {
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local STACK_ENV="${GRAYLOG_PATH}/${GRAYLOG_STACK_ENV}"
-    local REVERSEPROXY_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSEPROXY_ENV}"
-    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
+    local REVERSEPROXY_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSE_PROXY_ENV}"
+    # local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
