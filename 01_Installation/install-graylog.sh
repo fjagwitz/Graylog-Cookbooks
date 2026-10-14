@@ -48,6 +48,18 @@ SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dn
 #
 # Functions Definition
 
+function_checkInstallUser () {
+    local INSTALLUSER=$(whoami)
+
+    if [ ${INSTALLUSER} -eq "root" ]
+    then
+        echo "[INFO] - THIS SCRIPT CANNOT BE EXECUTED AS ROOT. EXIT."
+        exit
+    else
+        echo "[INFO] - RUNNING THIS SCRIPT AS USER ${INSTALLUSER} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    fi
+}
+
 function_checkSnapshot () {
 
     read -p "[INPUT] - Please confirm that you created a Snapshot of the VM before running this Script [no/yes]: " SNAPSHOT_CREATED
@@ -1031,7 +1043,8 @@ then
     exit
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
-    sudo date 2>/dev/null >/dev/null
+    function_checkInstallUser
+    sudo date 2>/dev/null >/dev/null    
     function_checkInternetConnectivity
   
     clear
