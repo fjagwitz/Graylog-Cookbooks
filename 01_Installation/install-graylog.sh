@@ -951,6 +951,7 @@ function_addEvaluationHostSidecarConfigurationTags () {
     local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-windows-*"))' | jq -r .id | xargs)
 
     while [[ ${COLLECTOR_CONFIGURATION_IDS}  == "" ]]
+    do
         for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
         do
             local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
