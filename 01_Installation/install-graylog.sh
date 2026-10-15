@@ -948,11 +948,10 @@ function_configureEvaluationSetup () {
 function_addEvaluationHostSidecarConfigurationTags () {
     # needs to run after configuration variables have been created
     local ADMIN_TOKEN=${1}
-    local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/collectors | jq .collectors | jq '.[] | select(.name == "filebeat" and .node_operating_system == "linux")' | jq -r .id)
-    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-self-*"))' | jq -r .id | xargs)
+    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-windows-*"))' | jq -r .id | xargs)
 
-    while [[ ${COLLECTOR_CONFIGURATION_ID}  == "" ]]
-    for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
+    while [[ ${COLLECTOR_CONFIGURATION_IDS}  == "" ]]
+        for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
         do
             local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
             local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
