@@ -198,7 +198,8 @@ services:
     volumes:
       # must be owned by user:group 999:999
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
-      - "./database/cache:/var/lib/graylog-datanode/opensearch/data/nodes/0/cache"
+      # the search cache sits in a subfolder of this bind mount
+      - "./database/datanode9:/var/lib/graylog-datanode"
     restart: "on-failure"
 
   graylog1:

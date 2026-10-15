@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "6d4d9f86-3f48-4c40-82c6-fd35cea3d073",
-  "rev": 3,
+  "rev": 4,
   "name": "Community: Evaluation Content Pack",
   "summary": "Community: Evaluation Content Pack",
   "description": "Community: Evaluation Content Pack",
@@ -235,79 +235,15 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "17ca904b-34d0-491a-9dd6-fef67295b446",
+      "id": "a305b84f-b210-4399-bae5-a6fddfd3add9",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "36972d78-a138-4c8a-863d-4fafa765e897"
+          "@value": "d4409c6a-a515-42fd-8cee-e7fd73b772bf"
         },
         "title": {
           "@type": "string",
-          "@value": "evaluation-windows-filebeat"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#194d33"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\nfilebeat.inputs:\n- type: filestream\n  id: graylog-sidecar\n  enabled: true\n  tags: graylog-sidecar\n  paths:\n    - C:\\Program Files\\graylog\\sidecar\\logs\\*.log\n<#if sidecar.tags.dns??>\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.1.3+c34604d"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "ca9b28a2-ad5a-4ac2-a5f2-8aa7c7b7e5a9",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "3c2c81f8-d5e2-4538-9b36-86c249dcc7aa"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "evaluation-sidecar-self-monitoring"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#827717"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_self}\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\n- type: filestream\n  id: graylog-sidecar-filestream\n  enabled: true\n  paths:\n  - /var/log/graylog-sidecar/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: graylog-sidecar\n\n- type: filestream\n  id: logsamples-filestream\n  enabled: true\n  paths:\n  - /opt/graylog/logsamples/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: logsamples\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.1.3+c34604d"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "3b3bcea2-4b60-4aff-9026-a3f8156e8401",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "ac3f3417-226f-4683-bf25-eb12e99de103"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "evaluation-windows-nxlog"
+          "@value": "my-windows-logs-nxlog"
         },
         "color": {
           "@type": "string",
@@ -321,7 +257,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.1.3+c34604d"
+          "version": ">=7.2.0+8c9a833"
         }
       ]
     },
@@ -331,15 +267,111 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "dbdfdd6a-7c48-40a0-9f85-6c833cc54b9a",
+      "id": "aef96113-4a2b-4f13-88be-f21912078eb6",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "05a84a20-cd64-4231-ab0a-3cf9cdc79e62"
+          "@value": "48aaa51f-31d1-4083-967b-bfa75fdb4d66"
         },
         "title": {
           "@type": "string",
-          "@value": "evaluation-windows-winlogbeat"
+          "@value": "my-windows-dns"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#194d33"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\nfilebeat.inputs:\n- type: filestream\n  id: graylog-sidecar\n  enabled: true\n  tags: graylog-sidecar\n  paths:\n    - C:\\Program Files\\graylog\\sidecar\\logs\\*.log\n<#if sidecar.tags.dns??>\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "a1744c5e-1c4e-4d13-8490-f25438ed4d1d",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "228dcb41-791d-4bb2-a373-9a0e3a488286"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "my-windows-logs-evtx-file"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#dce775"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n  hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n  \npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n  \ntags:\n  - windows-evtx\n\nwinlogbeat: \n    event_logs:\n      - name: 'Path1\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path1\n      - name: 'Path2\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path2\n      - name: 'Path3\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path3\n      - name: 'Path4\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path4\n    shutdown_timeout: 30s\n    registry_file: evtx-registry.yml\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "37864f05-fdff-4f04-84b0-3854f291f94a",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "0ec07db8-5cc6-45f6-b7e9-22ce7c6603d3"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "my-logsamples"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#f0f4c3"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_self}\"]\n   \npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: logsamples-filestream\n  enabled: true\n  paths:\n  - /opt/graylog/logsamples/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: logsamples\n     "
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "c8b4bcdd-8632-4f9b-ad77-ad8c3a73bb75",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "228dcb41-791d-4bb2-a373-9a0e3a488286"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "my-windows-logs"
         },
         "color": {
           "@type": "string",
@@ -353,7 +385,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.1.3+c34604d"
+          "version": ">=7.2.0+8c9a833"
         }
       ]
     },
@@ -363,23 +395,199 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "63e89cf8-8de9-49b9-9305-fbb0915b2732",
+      "id": "3452731d-b8aa-480c-9306-5c294d06123e",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "11a0989f-5fd2-4e2f-857d-7d4818ad67aa"
+          "@value": "0ec07db8-5cc6-45f6-b7e9-22ce7c6603d3"
         },
         "title": {
           "@type": "string",
-          "@value": "filebased-windows-winlogbeat"
+          "@value": "my-self-monitoring"
         },
         "color": {
           "@type": "string",
-          "@value": "#ffeb3b"
+          "@value": "#827717"
         },
         "template": {
           "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n  hosts: [\"MY_GRAYLOG:5046\"]\n  \npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n  \ntags:\n  - windows\n\nwinlogbeat: \n    event_logs:\n      - name: 'Path1\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path1\n      - name: 'Path2\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path2\n      - name: 'Path3\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path3\n      - name: 'Path4\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path4\n    shutdown_timeout: 30s\n    registry_file: evtx-registry.yml\n    \nfields:\n  source_file: evtx    \n"
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_self}\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\n- type: filestream\n  id: graylog-sidecar-filestream\n  enabled: true\n  paths:\n  - /var/log/graylog-sidecar/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: graylog-sidecar\n\n- type: filestream\n  id: graylog-compose-filestream\n  enabled: true\n  paths: \n  - /var/lib/docker/containers/*/*-json.log\n  fields_under_root: true\n  fields:\n      event_source_product: compose-stack      "
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "d4409c6a-a515-42fd-8cee-e7fd73b772bf",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "nxlog64"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\nxlog\\nxlog.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "-v -f -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "define ROOT ${sidecar.spoolDir!\"C:\\Program Files\\nxlog\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n<Extension logrotate>\n    Module  xm_fileop\n    <Schedule>\n        When    @daily\n        Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n     </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  # Avoid truncation of the short_message field to 64 characters.\n  ShortMessageLength 65536\n</Extension>\n\n<Input eventlog>\n        Module im_msvistalog\n        PollInterval 1\n        SavePos True\n        ReadFromLast True\n        \n        #Channel System\n        #<QueryXML>\n        #  <QueryList>\n        #   <Query Id='1'>\n        #    <Select Path='Security'>*[System/Level=4]</Select>\n        #    </Query>\n        #  </QueryList>\n        #</QueryXML>\n</Input>\n\n\n<Input file>\n\tModule im_file\n\tFile 'C:\\Windows\\MyLogDir\\\\*.log'\n\tPollInterval 1\n\tSavePos\tTrue\n\tReadFromLast True\n\tRecursive False\n\tRenameCheck False\n\tExec $FileName = file_name(); # Send file name with each message\n</Input>\n\n\n<Output gelf>\n\tModule om_tcp\n\tHost ${user.graylog_host}\n\tPort 12201\n\tOutputType  GELF_TCP\n\t<Exec>\n\t  # These fields are needed for ingestion\n\t  $gl2_source_collector = '${sidecar.nodeId}';\n\t  $collector_node_id = '${sidecar.nodeName}';\n\t</Exec>\n</Output>\n\n\n<Route route-1>\n  Path eventlog => gelf\n</Route>\n<Route route-2>\n  Path file => gelf\n</Route>\n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "48aaa51f-31d1-4083-967b-bfa75fdb4d66",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "filebeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\Graylog\\sidecar\\filebeat.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n- windows\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\logs\\log.log\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "228dcb41-791d-4bb2-a373-9a0e3a488286",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "winlogbeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\Graylog\\sidecar\\winlogbeat.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n - windows\nwinlogbeat:\n  event_logs:\n   - name: Application\n     ignore_older: 96h\n   - name: System\n     ignore_older: 96h\n   - name: Security\n     ignore_older: 96h\n   - name: Setup\n     ignore_older: 96h\n   - name: ForwardedEvents\n     forwarded: true\n     ignore_older: 96h\n   - name: Microsoft-Windows-Windows Defender/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-Sysmon/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-PowerShell/Operational\n     ignore_older: 96h\n   - name: windows PowerShell\n     ignore_older: 96h"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "0ec07db8-5cc6-45f6-b7e9-22ce7c6603d3",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "filebeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "exec"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "linux"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "/usr/lib/graylog-sidecar/filebeat"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c  %s"
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c %s"
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
         }
       },
       "constraints": [
