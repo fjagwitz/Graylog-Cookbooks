@@ -407,8 +407,8 @@ function_installGraylogStack () {
     echo "GRAYLOG_FQDN = \"${GRAYLOG_FQDN}\"" | sudo tee -a ${STACK_ENV} >/dev/null
     
     # Initially populate reverseproxy.env-file for the Reverse Proxy 
-    echo "GRAYLOG_BASIC_AUTH = 4c856ae3d621abc4bf894719fc3bbcc3805249643e11d2e24dcec216e6e9a7a0bfee80e10ce90c4c2a46c019d9ac1620" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
-    echo "MCP_SHARED_SECRET = f62c6231c81c6fd8f477f60fa1e2565695021d533e8950eba270516e8557008e" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
+    echo "GRAYLOG_BASIC_AUTH = $(openssl rand -hex 48)" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
+    echo "MCP_SHARED_SECRET = $(openssl rand -hex 32)" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
 
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
@@ -655,15 +655,17 @@ function_addSidecarConfigurationVariables () {
 function_configureMcpAccess () {
     local ADMIN_TOKEN=${1}
     local REVERSEPROXY_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSE_PROXY_ENV}"
-    local GRAYLOG_PATH="/opt/graylog"
     local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/templates/http.conf.template"
+    local MCP_SHARED_SECRET="$(openssl rand -hex 32)"
 
     # Add variables for NGINX reverse proxy
-    echo "MCP_SHARED_SECRET = ${GRAYLOG_MCP_SHARED_SECRET}" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
-    echo "GRAYLOG_BASIC_AUTH = ${ADMIN_TOKEN}" | sudo tee -a ${GRAYLOG_PATH}/${REVERSEPROXY_ENV} 2>/dev/null >/dev/null    
+    echo "[INFO] - MCP SHARED SECRET FOR OPEN WEBUI AUTHENTICATION: ${MCP_SHARED_SECRET}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    # Overwrite existing entries as these were fake but required to allow nginx to start
+    echo "MCP_SHARED_SECRET = \"${MCP_SHARED_SECRET}\"" | sudo tee ${REVERSEPROXY_ENV} >/dev/null
+    echo "GRAYLOG_BASIC_AUTH = \"${ADMIN_TOKEN}\"" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null    
 
-    # enable MCP Server in Graylog
-    curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
+    echo "[INFO] - ENABLE MCP SERVER" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
 
     # activate MCP 
     echo "[WARN] - RESTART REVERSEPROXY" | logger -p user.info -e -t GRAYLOG-INSTALLER
