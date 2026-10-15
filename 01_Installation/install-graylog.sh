@@ -523,7 +523,7 @@ function_downloadGraylogCollectorBinaries () {
     local COLLECTOR_MSI="https://github.com/Graylog2/collector/releases/download/${COLLECTOR_VERSION}/graylog-collector-${COLLECTOR_VERSION}.msi"
     
     echo "[INFO] - DOWNLOAD GRAYLOG COLLECTOR FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar -LOs ${COLLECTOR_MSI}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Collector -LOs ${COLLECTOR_MSI}
 }
 
 function_downloadBeatsBinaries () {
