@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "6d4d9f86-3f48-4c40-82c6-fd35cea3d073",
-  "rev": 6,
+  "rev": 7,
   "name": "Community: Evaluation Content Pack",
   "summary": "Community: Evaluation Content Pack",
   "description": "Community: Evaluation Content Pack",
@@ -12,38 +12,140 @@
     {
       "v": "1",
       "type": {
-        "name": "sidecar_collector",
+        "name": "pipeline",
         "version": "1"
       },
-      "id": "a04da19b-7661-42b4-abfe-e6cd0047606e",
+      "id": "700062eb-1542-45ab-801c-80917ad718e8",
       "data": {
-        "name": {
+        "title": {
           "@type": "string",
-          "@value": "filebeat"
+          "@value": "Evaluation: Self Monitoring Logs"
         },
-        "service_type": {
+        "description": {
           "@type": "string",
-          "@value": "svc"
+          "@value": "Evaluation: Self Monitoring Logs"
         },
-        "node_operating_system": {
+        "source": {
           "@type": "string",
-          "@value": "windows"
+          "@value": "pipeline \"Evaluation: Self Monitoring Logs\"\nstage 0 match pass\nrule \"Evaluation: Self Monitoring Logs - Parser MULTILINE\"\nstage 9 match either\nrule \"Evaluation: Self Monitoring Logs - Parser GRAYLOG\"\nrule \"Evaluation: Self Monitoring Logs - Parser NGINX\"\nstage 3 match all\nrule \"Evaluation: Self Monitoring Logs - Parser SINGLELINE\"\nend"
         },
-        "executable_path": {
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "50b074e8-b1ea-4787-acbd-c64069d2519e"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "7fe8b3c1-aa52-4977-a574-2159ff82e38b",
+      "data": {
+        "title": {
           "@type": "string",
-          "@value": "C:\\Program Files\\Graylog\\sidecar\\filebeat.exe"
+          "@value": "Evaluation: Self Monitoring Logs - Parser NGINX"
         },
-        "execute_parameters": {
+        "description": {
           "@type": "string",
-          "@value": "-c \"%s\""
+          "@value": "Graylog Compose Stack Parser"
         },
-        "validation_parameters": {
+        "source": {
           "@type": "string",
-          "@value": "test config -c \"%s\""
+          "@value": "rule \"Evaluation: Self Monitoring Logs - Parser NGINX\"\nwhen\n    grok(\"^%{IPV4}\", to_string($message.message)).matches == true\n    \nthen\n    let message = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{IPV4:source_ip}[\\\\s\\\\-]+\\\\[%{HTTPDATE:event_created}\\\\]%{GREEDYDATA:todo}$\"\n        ],\n        only_named_captures: true\n    );\n    \n    set_fields(message);\n    set_field(\"event_created\", to_date(flex_parse_date(to_string($message.event_created)))); \n    set_field(\"source_ip\", to_ip($message.source_ip));\n    set_field(\"application_name\", \"nginx\");\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "b6508cf5-fafe-412b-b32d-825cbf1197de",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self Monitoring Logs - Parser MULTILINE"
         },
-        "default_template": {
+        "description": {
           "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n- windows\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\logs\\log.log\n"
+          "@value": "Graylog Compose Stack Parser"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Self Monitoring Logs - Parser MULTILINE\"\nwhen \n    contains(to_string($message.filebeat_log_flags), \"multiline\")\n\nthen\n    let stacklog = to_map(parse_json(to_string($message.message)));\n    \n    set_field(\"full_message\", to_string($message.message));\n    set_field(\"event_collected\", to_date(flex_parse_date(to_string(stacklog.time))));\n    set_fields(stacklog);\n    \n    rename_fields(\n        fields: {\n            log:                        \"message\"\n            filebeat_log_file_path:     \"event_log_path\"\n        }\n    \n    );\n    \n    remove_multiple_fields(\n        names: [\"stream\",\"time\"],\n        pattern: \"filebeat_.*\"\n    );\n    \n    set_field(\"log_type\", \"stacktrace\");\n\nend\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "48dcbe0f-e62f-4162-bdb9-6846a2ebe765",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self Monitoring Logs - Parser SINGLELINE"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Graylog Compose Stack Parser"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Self Monitoring Logs - Parser SINGLELINE\"\nwhen \n    NOT starts_with(to_string($message.filebeat_log_file_path), \"/var/log/syslog\")\n    AND NOT contains(to_string($message.filebeat_log_flags), \"multiline\")\n\nthen\n    let stacklog = to_map(parse_json(to_string($message.message)));\n    \n    set_field(\"full_message\", to_string($message.message));\n    set_field(\"event_collected\", to_date(flex_parse_date(to_string(stacklog.time))));\n    set_fields(stacklog);\n    \n    rename_fields(\n        fields: {\n            log:                        \"message\"\n            filebeat_log_file_path:     \"event_log_path\"\n        }\n    \n    );\n    \n    remove_multiple_fields(\n        names: [\"stream\",\"time\"],\n        pattern: \"filebeat_.*\"\n    );\n    \nend\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "ec0b4759-caeb-4f3c-8570-67a38c691bca",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self Monitoring Logs - Parser GRAYLOG"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Graylog Compose Stack Parser"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Self Monitoring Logs - Parser GRAYLOG\"\nwhen\n    grok(\"^%{TIMESTAMP_ISO8601}\", to_string($message.message)).matches == true\n\nthen\n    let message = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{LOGLEVEL:event_severity}\\\\:%{SPACE}%{NOTSPACE:application_component}%{SPACE}\\\\-%{SPACE}%{DATA:message}$\"\n        ],\n        only_named_captures: true\n    );\n    \n    set_field(\"event_collected\", to_date(flex_parse_date(to_string(stacklog.time))));\n    set_field(\"full_message\", to_string(stacklog.log));\n    set_fields(message);\n    set_field(\"application_name\", \"graylog\");\n\nend"
         }
       },
       "constraints": [
@@ -59,7 +161,7 @@
         "name": "sidecar_collector",
         "version": "1"
       },
-      "id": "c843ae02-be17-4e3c-9302-0381b0d6a866",
+      "id": "d3a52bc8-9caa-415b-9053-d278d3a6cc58",
       "data": {
         "name": {
           "@type": "string",
@@ -103,51 +205,7 @@
         "name": "sidecar_collector",
         "version": "1"
       },
-      "id": "ea25fa09-4daf-496d-857e-ab9ef9f5fa65",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "winlogbeat"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "svc"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "windows"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "C:\\Program Files\\Graylog\\sidecar\\winlogbeat.exe"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c \"%s\""
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "test config -c \"%s\""
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n - windows\nwinlogbeat:\n  event_logs:\n   - name: Application\n     ignore_older: 96h\n   - name: System\n     ignore_older: 96h\n   - name: Security\n     ignore_older: 96h\n   - name: Setup\n     ignore_older: 96h\n   - name: ForwardedEvents\n     forwarded: true\n     ignore_older: 96h\n   - name: Microsoft-Windows-Windows Defender/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-Sysmon/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-PowerShell/Operational\n     ignore_older: 96h\n   - name: windows PowerShell\n     ignore_older: 96h"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.0+8c9a833"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "65da71c1-0c55-468c-ad74-f73240af178a",
+      "id": "197f291d-4fe3-4587-8324-b91e291d8c75",
       "data": {
         "name": {
           "@type": "string",
@@ -188,14 +246,134 @@
     {
       "v": "1",
       "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "5b44f358-5685-4195-9f95-1f94dbb11c9f",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "filebeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\Graylog\\sidecar\\filebeat.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n- windows\nfilebeat.inputs:\n- type: log\n  enabled: true\n  paths:\n  - C:\\logs\\log.log\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector",
+        "version": "1"
+      },
+      "id": "ea799602-0fcc-44c2-9e12-00cbee9f576d",
+      "data": {
+        "name": {
+          "@type": "string",
+          "@value": "winlogbeat"
+        },
+        "service_type": {
+          "@type": "string",
+          "@value": "svc"
+        },
+        "node_operating_system": {
+          "@type": "string",
+          "@value": "windows"
+        },
+        "executable_path": {
+          "@type": "string",
+          "@value": "C:\\Program Files\\Graylog\\sidecar\\winlogbeat.exe"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c \"%s\""
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c \"%s\""
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\ntags:\n - windows\nwinlogbeat:\n  event_logs:\n   - name: Application\n     ignore_older: 96h\n   - name: System\n     ignore_older: 96h\n   - name: Security\n     ignore_older: 96h\n   - name: Setup\n     ignore_older: 96h\n   - name: ForwardedEvents\n     forwarded: true\n     ignore_older: 96h\n   - name: Microsoft-Windows-Windows Defender/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-Sysmon/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\n     ignore_older: 96h\n   - name: Microsoft-Windows-PowerShell/Operational\n     ignore_older: 96h\n   - name: windows PowerShell\n     ignore_older: 96h"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "5a43bab3-3448-42f5-9f0b-8dafcb0c4b6e",
+      "id": "10ef511a-690d-472c-b260-0c985600257d",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "ea25fa09-4daf-496d-857e-ab9ef9f5fa65"
+          "@value": "d3a52bc8-9caa-415b-9053-d278d3a6cc58"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "my-windows-logs-nxlog"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#33691e"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "define ROOT ${user.nxlog_path}\ndefine SYSTEMROOT C:\\Windows\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n\n<Extension logrotate>\n  Module  xm_fileop\n  <Schedule>\n    When    @daily\n    Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n  </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  ShortMessageLength 65536\n</Extension>\n\n\n<Extension json>\n  Module  xm_json\n</Extension>\n\n<#if sidecar.tags.nxlog??>\n<Input wineventlog>\n  # Send Windows Security Logs\n  Module im_msvistalog\n  PollInterval 5\n  SavePos True\n  ReadFromLast True\n\n <QueryXML>\n    <QueryList>\n      <Query Id=\"0\">\n        <!-- Windows Security Logging -->\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Security\">*</Select>\n        <Select Path=\"Microsoft-Windows-Security-Audit-Configuration-Client/Operational\">*</Select>\n        </#if>\n        <!-- Windows Operational Logging -->\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Application\">*</Select>\n        <Select Path=\"System\">*</Select>\n        <Select Path=\"Setup\">*</Select>\n        <Select Path=\"Microsoft-Windows-GroupPolicy/Operational\">*</Select>\n        </#if>\n        <!-- Forwarded Events Logging -->\n        <#if sidecar.tags.forwarded??>\n        <Select Path=\"ForwardedEvents\">*</Select>\n        </#if> \n        <!-- Active Directory Domain Services Logging -->\n        <#if sidecar.tags.adds??>   \n        <Select Path=\"Active Directory Web Services\">*</Select>\n        <Select Path=\"DFS Replication\">*</Select>\n        <Select Path=\"Directory Service\">*</Select>\n        </#if> \n        <!-- Microsoft DNS Loggging -->\n        <#if sidecar.tags.dns??>    \n        <Select Path=\"DNS Server\">*</Select>\n        <Select Path=\"Microsoft-Windows-DNSServer/Audit\">*</Select>\n        </#if>\n        <!-- OpenSSH Logging -->\n        <#if sidecar.tags.ssh??>      \n        <Select Path=\"OpenSSH/Operational\">*</Select>\n        </#if> \n        <!-- Microsoft Windows Best Practices Analyzer (BPA) Logging -->\n        <#if sidecar.tags.bpa??>      \n        <Select Path=\"Microsoft-Windows-BestPractices/Operational\">*</Select>\n        </#if> \n        <!-- BITS Transfer Logging -->\n        <#if sidecar.tags.bits??>    \n        <Select Path=\"Microsoft-Windows-Bits-Client/Operational\">*</Select>\n        </#if> \n        <!-- Sysmon Logging -->\n        <#if sidecar.tags.sysmon??>    \n        <Select Path=\"Microsoft-Windows-Sysmon/Operational\">*</Select>\n        </#if> \n        <!-- Remote Desktop Services (Terminalservices) Logging -->\n        <#if sidecar.tags.rds??>    \n        <Select Path=\"Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\">*</Select>\n        </#if>\n        <!-- Defender Logging -->\n        <#if sidecar.tags.defender??>    \n        <Select Path=\"Microsoft-Windows-Windows Defender/Operational\">*</Select>  \n        </#if> \n        <!-- Powershell Logging -->\n        <#if sidecar.tags.powershell??>     \n        <Select Path=\"Windows PowerShell\">*</Select>\n        <Select Path=\"Microsoft-Windows-PowerShell/Operational\">*</Select>\n        </#if>   \n        <!-- Applocker Logging -->\n        <#if sidecar.tags.applocker??>    \n        <Select Path=\"Microsoft-Windows-AppLocker/EXE and DLL\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/MSI and Script\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Deployment\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Execution\">*</Select>\n        </#if> \n      </Query>\n    </QueryList>\n  </QueryXML>\n</Input>\n</#if>\n\n\n<Input internal>\n  # Sending NXLog Logs\n  Module  im_internal\n  Exec      if ($raw_event =~ /EOF/) drop();\n</Input>\n\n\n<Input system-heartbeat>\n  # Send Heartbeat every 1 Minute\n  Module          im_mark\n  MarkInterval    1\n  Mark            -=| ALIVE |=-\n</Input>\n\n<#if sidecar.tags.nxlog??>\n<Input file>\n  # Send Graylog Sidecar logs\n  Module im_file\n  File \"C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\"\n  PollInterval 1\n  SavePos  True\n  ReadFromLast True\n  Recursive False\n  RenameCheck False\n  Exec $FileName = file_name();\n</Input>\n</#if>\n\n\n<Input windows-features>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n\n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n\n  ## Using the configuration from the following line will only send the installed Features to Graylog\n  #Arg     Get-WindowsFeature | Where-Object { $_.Installed -eq $true } | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600\n\n  ## Using the configuration from the following line will send an overview of all installed and available Features to Graylog\n  Arg     Get-WindowsFeature | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600\n\n  <Exec>\n    $nxlog_tag = 'Compliance_WindowsServerRoles'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n    if $raw_event =~ /\"DisplayName\":\"(.*?)\",\"Description\"\\:\"(.*?)\",\"(Installed)\"\\:(true|false),/\n        $short_message = $1 + \" - \" + $3 + \": \" + $4 + \" - \" + $2;\n    $full_message = $raw_event;\n  </Exec>\n\n</Input>\n\n<#if sidecar.tags.adds??>   \n<Input users-with-reversible-password-encryption>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n  \n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n  \n  ## Using the configuration from the following line will send an overview of all Users configured with reversible Password Encryption\n  Arg     if ((Get-ADDomain | Select-Object -expandProperty PDCEmulator).startswith(\"$env:COMPUTERNAME\")) { Get-ADUser -filter {AllowReversiblePasswordEncryption -eq $True} -Properties \"AllowReversiblePasswordEncryption\" | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600 }\n  <Exec>\n    $nxlog_tag = 'Compliance_UserProperties'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n    if $raw_event =~ /\"Name\":\"(.*?)\".*?\"PropertyNames\":\\[\"(.*?)\",.*?\\],/\n        $short_message = $1 + \" - \" + $2;\n    $full_message = $raw_event;\n  </Exec>\n</Input>\n</#if>\n\n\n<Output gelf>\n  Module om_tcp\n  Host ${user.graylog_host}\n  Port ${user.nxlog_port_windows}\n  OutputType GELF_TCP\n  <Exec>\n    # These fields are needed for Graylog\n    $gl2_source_collector = '${sidecar.nodeId}';\n    $collector_node_id = '${sidecar.nodeName}';\n    $agent_type = 'nxlog';\n  </Exec>\n</Output>\n\n\n<#if sidecar.tags.nxlog??>    \n<Route route-1>\n  Path wineventlog => gelf\n</Route>\n</#if>\n<#if sidecar.tags.nxlog??>    \n<Route route-2>\n  Path file => gelf\n</Route>\n</#if>\n<Route route-3>\n  Path internal => gelf\n</Route>\n<Route route-4>\n  Path system-heartbeat => gelf\n</Route>\n<Route route-5>\n  Path windows-features => gelf\n</Route>\n<#if sidecar.tags.adds??>   \n<Route route-6>\n  Path users-with-reversible-password-encryption => gelf\n</Route>\n</#if>\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "20b76170-fd79-43d9-99c5-24cc5ec8cfb2",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "ea799602-0fcc-44c2-9e12-00cbee9f576d"
         },
         "title": {
           "@type": "string",
@@ -223,43 +401,11 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "77d9763d-65e2-40dc-9348-a0587bc4332f",
+      "id": "f49c24de-37a5-4db7-9c38-1682be4b0e2d",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "a04da19b-7661-42b4-abfe-e6cd0047606e"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "my-windows-dns"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#194d33"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\nfilebeat.inputs:\n- type: filestream\n  id: graylog-sidecar\n  enabled: true\n  tags: graylog-sidecar\n  paths:\n    - C:\\Program Files\\graylog\\sidecar\\logs\\*.log\n<#if sidecar.tags.dns??>\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.0+8c9a833"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "dba04ef7-156b-472c-ab9f-05e4011d8930",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "65da71c1-0c55-468c-ad74-f73240af178a"
+          "@value": "197f291d-4fe3-4587-8324-b91e291d8c75"
         },
         "title": {
           "@type": "string",
@@ -287,43 +433,11 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "51ab4fe5-c125-4b51-b84b-5337e45fbeed",
+      "id": "4c11124e-9777-4ec5-b5aa-56d4eb9c0984",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "ea25fa09-4daf-496d-857e-ab9ef9f5fa65"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "my-windows-logs-evtx-file"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#dce775"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n  hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n  \npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n  \ntags:\n  - windows-evtx\n\nwinlogbeat: \n    event_logs:\n      - name: 'Path1\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path1\n      - name: 'Path2\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path2\n      - name: 'Path3\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path3\n      - name: 'Path4\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path4\n    shutdown_timeout: 30s\n    registry_file: evtx-registry.yml\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.0+8c9a833"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "021b237c-ed1c-4cf1-a77e-a6f3c3a44c6e",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "65da71c1-0c55-468c-ad74-f73240af178a"
+          "@value": "197f291d-4fe3-4587-8324-b91e291d8c75"
         },
         "title": {
           "@type": "string",
@@ -351,23 +465,75 @@
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
-      "id": "34d6b7ec-a052-4320-a554-8905bd1c4f06",
+      "id": "9a23e26c-01c5-4e57-9d9e-777bc5a575cc",
       "data": {
         "collector_id": {
           "@type": "string",
-          "@value": "c843ae02-be17-4e3c-9302-0381b0d6a866"
+          "@value": "ea799602-0fcc-44c2-9e12-00cbee9f576d"
         },
         "title": {
           "@type": "string",
-          "@value": "my-windows-logs-nxlog"
+          "@value": "my-windows-logs-evtx-file"
         },
         "color": {
           "@type": "string",
-          "@value": "#33691e"
+          "@value": "#dce775"
         },
         "template": {
           "@type": "string",
-          "@value": "define ROOT ${user.nxlog_path}\ndefine SYSTEMROOT C:\\Windows\n\nModuledir %ROOT%\\modules\nCacheDir %ROOT%\\data\nPidfile %ROOT%\\data\\nxlog.pid\nSpoolDir %ROOT%\\data\nLogFile %ROOT%\\data\\nxlog.log\nLogLevel INFO\n\n\n<Extension logrotate>\n  Module  xm_fileop\n  <Schedule>\n    When    @daily\n    Exec    file_cycle('%ROOT%\\data\\nxlog.log', 7);\n  </Schedule>\n</Extension>\n\n\n<Extension gelfExt>\n  Module xm_gelf\n  ShortMessageLength 65536\n</Extension>\n\n\n<Extension json>\n  Module  xm_json\n</Extension>\n\n<#if sidecar.tags.nxlog??>\n<Input wineventlog>\n  # Send Windows Security Logs\n  Module im_msvistalog\n  PollInterval 5\n  SavePos True\n  ReadFromLast True\n\n <QueryXML>\n    <QueryList>\n      <Query Id=\"0\">\n        <!-- Windows Security Logging -->\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Security\">*</Select>\n        <Select Path=\"Microsoft-Windows-Security-Audit-Configuration-Client/Operational\">*</Select>\n        </#if>\n        <!-- Windows Operational Logging -->\n        <#if sidecar.tags.windows??>\n        <Select Path=\"Application\">*</Select>\n        <Select Path=\"System\">*</Select>\n        <Select Path=\"Setup\">*</Select>\n        <Select Path=\"Microsoft-Windows-GroupPolicy/Operational\">*</Select>\n        </#if>\n        <!-- Forwarded Events Logging -->\n        <#if sidecar.tags.forwarded??>\n        <Select Path=\"ForwardedEvents\">*</Select>\n        </#if> \n        <!-- Active Directory Domain Services Logging -->\n        <#if sidecar.tags.adds??>   \n        <Select Path=\"Active Directory Web Services\">*</Select>\n        <Select Path=\"DFS Replication\">*</Select>\n        <Select Path=\"Directory Service\">*</Select>\n        </#if> \n        <!-- Microsoft DNS Loggging -->\n        <#if sidecar.tags.dns??>    \n        <Select Path=\"DNS Server\">*</Select>\n        <Select Path=\"Microsoft-Windows-DNSServer/Audit\">*</Select>\n        </#if>\n        <!-- OpenSSH Logging -->\n        <#if sidecar.tags.ssh??>      \n        <Select Path=\"OpenSSH/Operational\">*</Select>\n        </#if> \n        <!-- Microsoft Windows Best Practices Analyzer (BPA) Logging -->\n        <#if sidecar.tags.bpa??>      \n        <Select Path=\"Microsoft-Windows-BestPractices/Operational\">*</Select>\n        </#if> \n        <!-- BITS Transfer Logging -->\n        <#if sidecar.tags.bits??>    \n        <Select Path=\"Microsoft-Windows-Bits-Client/Operational\">*</Select>\n        </#if> \n        <!-- Sysmon Logging -->\n        <#if sidecar.tags.sysmon??>    \n        <Select Path=\"Microsoft-Windows-Sysmon/Operational\">*</Select>\n        </#if> \n        <!-- Remote Desktop Services (Terminalservices) Logging -->\n        <#if sidecar.tags.rds??>    \n        <Select Path=\"Microsoft-Windows-TerminalServices-LocalSessionManager/Operational\">*</Select>\n        </#if>\n        <!-- Defender Logging -->\n        <#if sidecar.tags.defender??>    \n        <Select Path=\"Microsoft-Windows-Windows Defender/Operational\">*</Select>  \n        </#if> \n        <!-- Powershell Logging -->\n        <#if sidecar.tags.powershell??>     \n        <Select Path=\"Windows PowerShell\">*</Select>\n        <Select Path=\"Microsoft-Windows-PowerShell/Operational\">*</Select>\n        </#if>   \n        <!-- Applocker Logging -->\n        <#if sidecar.tags.applocker??>    \n        <Select Path=\"Microsoft-Windows-AppLocker/EXE and DLL\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/MSI and Script\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Deployment\">*</Select>\n        <Select Path=\"Microsoft-Windows-AppLocker/Packaged app-Execution\">*</Select>\n        </#if> \n      </Query>\n    </QueryList>\n  </QueryXML>\n</Input>\n</#if>\n\n\n<Input internal>\n  # Sending NXLog Logs\n  Module  im_internal\n  Exec      if ($raw_event =~ /EOF/) drop();\n</Input>\n\n\n<Input system-heartbeat>\n  # Send Heartbeat every 1 Minute\n  Module          im_mark\n  MarkInterval    1\n  Mark            -=| ALIVE |=-\n</Input>\n\n<#if sidecar.tags.nxlog??>\n<Input file>\n  # Send Graylog Sidecar logs\n  Module im_file\n  File \"C:\\Program Files\\Graylog\\sidecar\\logs\\*.log\"\n  PollInterval 1\n  SavePos  True\n  ReadFromLast True\n  Recursive False\n  RenameCheck False\n  Exec $FileName = file_name();\n</Input>\n</#if>\n\n\n<Input windows-features>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n\n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n\n  ## Using the configuration from the following line will only send the installed Features to Graylog\n  #Arg     Get-WindowsFeature | Where-Object { $_.Installed -eq $true } | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600\n\n  ## Using the configuration from the following line will send an overview of all installed and available Features to Graylog\n  Arg     Get-WindowsFeature | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600\n\n  <Exec>\n    $nxlog_tag = 'Compliance_WindowsServerRoles'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n    if $raw_event =~ /\"DisplayName\":\"(.*?)\",\"Description\"\\:\"(.*?)\",\"(Installed)\"\\:(true|false),/\n        $short_message = $1 + \" - \" + $3 + \": \" + $4 + \" - \" + $2;\n    $full_message = $raw_event;\n  </Exec>\n\n</Input>\n\n<#if sidecar.tags.adds??>   \n<Input users-with-reversible-password-encryption>\n  # https://docs.nxlog.co/integrate/powershell-scripts.html\n  # Send overview of installed roles every 10 minutes\n  Module im_exec\n  Restart True\n  \n  Command \"%SYSTEMROOT%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe\"\n  \n  ## Using the configuration from the following line will send an overview of all Users configured with reversible Password Encryption\n  Arg     if ((Get-ADDomain | Select-Object -expandProperty PDCEmulator).startswith(\"$env:COMPUTERNAME\")) { Get-ADUser -filter {AllowReversiblePasswordEncryption -eq $True} -Properties \"AllowReversiblePasswordEncryption\" | Foreach-Object { ConvertTo-Json -InputObject $_ -Compress }; Start-Sleep -Seconds 3600 }\n  <Exec>\n    $nxlog_tag = 'Compliance_UserProperties'; \n    $source_ip = host_ip(); \n    $event_source = hostname_fqdn();\n    if $raw_event =~ /\"Name\":\"(.*?)\".*?\"PropertyNames\":\\[\"(.*?)\",.*?\\],/\n        $short_message = $1 + \" - \" + $2;\n    $full_message = $raw_event;\n  </Exec>\n</Input>\n</#if>\n\n\n<Output gelf>\n  Module om_tcp\n  Host ${user.graylog_host}\n  Port ${user.nxlog_port_windows}\n  OutputType GELF_TCP\n  <Exec>\n    # These fields are needed for Graylog\n    $gl2_source_collector = '${sidecar.nodeId}';\n    $collector_node_id = '${sidecar.nodeName}';\n    $agent_type = 'nxlog';\n  </Exec>\n</Output>\n\n\n<#if sidecar.tags.nxlog??>    \n<Route route-1>\n  Path wineventlog => gelf\n</Route>\n</#if>\n<#if sidecar.tags.nxlog??>    \n<Route route-2>\n  Path file => gelf\n</Route>\n</#if>\n<Route route-3>\n  Path internal => gelf\n</Route>\n<Route route-4>\n  Path system-heartbeat => gelf\n</Route>\n<Route route-5>\n  Path windows-features => gelf\n</Route>\n<#if sidecar.tags.adds??>   \n<Route route-6>\n  Path users-with-reversible-password-encryption => gelf\n</Route>\n</#if>\n"
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n  hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n  \npath:\n  data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\winlogbeat\"}\\data\n  logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n  \ntags:\n  - windows-evtx\n\nwinlogbeat: \n    event_logs:\n      - name: 'Path1\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path1\n      - name: 'Path2\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path2\n      - name: 'Path3\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path3\n      - name: 'Path4\\to\\my\\logs'\n        no_more_events: wait\n        tags: evtx_path4\n    shutdown_timeout: 30s\n    registry_file: evtx-registry.yml\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "5b041113-db25-4094-b0bf-313177f4b064",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "5b44f358-5685-4195-9f95-1f94dbb11c9f"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "my-windows-dns"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#194d33"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\nfilebeat.inputs:\n- type: filestream\n  id: graylog-sidecar\n  enabled: true\n  tags: graylog-sidecar\n  paths:\n    - C:\\Program Files\\graylog\\sidecar\\logs\\*.log\n<#if sidecar.tags.dns??>\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.0+8c9a833"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream_title",
+        "version": "1"
+      },
+      "id": "50b074e8-b1ea-4787-acbd-c64069d2519e",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self Monitoring Logs"
         }
       },
       "constraints": [
