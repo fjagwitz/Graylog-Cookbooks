@@ -13,7 +13,6 @@ services:
       - "graylog2"
     env_file: 
       - ".env"
-      - "reverseproxy.env"
     ports:       
       # WebUI
       - 443:443

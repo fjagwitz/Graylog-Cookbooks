@@ -19,7 +19,6 @@ GRAYLOG_HOME="/opt"
 GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
 GRAYLOG_STACK_ENV=".env"
-GRAYLOG_REVERSE_PROXY_ENV="reverseproxy.env"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
 GRAYLOG_ADMIN=""
@@ -362,7 +361,6 @@ function_installGraylogStack () {
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local STACK_ENV="${GRAYLOG_PATH}/${GRAYLOG_STACK_ENV}"
-    local REVERSEPROXY_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSE_PROXY_ENV}"
     # local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
@@ -410,11 +408,7 @@ function_installGraylogStack () {
     echo "GRAYLOG_VERSION = \"${GRAYLOG_VERSION}\"" | sudo tee -a ${STACK_ENV} >/dev/null
     echo "[INFO] - SYSTEM FQDN IS ${GRAYLOG_FQDN^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "GRAYLOG_FQDN = \"${GRAYLOG_FQDN}\"" | sudo tee -a ${STACK_ENV} >/dev/null
-    
-    # Initially populate reverseproxy.env-file for the Reverse Proxy 
-    echo "GRAYLOG_BASIC_AUTH = $(openssl rand -hex 48)" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
-    echo "MCP_SHARED_SECRET = $(openssl rand -hex 32)" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null
-
+        
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
     sudo mv ${GRAYLOG_PATH}/datanode.example ${DATANODE_ENV}
@@ -655,27 +649,6 @@ function_addSidecarConfigurationVariables () {
     
 }
 
-function_configureMcpAccess () {
-    local ADMIN_TOKEN=${1}
-    local REVERSEPROXY_ENV="${GRAYLOG_PATH}/${GRAYLOG_REVERSE_PROXY_ENV}"
-    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/templates/http.conf.template"
-    local MCP_SHARED_SECRET="$(openssl rand -hex 32)"
-
-    # Add variables for NGINX reverse proxy
-    echo "[INFO] - MCP SHARED SECRET FOR OPEN WEBUI AUTHENTICATION: ${MCP_SHARED_SECRET}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    # Overwrite existing entries as these were fake but required to allow nginx to start
-    echo "MCP_SHARED_SECRET = \"${MCP_SHARED_SECRET}\"" | sudo tee ${REVERSEPROXY_ENV} >/dev/null
-    echo "GRAYLOG_BASIC_AUTH = \"${ADMIN_TOKEN}\"" | sudo tee -a ${REVERSEPROXY_ENV} >/dev/null    
-
-    echo "[INFO] - ENABLE MCP SERVER" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
-
-    # activate MCP 
-    echo "[WARN] - RESTART REVERSEPROXY" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo docker compose -f ${GRAYLOG_PATH}/docker-compose.yaml restart nginx1 2>/dev/null >/dev/null
-
-}
-
 function_configurePlugins () {
     
     local ADMIN_TOKEN=${1}
@@ -710,6 +683,9 @@ function_configurePlugins () {
 
     echo "[INFO] - CONFIGURE PROMETHEUS CONNECTOR " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://${GRAYLOG_ADMIN}:$GRAYLOG_PASSWORD@localhost/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null >/dev/null
+
+    echo "[INFO] - ENABLE MCP SERVER" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
 }
 
 function_configureSelfMonitoring () {
@@ -783,11 +759,11 @@ function_displayClusterId () {
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
     echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/${GRAYLOG_ENV}\e[0m"
     echo ""
-    echo "       ********************************************************"
+    echo "       *******************************************************"
     echo "       *                                                    *"
     echo -e "       * CLUSTER-ID: \e[1;31m$(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
     echo "       *                                                    *"
-    echo "       ********************************************************"
+    echo "       *******************************************************"
     echo ""
     echo "[INFO] - CLUSTER-ID: $(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - GRAYLOG STACK WILL RESTART AFTER ADDING THE LICENSE"
@@ -1115,7 +1091,6 @@ then
     function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
     function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
     function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
-    function_configureMcpAccess ${GRAYLOG_ADMIN_TOKEN}
 
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
