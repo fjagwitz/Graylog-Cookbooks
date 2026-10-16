@@ -926,20 +926,22 @@ function_addEvaluationHostSidecarConfigurationTags () {
     local ADMIN_TOKEN=${1}
     local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-self-*"))' | jq -r .id | xargs)
 
-    while [[ ${COLLECTOR_CONFIGURATION_IDS}  == "" ]]; do
-        for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}; do
-            local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
-            local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
-            local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
-            local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
+    while [[ ${COLLECTOR_CONFIGURATION_IDS}  == "" ]]
+    do
+        $(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-self-*"))' | jq -r .id | xargs)
+        echo "[INFO] - WAIT FOR GRAYLOG TO BECOME CONFIGURABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
 
-            echo "[INFO] - CREATE HOST SIDECAR CONFIGURATION TAG ON ${COLLECTOR_CONFIGURATION_NAME^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-            curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":${COLLECTOR_ID},\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
-        done
+    done
 
-        echo "[INFO] - CREATE GRAYLOG HOST SIDECAR CONFIGURATION TAG " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":\"${COLLECTOR_ID}\",\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
+    for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
+    do
+        local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
+        local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
+        local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
+        local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
 
+        echo "[INFO] - CREATE HOST SIDECAR CONFIGURATION TAG ON ${COLLECTOR_CONFIGURATION_NAME^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":${COLLECTOR_ID},\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
     done
 
     }
