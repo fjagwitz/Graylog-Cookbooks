@@ -12,40 +12,6 @@
     {
       "v": "1",
       "type": {
-        "name": "pipeline",
-        "version": "1"
-      },
-      "id": "700062eb-1542-45ab-801c-80917ad718e8",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation: Self Monitoring Logs"
-        },
-        "description": {
-          "@type": "string",
-          "@value": "Evaluation: Self Monitoring Logs"
-        },
-        "source": {
-          "@type": "string",
-          "@value": "pipeline \"Evaluation: Self Monitoring Logs\"\nstage 0 match pass\nrule \"Evaluation: Self Monitoring Logs - Parser MULTILINE\"\nstage 9 match either\nrule \"Evaluation: Self Monitoring Logs - Parser GRAYLOG\"\nrule \"Evaluation: Self Monitoring Logs - Parser NGINX\"\nstage 3 match all\nrule \"Evaluation: Self Monitoring Logs - Parser SINGLELINE\"\nend"
-        },
-        "connected_streams": [
-          {
-            "@type": "string",
-            "@value": "50b074e8-b1ea-4787-acbd-c64069d2519e"
-          }
-        ]
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.0+8c9a833"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "pipeline_rule",
         "version": "1"
       },
@@ -514,26 +480,6 @@
         "template": {
           "@type": "string",
           "@value": "# Needed for Graylog\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_windows}\"]\n\npath:\n   data: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\\\\cache\\\\filebeat\"}\\data\n   logs: ${sidecar.spoolDir!\"C:\\\\Program Files\\\\Graylog\\\\sidecar\"}\\logs\n\ntags:\n- windows\n\nfilebeat.inputs:\n- type: filestream\n  id: graylog-sidecar\n  enabled: true\n  tags: graylog-sidecar\n  paths:\n    - C:\\Program Files\\graylog\\sidecar\\logs\\*.log\n<#if sidecar.tags.dns??>\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Analytical\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n- type: etw\n  id: etw-dnsserver\n  enabled: true\n  provider.name: Microsoft-Windows-DNSServer\n  session_name: DNSServer-Audit\n  trace_level: verbose\n  match_any_keyword: 0x8000000000000000\n  match_all_keyword: 0\n</#if> \n\n"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.0+8c9a833"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "stream_title",
-        "version": "1"
-      },
-      "id": "50b074e8-b1ea-4787-acbd-c64069d2519e",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation: Self Monitoring Logs"
         }
       },
       "constraints": [
