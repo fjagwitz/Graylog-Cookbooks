@@ -5,7 +5,7 @@ Create a virtual machine:
 - CPU Cores: at least 8
 - Memory: at least 32 GB
 - OS Storage: at least 300 GB available in [ **/** ] as Docker Containers and Volumes usually require a significant amount of available space
-- OPT Storage: at least 600 GB in [ **/opt** ] (depending on the amount of data you plan to Ingest over a defined timeframe)
+- OPT Storage: at least 900 GB in [ **/opt** ] (depending on the amount of data you plan to Ingest over a defined timeframe)
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
 - Have an SSL certificate handy for the Web UI

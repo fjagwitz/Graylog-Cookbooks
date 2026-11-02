@@ -36,7 +36,8 @@ SYSTEM_PROXY=$(printenv | grep -iwE https?_proxy | head -n1 | cut -d "=" -f 2 | 
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK="550"
+SYSTEM_REQUIREMENTS_OPT="900"
+SYSTEM_REQUIREMENTS_VAR="300"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Collector's Versions
@@ -207,7 +208,8 @@ function_checkSystemRequirements () {
     local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
-    local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
+    local OPT_DISK_SPACE=$(df -h --output=avail /opt | tail -1 | xargs | grep -oE [0-9]*)
+    local VAR_DISK_SPACE=$(df -h --output=avail /var/lib/docker | tail -1 | xargs | grep -oE [0-9]*)
 
     
     if [[ "${SYSTEM_PROXY}" == "" ]]
@@ -222,16 +224,17 @@ function_checkSystemRequirements () {
         local INTERNET_CONNECTIVITY_TYPE="proxied: "
     fi 
 
-    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${TOTAL_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_DISK} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
+    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${OPT_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_OPT} ] && [ ${VAR_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_VAR} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
         
-         Operating System: ${OPERATING_SYSTEM} 
-         Storage         : ${TOTAL_DISK_SPACE} GB 
-         Memory          : ${RANDOM_ACCESS_MEMORY} GB 
-         CPU Cores       : ${CPU_CORES_NUMBER} vCPU 
-         CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available 
-         Internet        : ${INTERNET_CONNECTIVITY_TYPE^}${SYSTEM_PROXY}
+         Operating System:  ${OPERATING_SYSTEM} 
+         Storage (graylog): ${OPT_DISK_SPACE} GB 
+         Storage (docker):  ${VAR_DISK_SPACE} GB 
+         Memory          :  ${RANDOM_ACCESS_MEMORY} GB 
+         CPU Cores       :  ${CPU_CORES_NUMBER} vCPU 
+         CPU Flags       :  ${CPU_REQUIRED_FLAGS^^} available 
+         Internet        :  ${INTERNET_CONNECTIVITY_TYPE^}${SYSTEM_PROXY}
         "
     else
         if [ ${INTERNET_CONNECTIVITY} -ne 200 ]
@@ -254,9 +257,13 @@ function_checkSystemRequirements () {
         then
             echo "[ERROR] - THE CPU MUST SUPPORT THE ${SYSTEM_REQUIREMENTS_CPU_FLAGS^^} FLAG(S), BUT DOES NOT" 
         fi
-        if [ ${TOTAL_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_DISK} ]
+        if [ ${OPT_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_OPT} ]
         then
-            echo "[ERROR] - THE /opt FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
+            echo "[ERROR] - THE /opt FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_OPT} GB STORAGE, BUT HAS ONLY ${OPT_DISK_SPACE} GB"
+        fi
+        if [ ${VAR_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_VAR} ]
+        then
+            echo "[ERROR] - THE /var/lib/docker FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_VAR} GB STORAGE, BUT HAS ONLY ${VAR_DISK_SPACE} GB"
         fi
         exit
     fi
