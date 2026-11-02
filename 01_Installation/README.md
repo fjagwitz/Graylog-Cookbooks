@@ -46,7 +46,7 @@ The installation script will create a few folders and populate these with helpfu
                 |--docker-compose.yaml
                 |--graylog.env
                 |--opensearch.env
-                |--reverseproxy.env
+                |--.env
                 |--your_graylog_credentials.txt
                 |
                 |--/archives -- (chown -R 1100:1100)
