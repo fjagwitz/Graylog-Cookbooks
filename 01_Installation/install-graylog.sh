@@ -229,8 +229,8 @@ function_checkSystemRequirements () {
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
         
          Operating System:  ${OPERATING_SYSTEM} 
-         Storage (graylog): ${OPT_DISK_SPACE} GB 
-         Storage (docker):  ${VAR_DISK_SPACE} GB 
+         Storage (/opt)  :  ${OPT_DISK_SPACE} GB 
+         Storage (/var)  :  ${VAR_DISK_SPACE} GB 
          Memory          :  ${RANDOM_ACCESS_MEMORY} GB 
          CPU Cores       :  ${CPU_CORES_NUMBER} vCPU 
          CPU Flags       :  ${CPU_REQUIRED_FLAGS^^} available 
