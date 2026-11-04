@@ -19,7 +19,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Evaluation: Self Monitoring Logs - Parser GRAYLOG"
+          "@value": "Self Monitoring Logs - Parser GRAYLOG"
         },
         "description": {
           "@type": "string",
@@ -27,7 +27,7 @@
         },
         "source": {
           "@type": "string",
-          "@value": "rule \"Evaluation: Self Monitoring Logs - Parser GRAYLOG\"\nwhen\n    grok(\"^%{TIMESTAMP_ISO8601}\", to_string($message.message)).matches == true\n\nthen\n    let mymessage = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{LOGLEVEL:event_severity}\\\\s*\\\\:%{SPACE}%{NOTSPACE:application_component}%{SPACE}\\\\-%{SPACE}%{DATA:message}$\" //WEBSERVER\n            \"^%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{NOTSPACE:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_hostname}\\\\]%{SPACE}%{DATA:message}$\" //DATANODE\n        ],\n        only_named_captures: true\n    );\n    \n    set_field(\"application_name\", \"graylog\");\n    set_field(\"full_message\", to_string($message.message));\n    \n    set_fields(mymessage);\n    \n    set_field(\"event_created\", to_date(flex_parse_date(to_string($message.event_created))));\n    \n    remove_multiple_fields(\n        pattern: \"^filebeat_.*\"\n    );\n\nend"
+          "@value": "rule \"Self Monitoring Logs - Parser GRAYLOG\"\nwhen\n    grok(\"^%{TIMESTAMP_ISO8601}\", to_string($message.message)).matches == true\n\nthen\n    let mymessage = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{LOGLEVEL:event_severity}\\\\s*\\\\:%{SPACE}%{NOTSPACE:application_component}%{SPACE}\\\\-%{SPACE}%{DATA:message}$\" //WEBSERVER\n            \"^%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{NOTSPACE:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_hostname}\\\\]%{SPACE}%{DATA:message}$\" //DATANODE\n        ],\n        only_named_captures: true\n    );\n    \n    set_field(\"application_name\", \"graylog\");\n    set_field(\"full_message\", to_string($message.message));\n    \n    set_fields(mymessage);\n    \n    set_field(\"event_created\", to_date(flex_parse_date(to_string($message.event_created))));\n    \n    remove_multiple_fields(\n        pattern: \"^filebeat_.*\"\n    );\n\nend"
         }
       },
       "constraints": [
@@ -47,15 +47,15 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Evaluation: Self Monitoring Logs"
+          "@value": "Self Monitoring Logs"
         },
         "description": {
           "@type": "string",
-          "@value": "Evaluation: Self Monitoring Logs"
+          "@value": "Self Monitoring Logs"
         },
         "source": {
           "@type": "string",
-          "@value": "pipeline \"Evaluation: Self Monitoring Logs\"\nstage 0 match either\nrule \"Evaluation: Self Monitoring Logs - Parser GRAYLOG\"\nend"
+          "@value": "pipeline \"Self Monitoring Logs\"\nstage 0 match either\nrule \"Self Monitoring Logs - Parser GRAYLOG\"\nend"
         },
         "connected_streams": [
           {
