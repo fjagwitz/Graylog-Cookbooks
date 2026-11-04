@@ -1,0 +1,41 @@
+{
+  "v": 1,
+  "id": "e141521e-d2cc-4c92-b703-ae40ffba67b3",
+  "rev": 1,
+  "name": "Community: Self-Monitoring",
+  "summary": "Community: Self-Monitoring",
+  "description": "Community: Self-Monitoring",
+  "vendor": "Graylog Community",
+  "url": "https://community.graylog.org",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "2390de13-fade-4e30-9427-f57d7c845be5",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self Monitoring Logs - Parser GRAYLOG"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Graylog Compose Stack Parser"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Evaluation: Self Monitoring Logs - Parser GRAYLOG\"\nwhen\n    grok(\"^%{TIMESTAMP_ISO8601}\", to_string($message.message)).matches == true\n\nthen\n    let mymessage = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{LOGLEVEL:event_severity}\\\\s*\\\\:%{SPACE}%{NOTSPACE:application_component}%{SPACE}\\\\-%{SPACE}%{DATA:message}$\" //WEBSERVER\n            \"^%{TIMESTAMP_ISO8601:event_created}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{NOTSPACE:application_component}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_hostname}\\\\]%{SPACE}%{DATA:message}$\" //DATANODE\n        ],\n        only_named_captures: true\n    );\n    \n    set_field(\"application_name\", \"graylog\");\n    set_field(\"full_message\", to_string($message.message));\n    \n    set_fields(mymessage);\n    \n    set_field(\"event_created\", to_date(flex_parse_date(to_string($message.event_created))));\n    \n    remove_multiple_fields(\n        pattern: \"^filebeat_.*\"\n    );\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.1+25725f2"
+        }
+      ]
+    }
+  ]
+}
