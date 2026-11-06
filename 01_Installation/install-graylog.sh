@@ -4,8 +4,8 @@
 # description:       Installs a complete Graylog Cluster for testing purposes
 # author:            Friedrich von Jagwitz 
 # email:             fvj@graylog.com
-# date:              2026-03-19
-# version:           7.1
+# date:              2026-11-06
+# version:           7.2
 # usage:             bash install-graylog.sh
 # notes:             
 #==============================================================================
@@ -14,9 +14,11 @@
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.1"
-GRAYLOG_PATH="/opt/graylog"
+GRAYLOG_VERSION="7.2"
+GRAYLOG_HOME="/opt"
+GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
+GRAYLOG_STACK_ENV=".env"
 GRAYLOG_SERVER_ENV="graylog.env"
 GRAYLOG_DATANODE_ENV="datanode.env"
 GRAYLOG_ADMIN=""
@@ -28,14 +30,20 @@ GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
-SYSTEM_PROXY=$(printenv | egrep -iw https?_proxy | head -n1 | cut -d "=" -f 2 | tr -d '"')
+SYSTEM_PROXY=$(printenv | grep -iwE https?_proxy | head -n1 | cut -d "=" -f 2 | tr -d '"')
 
 # Define minimum system requirements
 SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
-SYSTEM_REQUIREMENTS_DISK="550"
+SYSTEM_REQUIREMENTS_OPT="900"
+SYSTEM_REQUIREMENTS_VAR="100"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
+
+# Collector's Versions
+GRAYLOG_COLLECTOR_VERSION="0.6.0"
+GRAYLOG_SIDECAR_VERSION="1.5.6"
+BEATS_COLLECTOR_VERSION="8.19.23"
 
 # Define required dependencies to run the script as well as the Graylog Stack
 SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dnsutils dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
@@ -44,6 +52,18 @@ SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dn
 ###############################################################################
 #
 # Functions Definition
+
+function_checkInstallUser () {
+    local INSTALLUSER=$(whoami)
+
+    if [[ ${INSTALLUSER} == "root" ]]
+    then
+        echo "[INFO] - THIS SCRIPT CANNOT BE EXECUTED AS ROOT. EXIT."
+        exit
+    else
+        echo "[INFO] - RUNNING THIS SCRIPT AS USER ${INSTALLUSER^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    fi
+}
 
 function_checkSnapshot () {
 
@@ -188,7 +208,8 @@ function_checkSystemRequirements () {
     local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
-    local TOTAL_DISK_SPACE=$(df -hP /opt | awk '{print $4}' | tail -n1 | grep -oE [0-9]*)
+    local OPT_DISK_SPACE=$(df -h --output=avail /opt | tail -1 | xargs | grep -oE [0-9]*)
+    local VAR_DISK_SPACE=$(df -h --output=avail /var/lib/docker | tail -1 | xargs | grep -oE [0-9]*)
 
     
     if [[ "${SYSTEM_PROXY}" == "" ]]
@@ -203,16 +224,17 @@ function_checkSystemRequirements () {
         local INTERNET_CONNECTIVITY_TYPE="proxied: "
     fi 
 
-    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${TOTAL_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_DISK} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
+    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${OPT_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_OPT} ] && [ ${VAR_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_VAR} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
     then
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
         
-         Operating System: ${OPERATING_SYSTEM} 
-         Storage         : ${TOTAL_DISK_SPACE} GB 
-         Memory          : ${RANDOM_ACCESS_MEMORY} GB 
-         CPU Cores       : ${CPU_CORES_NUMBER} vCPU 
-         CPU Flags       : ${CPU_REQUIRED_FLAGS^^} available 
-         Internet        : ${INTERNET_CONNECTIVITY_TYPE^}${SYSTEM_PROXY}
+         Operating System:  ${OPERATING_SYSTEM} 
+         Storage (/opt)  :  ${OPT_DISK_SPACE} GB 
+         Storage (/var)  :  ${VAR_DISK_SPACE} GB 
+         Memory          :  ${RANDOM_ACCESS_MEMORY} GB 
+         CPU Cores       :  ${CPU_CORES_NUMBER} vCPU 
+         CPU Flags       :  ${CPU_REQUIRED_FLAGS^^} available 
+         Internet        :  ${INTERNET_CONNECTIVITY_TYPE^}${SYSTEM_PROXY}
         "
     else
         if [ ${INTERNET_CONNECTIVITY} -ne 200 ]
@@ -235,9 +257,13 @@ function_checkSystemRequirements () {
         then
             echo "[ERROR] - THE CPU MUST SUPPORT THE ${SYSTEM_REQUIREMENTS_CPU_FLAGS^^} FLAG(S), BUT DOES NOT" 
         fi
-        if [ ${TOTAL_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_DISK} ]
+        if [ ${OPT_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_OPT} ]
         then
-            echo "[ERROR] - THE /opt FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_DISK} GB STORAGE, BUT HAS ONLY ${TOTAL_DISK_SPACE} GB"
+            echo "[ERROR] - THE /opt FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_OPT} GB STORAGE, BUT HAS ONLY ${OPT_DISK_SPACE} GB"
+        fi
+        if [ ${VAR_DISK_SPACE} -lt ${SYSTEM_REQUIREMENTS_VAR} ]
+        then
+            echo "[ERROR] - THE /var/lib/docker FOLDER MUST PROVIDE AT LEAST ${SYSTEM_REQUIREMENTS_VAR} GB STORAGE, BUT HAS ONLY ${VAR_DISK_SPACE} GB"
         fi
         exit
     fi
@@ -309,7 +335,7 @@ function_installDocker () {
 }
 
 # following https://go2docs.graylog.org/current/getting_in_log_data/set_up_sidecar_collectors.htm
-function_installGraylogSidecar () {
+function_installGraylogSidecarOnEvaluationHost () {
     
     local SIDECAR_INSTALLED=$(dpkg -l | grep -E "(^| )graylog-sidecar($| )" | cut -d" " -f3)
     local SIDECAR_YAML="/etc/graylog/sidecar/sidecar.yml"
@@ -338,10 +364,11 @@ function_installGraylogSidecar () {
 function_installGraylogStack () {
 
     local INSTALLPATH=$(mktemp -d)
-    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives datalake input_tls journal1 journal2 notifications"
+    local FOLDERS_WITH_GRAYLOG_PERMISSIONS="archives certs datalake notifications"
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
-    local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
+    local STACK_ENV="${GRAYLOG_PATH}/${GRAYLOG_STACK_ENV}"
+    # local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
@@ -350,7 +377,7 @@ function_installGraylogStack () {
 
     # Create required Folders in the Filesystem
     echo "[INFO] - CREATE REQUIRED SUBFOLDERS IN /OPT " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,configuration,configuration_dump,contentpacks,database/{datanode1,datanode2,datanode3,warm_tier},datalake,input_tls,journal1,journal2,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,rootcerts,samba,scripts,sources/{Graylog_Sidecar/{MSI,EXE},Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
+    sudo mkdir -p ${GRAYLOG_PATH}/{archives,assetdata,backup,certs/{root_ca,input_tls},contentpacks,database/{datanode1,datanode2,datanode3,datanode9,warm_tier},datalake,logsamples,lookuptables,maxmind,nessus/ssl,nginx1,nginx2,notifications,prometheus,samba,scripts,sources/{Graylog_Collector,Graylog_Sidecar,Filebeat_Standalone,Winlogbeat_Standalone,NXLog_CommunityEdition}}
 
     echo "[INFO] - CLONE GITHUB REPO " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo git clone -q --single-branch --branch Graylog-${GRAYLOG_VERSION} https://github.com/fjagwitz/Graylog-Cookbooks.git ${INSTALLPATH} 
@@ -383,6 +410,12 @@ function_installGraylogStack () {
         sudo chown -R 1100:1100 ${GRAYLOG_PATH}/${FOLDER}
     done
     
+    # Initially populate .env-file for the Stack 
+    echo "[INFO] - SYSTEM VERSION IS ${GRAYLOG_VERSION^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "GRAYLOG_VERSION = \"${GRAYLOG_VERSION}\"" | sudo tee -a ${STACK_ENV} >/dev/null
+    echo "[INFO] - SYSTEM FQDN IS ${GRAYLOG_FQDN^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "GRAYLOG_FQDN = \"${GRAYLOG_FQDN}\"" | sudo tee -a ${STACK_ENV} >/dev/null
+        
     echo "[INFO] - RENAME GRAYLOG ENVIRONMENT FILE " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo mv ${GRAYLOG_PATH}/graylog.example ${GRAYLOG_ENV}
     sudo mv ${GRAYLOG_PATH}/datanode.example ${DATANODE_ENV}
@@ -406,8 +439,8 @@ function_installGraylogStack () {
         sudo sed -i "s\# GRAYLOG_HTTP_NON_PROXY_HOSTS\GRAYLOG_HTTP_NON_PROXY_HOSTS\g" ${GRAYLOG_ENV}
     fi
 
-    sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
-    sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
+    # sudo sed -i "s\server_name webserver.graylog.test;\server_name ${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
+    # sudo sed -i "s\server_name sidecar.graylog.test;\server_name sidecar.${GRAYLOG_FQDN};\g" ${NGINX_HTTP_CONF}
 
     sudo sed -i "s\GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"\GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"\g" ${GRAYLOG_PATH}/${GRAYLOG_COMPOSE}
 
@@ -476,20 +509,27 @@ function_enableGeoIpLocation () {
 
 function_downloadGraylogSidecarBinaries () {
 
-    local SIDECAR_VERSION="1.5.6"
+    local SIDECAR_VERSION=${GRAYLOG_SIDECAR_VERSION}
     local SIDECAR_MSI="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog-sidecar-${SIDECAR_VERSION}-1.msi"
-    local SIDECAR_EXE="https://github.com/Graylog2/collector-sidecar/releases/download/${SIDECAR_VERSION}/graylog_sidecar_installer_${SIDECAR_VERSION}-1.exe"
     local SIDECAR_YML="https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/sidecar-windows-msi-example.yml.template"
     
     echo "[INFO] - DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI -LOs ${SIDECAR_MSI}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI -LOs ${SIDECAR_YML}
-    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE -LOs ${SIDECAR_EXE}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar -LOs ${SIDECAR_MSI}
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Sidecar -LOs ${SIDECAR_YML}
+}
+
+function_downloadGraylogCollectorBinaries () {
+
+    local COLLECTOR_VERSION=${GRAYLOG_COLLECTOR_VERSION}
+    local COLLECTOR_MSI="https://github.com/Graylog2/collector/releases/download/${COLLECTOR_VERSION}/graylog-collector-${COLLECTOR_VERSION}.msi"
+    
+    echo "[INFO] - DOWNLOAD GRAYLOG COLLECTOR FOR WINDOWS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    sudo curl --output-dir ${GRAYLOG_PATH}/sources/Graylog_Collector -LOs ${COLLECTOR_MSI}
 }
 
 function_downloadBeatsBinaries () {
 
-    local BEATS_VERSION="8.19.16"
+    local BEATS_VERSION="${BEATS_COLLECTOR_VERSION}"
 
     local FILEBEAT_ZIP="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.zip"
     local FILEBEAT_MSI="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${BEATS_VERSION}-windows-x86_64.msi"
@@ -507,15 +547,13 @@ function_downloadBeatsBinaries () {
 
     sudo unzip ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/Filebeat_Standalone/ 2>/dev/null >/dev/null
     sudo cp ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/Filebeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64/filebeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/ 2>/dev/null >/dev/null
     sudo rm -rf ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64
     sudo rm ${GRAYLOG_PATH}/sources/Filebeat_Standalone/filebeat-${BEATS_VERSION}-windows-x86_64.zip
 
     sudo unzip ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip -d ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
     sudo cp ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/ 2>/dev/null >/dev/null
-    sudo cp ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/ 2>/dev/null >/dev/null
+    sudo cp ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64/winlogbeat.exe ${GRAYLOG_PATH}/sources/Graylog_Sidecar/ 2>/dev/null >/dev/null
     sudo rm -rf ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64
     sudo rm ${GRAYLOG_PATH}/sources/Winlogbeat_Standalone/winlogbeat-${BEATS_VERSION}-windows-x86_64.zip
 
@@ -533,12 +571,11 @@ function_downloadNxlogBinaries () {
 function_prepareSidecarConfiguration () {
     
     local SIDECAR_TOKEN=${1}
-    local SIDECAR_YML="${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/sidecar.yml"
+    local SIDECAR_YML="${GRAYLOG_PATH}/sources/Graylog_Sidecar/sidecar.yml"
     local SIDECAR_ID=$(curl -s http://localhost/api/users -u ${SIDECAR_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .[] | jq '.[] | select(.username=="graylog-sidecar")' | jq -r .id)
-    local SIDECAR_INSTALLER_CMD=$(ls "${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE" | grep cmd)
 
     echo "[INFO] - CONFIGURE GRAYLOG SIDECAR FOR WINDOWS (MSI)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo cp ${GRAYLOG_PATH}/sources/Graylog_Sidecar/MSI/sidecar-windows-msi-example.yml.template ${SIDECAR_YML}
+    sudo cp ${GRAYLOG_PATH}/sources/Graylog_Sidecar/sidecar-windows-msi-example.yml.template ${SIDECAR_YML}
 
     # Replace Graylog Host URL
     sudo sed -i "s\server_url: \"http://127.0.0.1:9000/api/\"\server_url: \"https://${GRAYLOG_FQDN}/api/\"\g" ${SIDECAR_YML}
@@ -553,12 +590,6 @@ function_prepareSidecarConfiguration () {
     # Change LF to CRLF as this is a Windows Configuration File
     sudo unix2dos ${SIDECAR_YML} 2>/dev/null >/dev/null
 
-    echo "[INFO] - CONFIGURE GRAYLOG SIDECAR FOR WINDOWS (EXE)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    for SIDECAR_INSTALLER in ${SIDECAR_INSTALLER_CMD}
-    do
-        sudo sed -i "s\SET serverurl=\"\"\SET serverurl=\"https://${GRAYLOG_FQDN}/api/\"\g" ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
-        sudo sed -i "s\SET apitoken=\"\"\SET apitoken=\"${SIDECAR_TOKEN}\"\g" ${GRAYLOG_PATH}/sources/Graylog_Sidecar/EXE/${SIDECAR_INSTALLER}
-    done
 }
 
 function_checkSystemAvailability () {
@@ -659,6 +690,9 @@ function_configurePlugins () {
 
     echo "[INFO] - CONFIGURE PROMETHEUS CONNECTOR " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://${GRAYLOG_ADMIN}:$GRAYLOG_PASSWORD@localhost/grafana/api/datasources -H 'Content-Type: application/json' -X POST -d '{ "name" : "prometheus", "type" : "prometheus", "url": "http://prometheus1:9090/prometheus", "access": "proxy", "readOnly" : false, "isDefault" : true, "basicAuth" : false }' 2>/dev/null >/dev/null
+
+    echo "[INFO] - ACTIVATE MCP SERVER" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/system/cluster_config/org.graylog.mcp.config.McpConfiguration -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"enable_remote_access":true,"enable_output_schema":true,"enable_input_validation":true}' 2>/dev/null >/dev/null
 }
 
 function_configureSelfMonitoring () {
@@ -666,9 +700,6 @@ function_configureSelfMonitoring () {
     local ADMIN_TOKEN=${1}
     local LOG_ITEM="evaluation-self-monitoring"
     local ITEM_TITLE="Evaluation: Self Monitoring Logs"
-
-    echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (GELF UDP 9900)" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    local MONITORING_INPUT_GELF=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 9900 UDP GELF | ${ITEM_TITLE}\", \"type\": \"org.graylog2.inputs.gelf.udp.GELFUDPInput\", \"configuration\": { \"port\": 9900, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id') 
 
     echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (BEATS TCP 5054)" | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_INPUT_BEATS=$(curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 5054 Beats | ${ITEM_TITLE}\", \"type\": \"org.graylog.plugins.beats.Beats2Input\", \"configuration\": { \"port\": 5054, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id')  
@@ -681,9 +712,6 @@ function_configureSelfMonitoring () {
 
     echo "[INFO] - CREATE STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_STREAM=$(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\": { \"description\": \"Stream containing messages created by Graylog Stack\", \"title\": \"${ITEM_TITLE}\", \"remove_matches_from_default_stream\": true, \"matching_type\": \"OR\", \"index_set_id\": ${MONITORING_INDEX} }}" | jq -r '.stream_id') 2>/dev/null >/dev/null
-
-    echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (GELF) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-docker\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_GELF} }" 2>/dev/null >/dev/null
 
     echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-beats\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
@@ -732,11 +760,11 @@ function_displayClusterId () {
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
     echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/${GRAYLOG_ENV}\e[0m"
     echo ""
-    echo "       ******************************************************"
+    echo "       *******************************************************"
     echo "       *                                                    *"
     echo -e "       * CLUSTER-ID: \e[1;31m$(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )\e[0m *"
     echo "       *                                                    *"
-    echo "       ******************************************************"
+    echo "       *******************************************************"
     echo ""
     echo "[INFO] - CLUSTER-ID: $(curl -s http://localhost/api | jq '.cluster_id' | tr a-z A-Z )" | logger -p user.info -e -t GRAYLOG-INSTALLER
     echo "[INFO] - GRAYLOG STACK WILL RESTART AFTER ADDING THE LICENSE"
@@ -810,8 +838,11 @@ function_createInputs () {
         # Port 5140 Syslog TCP Input for Network Devices
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5140 TCP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput", "configuration": { "port": 5140, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
 
-        # Port 5044 Beats Input for Winlogbeat, Auditbeat, Filebeat
+        # Port 5044 Beats Input for Windows - Winlogbeat, Filebeat
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5044 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5044, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
+        
+        # Port 5045 Beats Input for Linux - Auditbeat, Filebeat
+        curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5045 Beats | Evaluation Input", "type": "org.graylog.plugins.beats.Beats2Input", "configuration": { "port": 5045, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
         
         # Port 5555 RAW TCP Input
         curl -s http://localhost/api/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d '{ "global": true, "title": "Port 5555 TCP RAW | Evaluation Input", "type": "org.graylog2.inputs.raw.tcp.RawTCPInput", "configuration": { "port": 5555, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}' 2>/dev/null >/dev/null
@@ -853,13 +884,13 @@ function_configureEvaluationSetup () {
  
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then        
-        echo "[INFO] - ENABLE HEADER BADGE " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ACTIVATE HEADER BADGE " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/system/cluster_config/org.graylog.plugins.customization.HeaderBadge -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"badge_enable": true,"badge_color": "#689f38","badge_text": "EVAL"}' 2>/dev/null >/dev/null  
         
-        echo "[INFO] - ENABLE EVALUATION NOTIFICATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ACTIVATE EVALUATION NOTIFICATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.customization/notifications -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"Evaluation System","shortMessage":"DO NOT USE IN PRODUCTION","longMessage":"This System was set up for a Graylog Product Evaluation and MUST NOT be used in production. For a secure and production-ready setup please get in touch with your Graylog Customer Success Manager who will help you to deploy your Graylog Stack following best practices.","isActive":true,"isDismissible":true,"atLogin":true,"isGlobal":false,"variant":"warning","hiddenTitle":false}' 2>/dev/null >/dev/null
         
-        # echo "[INFO] - ENABLE GRAYLOG v5 COLOUR SCHEME " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        # echo "[INFO] - ACTIVATE GRAYLOG v5 COLOUR SCHEME " | logger -p user.info -e -t GRAYLOG-INSTALLER
         # curl -s http://localhost/api/plugins/org.graylog.plugins.customization/theme -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"light":{"global":{"background":"#eeeff2","link":"#578dcc"},"brand":{"tertiary":"#3e434c"},"variant":{"default":"#9aa8bd","danger":"#eb5454","info":"#578dcc","primary":"#697586","success":"#7eb356","warning":"#eedf64"}},"dark":{"global":{"background":"#222222","contentBackground":"#303030","link":"#629de2"},"brand":{"tertiary":"#ffffff"},"variant":{"default":"#595959","danger":"#e74c3c","info":"#578dcc","primary":"#697586","success":"#709e4c","warning":"#e3d45f"}}}' 2>/dev/null >/dev/null
   
         echo "[INFO] - CONFIGURE ARCHIVE " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -867,7 +898,7 @@ function_configureEvaluationSetup () {
 
         curl -s http://localhost/api/plugins/org.graylog.plugins.archive/config -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"archive_path\": \"/usr/share/graylog/data/archives\",\"max_segment_size\": 524288000,\"segment_filename_prefix\": \"archive-segment\",\"segment_compression_type\": \"GZIP\",\"metadata_filename\": \"archive-metadata.json\",\"histogram_bucket_size\": 86400000,\"restore_index_batch_size\": 1000,\"excluded_streams\": [],\"segment_checksum_type\": \"CRC32\",\"backend_id\": \"${ARCHIVE_BACKEND}\",\"archive_failure_threshold\": 1,\"retention_time\": 30,\"restrict_to_leader\": true,\"parallelize_archive_creation\": true}" 2>/dev/null >/dev/null
 
-        echo "[INFO] - ENABLE WARM TIER (LOCAL FILESTORE OR MOUNTPOINT) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ACTIVATE WARM TIER (LOCAL FILESTORE OR MOUNTPOINT) " | logger -p user.info -e -t GRAYLOG-INSTALLER
         WARM_TIER_NAME=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datatiering/datatiering/repositories -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"type":"fs","name":"warm_tier","location":"/var/lib/graylog/warm_tier"}' | jq -r .name) 2>/dev/null >/dev/null
 
         echo "[INFO] - CREATE INDEX SET TEMPLATE FOR EVALUATION (SHORT RETENTION) " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -876,7 +907,7 @@ function_configureEvaluationSetup () {
         echo "[INFO] - CONFIGURE INDEX SET TEMPLATE FOR EVALUATION AS DEFAULT " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/system/indices/index_set_defaults -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${INDEX_SET_TEMPLATE}\"}" 2>/dev/null >/dev/null
 
-        echo "[INFO] - ENABLE DATALAKE (LOCAL FILESTORE OR MOUNTPOINT) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ACTIVATE DATALAKE (LOCAL FILESTORE OR MOUNTPOINT) " | logger -p user.info -e -t GRAYLOG-INSTALLER
         ACTIVE_BACKEND=$(curl -s http://localhost/api/plugins/org.graylog.plugins.datalake/data_lake/backends -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{"title":"File System Data Lake","description":"Data Lake on the local Filesystem","settings":{"type":"fs-1","output_path":"/usr/share/graylog/data/datalake","usage_threshold":80}}' | jq -r .id) 2>/dev/null >/dev/null
 
         echo "[INFO] - ACTIVATE DATALAKE (LOCAL FILESTORE OR MOUNTPOINT) " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -891,33 +922,35 @@ function_configureEvaluationSetup () {
     
 }
 
-function_addHostSidecarConfigurationTags () {
+function_addEvaluationHostSidecarConfigurationTags () {
     # needs to run after configuration variables have been created
     local ADMIN_TOKEN=${1}
-    # identify Filebeat Collector for Linux
-    local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/collectors | jq .collectors | jq '.[] | select(.name == "filebeat" and .node_operating_system == "linux")' | jq -r .id)
-    local COLLECTOR_CONFIGURATION_ID=""
+    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-self-*"))' | jq -r .id | xargs)
 
-    while [[ ${COLLECTOR_CONFIGURATION_ID}  == "" ]]
+    while [[ ${COLLECTOR_CONFIGURATION_IDS}  == "" ]]
     do
-        local COLLECTOR_CONFIGURATION_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name == "evaluation-sidecar-self-monitoring")' | jq -r .id)
+        COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-self-*"))' | jq -r .id | xargs)
+        echo "[INFO] - WAIT FOR GRAYLOG SIDECAR COLLECTOR TEMPLATES TO BECOME CONFIGURABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+    done
+
+    for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
+    do
+        local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
         local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
         local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
         local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
-        
-        echo "[INFO] - WAIT FOR SIDECAR CONFIGURATION TO BECOME AVAILABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sleep 10s        
-    done
 
-    echo "[INFO] - CREATE GRAYLOG HOST SIDECAR CONFIGURATION TAG " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":\"${COLLECTOR_ID}\",\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
+        echo "[INFO] - CREATE HOST SIDECAR CONFIGURATION TAG ON ${COLLECTOR_CONFIGURATION_NAME^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        curl -s http://localhost/api/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":${COLLECTOR_ID},\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
+    done
 }
 
 function_addWindowsSidecarConfigurationTags () {
     # this function is only required unless https://github.com/Graylog2/graylog2-server/issues/24398 will be resolved 
     local ADMIN_TOKEN=${1}
     local GRAYLOG_SIDECAR_TAG="evaluation"
-    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("evaluation-windows-*"))' | jq -r .id | xargs)
+    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token http://localhost/api/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-windows-*"))' | jq -r .id | xargs)
 
     for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
     do
@@ -936,7 +969,7 @@ function_enableGraylogSidecar () {
 
     local SIDECAR_TOKEN=${1}
     
-    echo "[INFO] - ENABLE AND START GRAYLOG SIDECAR ON HOST " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - ACTIVATE AND START GRAYLOG SIDECAR ON HOST " | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo graylog-sidecar -service install 2>/dev/null >/dev/null
     sudo systemctl enable graylog-sidecar 2>/dev/null >/dev/null
     sudo systemctl start graylog-sidecar 2>/dev/null >/dev/null
@@ -951,10 +984,10 @@ function_configureEnterpriseFeatures () {
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then
         
-        echo "[INFO] - ENABLE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ACTIVATE ILLUMINATE PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
         sleep 90s
-        echo "[INFO] - ILLUMINATE PACKAGES ENABLED " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ILLUMINATE PACKAGES ACTIVATED " | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO ENTERPRISE LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi
@@ -968,7 +1001,7 @@ function_configureSecurityFeatures () {
     then
         local ACTIVE_AI="" 
         local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777","7b319ad0-352c-48b9-b7d9-877fc1720164"]'
-        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7","90e37be0-d112-44f8-afe7-eadcafbe4ba3"]' 
+        local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7","90e37be0-d112-44f8-afe7-eadcafbe4ba3","fd45efec-c972-4616-a9e2-d68930ce9478"]'
         
         while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
         do 
@@ -978,10 +1011,10 @@ function_configureSecurityFeatures () {
             ACTIVE_AI=$(curl -s http://localhost/api/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
         done
 
-        echo "[INFO] - ENABLE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ACTIVATE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
         curl -s http://localhost/api/plugins/org.graylog.plugins.illuminate/bundles/latest/enable_packs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"entity\":{\"processing_pack_ids\":${ILLUMINATE_SECURITY_PROCESSING_PACK_IDS},\"spotlight_pack_ids\":${ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS}}}" 2>/dev/null >/dev/null
         sleep 90s
-        echo "[INFO] - ILLUMINATE SECURITY PACKAGES ENABLED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        echo "[INFO] - ILLUMINATE SECURITY PACKAGES ACTIVATED" | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO SECURITY LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
     fi 
@@ -1013,7 +1046,8 @@ then
     exit
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
-    sudo date 2>/dev/null >/dev/null
+    function_checkInstallUser
+    sudo date 2>/dev/null >/dev/null    
     function_checkInternetConnectivity
   
     clear
@@ -1041,6 +1075,7 @@ then
     function_addDataNodesToCluster ${GRAYLOG_ADMIN}
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
+    function_downloadGraylogCollectorBinaries 
     function_downloadGraylogSidecarBinaries 
     function_downloadBeatsBinaries 
     function_downloadNxlogBinaries 
@@ -1050,7 +1085,8 @@ then
     GRAYLOG_SIDECAR_TOKEN=$(function_createUserToken $GRAYLOG_SIDECAR 730)
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
-    function_installGraylogSidecar ${GRAYLOG_SIDECAR_TOKEN}
+    function_installGraylogSidecarOnEvaluationHost ${GRAYLOG_SIDECAR_TOKEN}
+
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
@@ -1058,11 +1094,12 @@ then
     function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
     function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
 
+
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer "graylog1"
     function_checkSystemAvailability
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
-    function_addHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    function_addEvaluationHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
@@ -1115,7 +1152,7 @@ then
 
     function_removeAdminToken ${GRAYLOG_ADMIN_TOKEN}
 
-    echo "[INFO] - GRAYLOG INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
+    echo "[INFO] - GRAYLOG INSTALLATION COMPLETELY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
 else
     echo "[INFO] - GRAYLOG INSTALLATION FAILED - DELETING TRACES" | logger -p user.info -e -t GRAYLOG-INSTALLER

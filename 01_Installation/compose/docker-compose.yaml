@@ -11,6 +11,8 @@ services:
     depends_on:
       - "graylog1"
       - "graylog2"
+    env_file: 
+      - ".env"
     ports:       
       # WebUI
       - 443:443
@@ -47,9 +49,8 @@ services:
       - 13302:13302
       # Additional Input Ports
     volumes:
+      - "./nginx1/templates:/etc/nginx/templates:ro"
       - "./nginx1/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "./nginx1/http.conf:/etc/nginx/conf.d/http.conf:ro"
-      - "./nginx1/stream.conf:/etc/nginx/conf.d/stream.conf:ro"
       - "./nginx1/ssl:/etc/nginx/ssl:ro"
     restart: "always"
 
@@ -69,7 +70,7 @@ services:
     restart: "always"
 
   mongodb1:
-    image: "mongo:7"
+    image: "mongo:8.2"
     hostname: "mongodb1"
     deploy:
       resources:
@@ -77,17 +78,13 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     volumes:
-      - "./configuration:/data/db"
-      - "./configuration_dump:/configuration_dump"
+      - "mongo-db-01:/data/db"
+      - "./backup:/backup"
     restart: "always"
 
   datanode1:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:${GRAYLOG_VERSION}"
     hostname: "datanode1"
     deploy:
       resources:
@@ -95,13 +92,11 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"        
+    env_file: 
+      - ".env"
+      - "datanode.env"        
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
@@ -118,7 +113,7 @@ services:
     restart: "on-failure"
 
   datanode2:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:${GRAYLOG_VERSION}"
     hostname: "datanode2"
     deploy:
       resources:
@@ -126,13 +121,11 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"        
+    env_file: 
+      - ".env"
+      - "datanode.env"     
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
@@ -149,7 +142,7 @@ services:
     restart: "on-failure"
 
   datanode3:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:${GRAYLOG_VERSION}"
     hostname: "datanode3"
     deploy:
       resources:
@@ -157,13 +150,11 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"        
+    env_file: 
+      - ".env"
+      - "datanode.env"  
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "cluster_manager, data"
     ulimits:
@@ -180,7 +171,7 @@ services:
     restart: "on-failure"
 
   datanode9:
-    image: "graylog/graylog-datanode:7.1"
+    image: "graylog/graylog-datanode:${GRAYLOG_VERSION}"
     hostname: "datanode9"
     deploy:
       resources:
@@ -188,13 +179,11 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
-    env_file: "datanode.env"
+    env_file: 
+      - ".env"
+      - "datanode.env" 
     environment:
       GRAYLOG_DATANODE_NODE_ROLES: "search"
       GRAYLOG_DATANODE_NODE_SEARCH_CACHE_SIZE: "20gb"
@@ -208,10 +197,12 @@ services:
     volumes:
       # must be owned by user:group 999:999
       - "./database/warm_tier:/var/lib/graylog/warm_tier"
+      # the search cache sits in a subfolder of this bind mount
+      - "./database/datanode9:/var/lib/graylog-datanode"
     restart: "on-failure"
 
   graylog1:
-    image: "graylog/graylog-enterprise:7.1"
+    image: "graylog/graylog-enterprise:${GRAYLOG_VERSION}"
     hostname: "graylog1"
     deploy:
       resources:
@@ -219,10 +210,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
       - "datanode1"
@@ -233,32 +220,34 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: "graylog.env"
+    env_file: 
+      - ".env"
+      - "graylog.env" 
     environment: 
       - "GRAYLOG_IS_LEADER=true"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog1:9000"
     volumes:
-      - "./journal1:/usr/share/graylog/data/journal"
+      - "graylog-journal-01:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
+      # only required if you want to use encrypted Syslog (stores the required certificates)
+      - "./certs/input_tls:/etc/graylog/server/input_tls:ro"
+      # only required if you want to add your own self-signed root certificate
+      - "./certs/root_ca:/certificates"
       # only required if you want to use predefined content packs
       - "./contentpacks:/etc/graylog/server/contentpacks:ro"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./datalake:/usr/share/graylog/data/datalake"
-      # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
       - "./lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
       - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
-      # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/certificates"
     restart: "on-failure"
 
   graylog2:
-    image: "graylog/graylog-enterprise:7.1"
+    image: "graylog/graylog-enterprise:${GRAYLOG_VERSION}"
     hostname: "graylog2"
     deploy:
       resources:
@@ -266,10 +255,6 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     depends_on:
       - "mongodb1"
       - "datanode1"
@@ -280,28 +265,30 @@ services:
     post_start:
       - command: /__cacert_entrypoint.sh
         user: root
-    env_file: "graylog.env"
+    env_file: 
+      - ".env"
+      - "graylog.env" 
     environment: 
       - "GRAYLOG_IS_LEADER=false"
       - "GRAYLOG_HTTP_PUBLISH_URI=http://graylog2:9000"
     volumes:
-      - "./journal2:/usr/share/graylog/data/journal"
+      - "graylog-journal-02:/usr/share/graylog/data/journal"
       # only required if you want to store archives in a local folder; make sure the "archives" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./archives:/usr/share/graylog/data/archives"
+      # only required if you want to use encrypted Syslog (stores the required certificates)
+      - "./certs/input_tls:/etc/graylog/server/input_tls:ro"
+      # only required if you want to add your own self-signed root certificate
+      - "./certs/root_ca:/certificates"
       # only required if you want to use predefined content packs
       - "./contentpacks:/etc/graylog/server/contentpacks:ro"
       # only required if you want to use the data warehouse in a local folder; make sure the "warehouse" folder has 1100:1100 permissions on the host; don't use in Cloud Environments but work with s3 Backend instead
       - "./datalake:/usr/share/graylog/data/datalake"
-      # only required if you want to use encrypted Syslog (stores the required certificates)
-      - "./input_tls:/etc/graylog/server/input_tls:ro"
       # only required if you want to work with Lookup Tables for Enrichment
       - "./lookuptables:/etc/graylog/server/lookuptables:ro"
       # only required if you want to work with Geolocation Data
       - "./maxmind:/etc/graylog/server/mmdb:ro"
       # only required if you want to run script notifications (bash, any other script language); make sure the "notifications" folder has 1100:1100 permissions on the host
       - "./notifications:/etc/graylog/server/notifications"
-      # only required if you want to add your own self-signed root certificate
-      - "./rootcerts:/certificates"
     restart: "on-failure"
 
   # This container can be skipped based on your needs, just make sure to remove the corresponding locations in nginx.conf  
@@ -359,17 +346,13 @@ services:
           memory: 6g
         reservations:
           memory: 1g
-    logging: 
-      driver: "gelf"
-      options: 
-        gelf-address: "udp://localhost:9900"
     ports:
       - "445:445"
     volumes:
       - ./samba/smb.conf:/etc/samba/smb.conf:ro
       - ./samba/users.conf:/etc/samba/users.conf:ro
       - ./assetdata:/storage/assetdata
-      - ./configuration_dump:/storage/configuration_dump      
+      - ./backup:/storage/backup
       - ./logsamples:/storage/logsamples
       - ./lookuptables:/storage/lookuptables
       - ./sources:/storage/sources
@@ -402,5 +385,8 @@ services:
   #    - ./rootcerts/my-root-ca.crt:/opt/nessus/com/nessus/CA/cacert.pem:ro
 
 volumes:
+  mongo-db-01:
+  graylog-journal-01:
+  graylog-journal-02:
   grafana-data-01:
   prometheus-data-01:
