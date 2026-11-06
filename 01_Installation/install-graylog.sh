@@ -4,7 +4,7 @@
 # description:       Installs a complete Graylog Cluster for testing purposes
 # author:            Friedrich von Jagwitz 
 # email:             fvj@graylog.com
-# date:              2026-10-14
+# date:              2026-11-06
 # version:           7.2
 # usage:             bash install-graylog.sh
 # notes:             
