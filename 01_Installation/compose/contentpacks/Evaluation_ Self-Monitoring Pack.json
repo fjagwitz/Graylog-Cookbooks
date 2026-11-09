@@ -1,21 +1,55 @@
 {
   "v": 1,
-  "id": "69add849-20ae-4bf2-9436-69e8c2adcf88",
+  "id": "52f953d7-0485-47b7-b6a7-f97c0bacc848",
   "rev": 1,
-  "name": "Evaluation: Self-Monitoring Pack ",
-  "summary": "Evaluation: Self-Monitoring Pack ",
-  "description": "Evaluation: Self-Monitoring Pack ",
-  "vendor": "Graylog Community",
-  "url": "https://community.graylog.org",
+  "name": "Evaluation: Self-Monitoring Pack  ",
+  "summary": "Evaluation: Self-Monitoring Pack  ",
+  "description": "Evaluation: Self-Monitoring Pack  ",
+  "vendor": "Graylog Evaluation Team",
+  "url": "https://graylog.org/try-graylog",
   "parameters": [],
   "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "db41c4e5-f441-42a5-aca7-696397c3437a",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self-Monitoring Logs"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation: Self-Monitoring Logs"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Evaluation: Self-Monitoring Logs\"\nstage 10 match either\nrule \"10 - Evaluation: Self-Monitoring Logs - Parser Graylog\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "7347d0b4-bd81-49a2-8748-4fc75d05a9bf"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
     {
       "v": "1",
       "type": {
         "name": "input",
         "version": "1"
       },
-      "id": "abeb81d0-1188-4ae0-b107-6bff142e47d0",
+      "id": "06a25bb6-f6b7-437e-9325-6be4866e3160",
       "data": {
         "title": {
           "@type": "string",
@@ -56,10 +90,42 @@
     {
       "v": "1",
       "type": {
+        "name": "sidecar_collector_configuration",
+        "version": "1"
+      },
+      "id": "132b3407-31fa-48de-beb7-680934e69f0a",
+      "data": {
+        "collector_id": {
+          "@type": "string",
+          "@value": "06062e78-f9fa-44a9-82dc-43ed6d875477"
+        },
+        "title": {
+          "@type": "string",
+          "@value": "my-self-monitoring"
+        },
+        "color": {
+          "@type": "string",
+          "@value": "#827717"
+        },
+        "template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_self}\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\n- type: filestream\n  id: graylog-sidecar-filestream\n  enabled: true\n  paths:\n  - /var/log/graylog-sidecar/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: graylog-sidecar\n\n- type: filestream\n  id: graylog-compose-filestream\n  enabled: true\n  paths: \n  - /var/lib/docker/containers/*/*-json.log\n  parsers:\n  # parser processing happens in the order they are configured here; first ndjson, then multiline\n  # parsers are processed before processors\n  #\n  parsers:\n  - ndjson:\n      target: \"\"\n      message_key: log\n  - multiline:\n      type: pattern\n      pattern: '^\\s*\\d{4}\\-'\n      match: after\n      negate: true\n      max_lines: 200\n      skip_newline: true      \n  exclude_lines: ['^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}', '^\\{\"t\":\\{', '^logger=', '^time=']\n  fields_under_root: true\n  fields:\n      event_source_product: compose-stack"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "7ddb2a9d-2c9f-416a-99d7-4da8608fd51b",
+      "id": "cfb7209e-bc4a-46de-ae72-5e52e3a2d01b",
       "data": {
         "title": {
           "@type": "string",
@@ -81,62 +147,14 @@
     {
       "v": "1",
       "type": {
-        "name": "stream",
+        "name": "stream_title",
         "version": "1"
       },
-      "id": "daaa3df9-7716-49a7-8ea6-2ebc01064e7c",
+      "id": "7347d0b4-bd81-49a2-8748-4fc75d05a9bf",
       "data": {
-        "alarm_callbacks": [],
-        "outputs": [],
-        "remove_matches": {
-          "@type": "boolean",
-          "@value": true
-        },
         "title": {
           "@type": "string",
           "@value": "Evaluation: Self-Monitoring Logs"
-        },
-        "stream_rules": [
-          {
-            "type": {
-              "@type": "string",
-              "@value": "REGEX"
-            },
-            "field": {
-              "@type": "string",
-              "@value": "filebeat_event_source_product"
-            },
-            "value": {
-              "@type": "string",
-              "@value": "self-monitoring-.*"
-            },
-            "inverted": {
-              "@type": "boolean",
-              "@value": false
-            },
-            "description": {
-              "@type": "string",
-              "@value": ""
-            }
-          }
-        ],
-        "alert_conditions": [],
-        "matching_type": {
-          "@type": "string",
-          "@value": "AND"
-        },
-        "disabled": {
-          "@type": "boolean",
-          "@value": true
-        },
-        "favorite_fields": null,
-        "description": {
-          "@type": "string",
-          "@value": "Evaluation: Self-Monitoring Logs"
-        },
-        "default_stream": {
-          "@type": "boolean",
-          "@value": false
         }
       },
       "constraints": [
@@ -149,29 +167,39 @@
     {
       "v": "1",
       "type": {
-        "name": "pipeline",
+        "name": "sidecar_collector",
         "version": "1"
       },
-      "id": "f793c51e-c326-48b7-a579-4301bc8e5aec",
+      "id": "06062e78-f9fa-44a9-82dc-43ed6d875477",
       "data": {
-        "title": {
+        "name": {
           "@type": "string",
-          "@value": "Evaluation: Self-Monitoring Logs"
+          "@value": "filebeat"
         },
-        "description": {
+        "service_type": {
           "@type": "string",
-          "@value": "Evaluation: Self-Monitoring Logs"
+          "@value": "exec"
         },
-        "source": {
+        "node_operating_system": {
           "@type": "string",
-          "@value": "pipeline \"Evaluation: Self-Monitoring Logs\"\nstage 10 match either\nrule \"10 - Evaluation: Self-Monitoring Logs - Parser Graylog\"\nend"
+          "@value": "linux"
         },
-        "connected_streams": [
-          {
-            "@type": "string",
-            "@value": "daaa3df9-7716-49a7-8ea6-2ebc01064e7c"
-          }
-        ]
+        "executable_path": {
+          "@type": "string",
+          "@value": "/usr/lib/graylog-sidecar/filebeat"
+        },
+        "execute_parameters": {
+          "@type": "string",
+          "@value": "-c  %s"
+        },
+        "validation_parameters": {
+          "@type": "string",
+          "@value": "test config -c %s"
+        },
+        "default_template": {
+          "@type": "string",
+          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
+        }
       },
       "constraints": [
         {
