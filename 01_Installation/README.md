@@ -22,7 +22,7 @@ Depending on your setup, you might want to add hypervisor-specific guest tools a
 
 Get it from here:
 
-    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/main/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && ./install-graylog.sh
+    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/Graylog-7.2/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && ./install-graylog.sh
 
 The system is accessible via
 
@@ -114,16 +114,16 @@ The installation script will create a few folders and populate these with helpfu
 - **/backup**: this folder contains Graylog's configuration in a MongoDB database.
 - **/certs/input_tls**: _(must be owned by the user:group with the id 1100)_: this folder contains the certificates that may be used for securing Inputs with TLS
 - **/certs/root_ca**: in case you are working with self-signed Certificates, this folder should contain your Trusted Root Certificate; it will be picked up and made available to Graylog
-- [**/contentpacks**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/contentpacks): this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
+- [**/contentpacks**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/Graylog-7.2/01_Installation/compose/contentpacks): this folder contains Graylog Content Packs to pre-populate your Graylog Installation with a few Configurations in order to accelerate the process.
 - **/database** _(must be owned by the user:group with the id 999)_: this folder contains Graylog's log data in an Opensearch database.
 - **/datalake** _(must be owned by the user:group with the id 1100)_: this folder contains data that is prepared for requirement-driven ingestion (Data Routing). You can mount any remote storage to that folder.
 -**/logsamples**: this folder is shared via Samba and can be used to drop any file with log information; it will be automatically read and sent to Graylog
-- [**/lookuptables**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/lookuptables): this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
+- [**/lookuptables**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/Graylog-7.2/01_Installation/compose/lookuptables): this folder contains a few lookuptables that can be used by Graylog Data Adapters. The Folder is accessible for Windows machines via Samba Share (credentials are the same as for the WebUI).
 - **/maxmind**: this folder contains the GeoIP databases to be used by the Graylog Geo-Location Processor.
-- [**/nginx1**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/nginx1): this folder contains the nginx configuration files for the nginx container.
+- [**/nginx1**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/Graylog-7.2/01_Installation/compose/nginx1): this folder contains the nginx configuration files for the nginx container.
 - **/nginx1/ssl**: this folder contains the nginx certificates for https connections.
-- [**/nginx2**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/nginx2): this folder contains the nginx configuration files for the internal nginx container within the Graylog Stack. It stores and provides lookup tables used with Graylog's _"DSV File from HTTP"_ adapter.
+- [**/nginx2**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/Graylog-7.2/01_Installation/compose/nginx2): this folder contains the nginx configuration files for the internal nginx container within the Graylog Stack. It stores and provides lookup tables used with Graylog's _"DSV File from HTTP"_ adapter.
 - **/notifications** _(must be owned by the user:group with the id 1100)_: this folder contains scripts being used when the "SCRIPT NOTIFICATION" feature (Enterprise) is tested.
-- [**/prometheus**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/prometheus): this folder contains configuration data to get metrics from Graylog to Grafana.
+- [**/prometheus**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/Graylog-7.2/01_Installation/compose/prometheus): this folder contains configuration data to get metrics from Graylog to Grafana.
 - **/samba**: this folder contains the configuration data for Samba, giving access to Graylog via SMB/CIFS
-- [**/sources**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/main/01_Installation/compose/sources): this folder contains sources that help you getting started with Graylog
+- [**/sources**](https://github.com/fjagwitz/Graylog-Cookbooks/tree/Graylog-7.2/01_Installation/compose/sources): this folder contains sources that help you getting started with Graylog
