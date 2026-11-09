@@ -19,15 +19,15 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Evaluation: Self-Monitoring Logs"
+          "@value": "Self-Monitoring"
         },
         "description": {
           "@type": "string",
-          "@value": "Evaluation: Self-Monitoring Logs"
+          "@value": "Self-Monitoring"
         },
         "source": {
           "@type": "string",
-          "@value": "pipeline \"Evaluation: Self-Monitoring Logs\"\nstage 10 match either\nrule \"10 - Evaluation: Self-Monitoring Logs - Parser Graylog\"\nend"
+          "@value": "pipeline \"Self-Monitoring\"\nstage 10 match either\nrule \"10 - Self-Monitoring - Parser Graylog\"\nend"
         },
         "connected_streams": [
           {
@@ -85,12 +85,12 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "10 - Evaluation: Self-Monitoring Logs - Parser Graylog"
+          "@value": "10 - Self-Monitoring - Parser Graylog"
         },
         "description": null,
         "source": {
           "@type": "string",
-          "@value": "rule \"10 - Evaluation: Self-Monitoring Logs - Parser Graylog\"\nwhen\n    to_string($message.filebeat_event_source_product) == \"self-monitoring-compose-stack\"\n    \nthen\n    let this_log = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{LOGLEVEL:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_component}\\\\]%{SPACE}\\\\[%{DATA:container_name}\\\\]%{DATA:message}$\", //DATANODE\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}:%{SPACE}%{DATA:application_component}%{SPACE}-%{SPACE}%{DATA:message}$\"\n        ], \n        only_named_captures: true\n    );\n    \n    set_fields(this_log); \n    \n    rename_fields(\n        fields: {\n            filebeat_event_source_product: \"event_source_product\"\n        }\n    );\n    \n    remove_multiple_fields(\n        pattern: \"filebeat_.*\", \n        names: []\n    );\n    \n    set_field(\"event_received\", to_date(flex_parse_date(to_string($message.event_received))));\n    \nend"
+          "@value": "rule \"10 - Self-Monitoring - Parser Graylog\"\nwhen\n    to_string($message.filebeat_event_source_product) == \"self-monitoring-compose-stack\"\n    \nthen\n    let this_log = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{LOGLEVEL:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_component}\\\\]%{SPACE}\\\\[%{DATA:container_name}\\\\]%{DATA:message}$\", //DATANODE\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}:%{SPACE}%{DATA:application_component}%{SPACE}-%{SPACE}%{DATA:message}$\"\n        ], \n        only_named_captures: true\n    );\n    \n    set_fields(this_log); \n    \n    rename_fields(\n        fields: {\n            filebeat_event_source_product: \"event_source_product\"\n        }\n    );\n    \n    remove_multiple_fields(\n        pattern: \"filebeat_.*\", \n        names: []\n    );\n    \n    set_field(\"event_received\", to_date(flex_parse_date(to_string($message.event_received))));\n    \nend"
         }
       },
       "constraints": [
@@ -110,7 +110,7 @@
       "data": {
         "title": {
           "@type": "string",
-          "@value": "Evaluation: Self-Monitoring Logs"
+          "@value": "Evaluation: Self-Monitoring"
         }
       },
       "constraints": [

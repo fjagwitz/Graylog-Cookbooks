@@ -716,6 +716,12 @@ function_configureSelfMonitoring () {
     echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-beats\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
 
+    # Create Pipeline
+
+    # Create Pipeline Rule
+
+    # Connect Pipeline Rule to Pipeline
+
     echo "[INFO] - START STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
 
