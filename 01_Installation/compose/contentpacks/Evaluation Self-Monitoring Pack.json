@@ -1,0 +1,184 @@
+{
+  "v": 1,
+  "id": "460d2c43-c63a-40e6-a9a9-1c5dbdffdcdf",
+  "rev": 1,
+  "name": "Evaluation: Self-Monitoring Pack",
+  "summary": "Evaluation: Self-Monitoring Pack",
+  "description": "",
+  "vendor": "Graylog Community",
+  "url": "https://community.graylog.org",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "9e02ba50-1f55-4517-a132-329bd26ac3f7",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self-Monitoring Logs"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation: Self-Monitoring Logs"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Evaluation: Self-Monitoring Logs\"\nstage 10 match either\nrule \"10 - Evaluation: Self-Monitoring Logs - Parser Graylog\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "06941346-4f76-44a2-9379-debf5cfea39f"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "06941346-4f76-44a2-9379-debf5cfea39f",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Self-Monitoring Logs"
+        },
+        "stream_rules": [
+          {
+            "type": {
+              "@type": "string",
+              "@value": "REGEX"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "filebeat_event_source_product"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "self-monitoring-.*"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": ""
+            }
+          }
+        ],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "AND"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "favorite_fields": null,
+        "description": {
+          "@type": "string",
+          "@value": "Evaluation: Self-Monitoring Logs"
+        },
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "0636f164-2d34-464f-800e-2611a834e5de",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Port 5054 Beats | Evaluation: Self Monitoring Logs"
+        },
+        "configuration": {
+          "port": {
+            "@type": "integer",
+            "@value": 5054
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "number_worker_threads": {
+            "@type": "integer",
+            "@value": 2
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog.plugins.beats.Beats2Input"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "extractors": []
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "270698e3-5c68-4464-a70f-7107684050d5",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "10 - Evaluation: Self-Monitoring Logs - Parser Graylog"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"10 - Evaluation: Self-Monitoring Logs - Parser Graylog\"\nwhen\n    to_string($message.filebeat_event_source_product) == \"self-monitoring-compose-stack\"\n    \nthen\n    let this_log = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{LOGLEVEL:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_component}\\\\]%{SPACE}\\\\[%{DATA:container_name}\\\\]%{DATA:message}$\", //DATANODE\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}:%{SPACE}%{DATA:application_component}%{SPACE}-%{SPACE}%{DATA:message}$\"\n        ], \n        only_named_captures: true\n    );\n    \n    set_fields(this_log); \n    \n    rename_fields(\n        fields: {\n            filebeat_event_source_product: \"event_source_product\"\n        }\n    );\n    \n    remove_multiple_fields(\n        pattern: \"filebeat_.*\", \n        names: []\n    );\n    \n    set_field(\"event_received\", to_date(flex_parse_date(to_string($message.event_received))));\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    }
+  ]
+}
