@@ -46,50 +46,6 @@
     {
       "v": "1",
       "type": {
-        "name": "input",
-        "version": "1"
-      },
-      "id": "06a25bb6-f6b7-437e-9325-6be4866e3160",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Port 5054 Beats | Evaluation: Self Monitoring Logs"
-        },
-        "configuration": {
-          "port": {
-            "@type": "integer",
-            "@value": 5054
-          },
-          "bind_address": {
-            "@type": "string",
-            "@value": "0.0.0.0"
-          },
-          "number_worker_threads": {
-            "@type": "integer",
-            "@value": 2
-          }
-        },
-        "static_fields": {},
-        "type": {
-          "@type": "string",
-          "@value": "org.graylog.plugins.beats.Beats2Input"
-        },
-        "global": {
-          "@type": "boolean",
-          "@value": true
-        },
-        "extractors": []
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.2+94adc86"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
