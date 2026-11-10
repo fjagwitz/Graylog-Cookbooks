@@ -368,7 +368,11 @@ function_installGraylogStack () {
     local GRAYLOG_ENV="${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}"
     local DATANODE_ENV="${GRAYLOG_PATH}/${GRAYLOG_DATANODE_ENV}"
     local STACK_ENV="${GRAYLOG_PATH}/${GRAYLOG_STACK_ENV}"
-    # local NGINX_HTTP_CONF="${GRAYLOG_PATH}/nginx1/http.conf"
+
+    # Stop and disable ttyS0 Service
+    echo "[INFO] - STOP AND DISABLE SERVICE FOR TTYSO TO AVOID UNNECESSARY LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER   
+    sudo systemctl stop serial-getty@ttyS0.service
+    sudo systemctl disable serial-getty@ttyS0.service
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
