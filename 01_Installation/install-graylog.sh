@@ -717,10 +717,13 @@ function_configureSelfMonitoring () {
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-beats\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
 
     echo "[INFO] - CREATE PIPELINE FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    curl -s http://localhost/api/system/pipelines/pipeline -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"title\":\"${ITEM_TITLE}\",\"description\":\"${ITEM_TITLE}\",\"stages\":[{\"stage\":10,\"rules\":[],\"match\":\"EITHER\"}],\"source\":\"pipeline \\\"${ITEM_TITLE}\\\"\nstage 10 match either\nend\",\"has_deprecated_functions\":false}" 2>/dev/null >/dev/null
+    local PIPELINE_ID=$(curl -s http://localhost/api/system/pipelines/pipeline -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"title\":\"${ITEM_TITLE}\",\"description\":\"${ITEM_TITLE}\",\"stages\":[{\"stage\":10,\"rules\":[],\"match\":\"EITHER\"}],\"source\":\"pipeline \\\"${ITEM_TITLE}\\\"\nstage 10 match either\nend\",\"has_deprecated_functions\":false}" | jq '.id') 2>/dev/null >/dev/null
     
+    echo "[INFO] - CONNECT PIPELINE FOR ${LOG_ITEM^^} LOGS (BEATS) TO MONITORING STREAM " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/system/pipelines/connections/to_pipeline -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{"pipeline_id":"${PIPELINE_ID}","stream_ids":["${MONITORING_STREAM}"]}"
+
     echo "[INFO] - CONNECT PIPELINE RULES FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    
+    curl -s http://localhost/api/system/pipelines/pipeline/${PIPELINE_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${PIPELINE_ID}\",\"_scope\":\"DEFAULT\",\"title\":\"${ITEM_TITLE}\",\"description\":\"${ITEM_TITLE}\",\"source\":\"pipeline \\\"${ITEM_TITLE}\\\"\nstage 10 match either\nrule \\\"10 - Self-Monitoring - Parser Graylog\\\"\nend\",\"stages\":[{\"stage\":10,\"match\":\"EITHER\",\"rules\":[\"10 - Self-Monitoring - Parser Graylog\"]}],\"errors\":null,\"has_deprecated_functions\":null}"
 
     echo "[INFO] - START STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
@@ -1097,7 +1100,6 @@ then
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
     function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
-    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
     function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
 
 
@@ -1107,6 +1109,7 @@ then
     function_addSidecarConfigurationVariables ${GRAYLOG_ADMIN_TOKEN}
     function_addEvaluationHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
+    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}    
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
     function_addScriptRepositoryToPathVariable
