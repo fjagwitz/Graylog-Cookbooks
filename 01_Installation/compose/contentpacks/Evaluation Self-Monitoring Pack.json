@@ -12,38 +12,6 @@
     {
       "v": "1",
       "type": {
-        "name": "sidecar_collector_configuration",
-        "version": "1"
-      },
-      "id": "132b3407-31fa-48de-beb7-680934e69f0a",
-      "data": {
-        "collector_id": {
-          "@type": "string",
-          "@value": "06062e78-f9fa-44a9-82dc-43ed6d875477"
-        },
-        "title": {
-          "@type": "string",
-          "@value": "my-self-monitoring"
-        },
-        "color": {
-          "@type": "string",
-          "@value": "#827717"
-        },
-        "template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:${user.beats_port_self}\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: syslog-filestream\n  enabled: true\n  paths:\n  - /var/log/syslog\n  fields_under_root: true\n  fields:\n      event_source_product: syslog\n\n- type: filestream\n  id: graylog-sidecar-filestream\n  enabled: true\n  paths:\n  - /var/log/graylog-sidecar/*.log\n  fields_under_root: true\n  fields:\n      event_source_product: graylog-sidecar\n\n- type: filestream\n  id: graylog-compose-filestream\n  enabled: true\n  paths: \n  - /var/lib/docker/containers/*/*-json.log\n  parsers:\n  # parser processing happens in the order they are configured here; first ndjson, then multiline\n  # parsers are processed before processors\n  #\n  parsers:\n  - ndjson:\n      target: \"\"\n      message_key: log\n  - multiline:\n      type: pattern\n      pattern: '^\\s*\\d{4}\\-'\n      match: after\n      negate: true\n      max_lines: 200\n      skip_newline: true      \n  exclude_lines: ['^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}', '^\\{\"t\":\\{', '^logger=', '^time=']\n  fields_under_root: true\n  fields:\n      event_source_product: compose-stack"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.4+ac94792"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "pipeline_rule",
         "version": "1"
       },
@@ -57,50 +25,6 @@
         "source": {
           "@type": "string",
           "@value": "rule \"10 - Self-Monitoring - Parser Graylog\"\nwhen\n    to_string($message.filebeat_event_source_product) == \"self-monitoring-compose-stack\"\n    \nthen\n    let this_log = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{LOGLEVEL:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_component}\\\\]%{SPACE}\\\\[%{DATA:container_name}\\\\]%{DATA:message}$\", //DATANODE\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}:%{SPACE}%{DATA:application_component}%{SPACE}-%{SPACE}%{DATA:message}$\"\n        ], \n        only_named_captures: true\n    );\n    \n    set_fields(this_log); \n    \n    rename_fields(\n        fields: {\n            filebeat_event_source_product: \"event_source_product\"\n        }\n    );\n    \n    remove_multiple_fields(\n        pattern: \"filebeat_.*\", \n        names: []\n    );\n    \n    set_field(\"event_received\", to_date(flex_parse_date(to_string($message.event_received))));\n    \nend"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.0.4+ac94792"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "sidecar_collector",
-        "version": "1"
-      },
-      "id": "06062e78-f9fa-44a9-82dc-43ed6d875477",
-      "data": {
-        "name": {
-          "@type": "string",
-          "@value": "filebeat"
-        },
-        "service_type": {
-          "@type": "string",
-          "@value": "exec"
-        },
-        "node_operating_system": {
-          "@type": "string",
-          "@value": "linux"
-        },
-        "executable_path": {
-          "@type": "string",
-          "@value": "/usr/lib/graylog-sidecar/filebeat"
-        },
-        "execute_parameters": {
-          "@type": "string",
-          "@value": "-c  %s"
-        },
-        "validation_parameters": {
-          "@type": "string",
-          "@value": "test config -c %s"
-        },
-        "default_template": {
-          "@type": "string",
-          "@value": "# Required settings\nfields_under_root: true\nfields.collector_node_id: ${sidecar.nodeName}\nfields.gl2_source_collector: ${sidecar.nodeId}\n\n\noutput.logstash:\n   hosts: [\"${user.graylog_host}:5044\"]\npath:\n   data: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/data\n   logs: ${sidecar.spoolDir!\"/var/lib/graylog-sidecar/collectors/filebeat\"}/log\n\nfilebeat.inputs:\n\n- type: filestream\n  id: snort-filestream\n  enabled: true\n  paths:\n    - /var/log/snort/alert_json.txt\n    - /var/log/snort/appid-output.json\n  parsers:\n    - ndjson:\n        target: \"snort3\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: snort3\n\n- type: filestream\n  id: zeek-filestream\n  enabled: true\n  paths:\n    - /opt/zeek/logs/current\n  parsers:\n    - ndjson:\n        target: \"zeek\"\n        add_error_key: true\n        overwrite_keys: true\n  fields:\n    event_source_product: zeek\n\n- type: filestream\n  id: apache-filestream\n  enabled: true\n  paths:\n  - /var/log/apache2/access.log\n  - /var/log/apache2/error.log\n  - /var/log/httpd/access_log\n  - /var/log/httpd/error_log\n  fields_under_root: true\n  fields:\n      event_source_product: apache_httpd\n"
         }
       },
       "constraints": [
