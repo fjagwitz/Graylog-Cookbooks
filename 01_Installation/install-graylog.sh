@@ -716,11 +716,11 @@ function_configureSelfMonitoring () {
     echo "[INFO] - CREATE STREAM RULE FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/rules -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{ \"field\": \"gl2_source_input\", \"description\": \"${LOG_ITEM}-beats\", \"type\": 1, \"inverted\": false, \"value\": ${MONITORING_INPUT_BEATS} }" 2>/dev/null >/dev/null
 
-    # Create Pipeline
-
-    # Create Pipeline Rule
-
-    # Connect Pipeline Rule to Pipeline
+    echo "[INFO] - CREATE PIPELINE FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    curl -s http://localhost/api/system/pipelines/pipeline -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"title\":\"${ITEM_TITLE}\",\"description\":\"${ITEM_TITLE}\",\"stages\":[{\"stage\":10,\"rules\":[],\"match\":\"EITHER\"}],\"source\":\"pipeline \\\"${ITEM_TITLE}\\\"\nstage 10 match either\nend\",\"has_deprecated_functions\":false}" 2>/dev/null >/dev/null
+    
+    echo "[INFO] - CONNECT PIPELINE RULES FOR ${LOG_ITEM^^} LOGS (BEATS) " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    
 
     echo "[INFO] - START STREAM FOR ${LOG_ITEM^^} LOGS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     curl -s http://localhost/api/streams/${MONITORING_STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" 2>/dev/null >/dev/null

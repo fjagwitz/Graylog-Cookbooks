@@ -12,40 +12,6 @@
     {
       "v": "1",
       "type": {
-        "name": "pipeline",
-        "version": "1"
-      },
-      "id": "db41c4e5-f441-42a5-aca7-696397c3437a",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Self-Monitoring"
-        },
-        "description": {
-          "@type": "string",
-          "@value": "Self-Monitoring"
-        },
-        "source": {
-          "@type": "string",
-          "@value": "pipeline \"Self-Monitoring\"\nstage 10 match either\nrule \"10 - Self-Monitoring - Parser Graylog\"\nend"
-        },
-        "connected_streams": [
-          {
-            "@type": "string",
-            "@value": "7347d0b4-bd81-49a2-8748-4fc75d05a9bf"
-          }
-        ]
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.2+94adc86"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
         "name": "sidecar_collector_configuration",
         "version": "1"
       },
@@ -71,7 +37,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.2.2+94adc86"
+          "version": ">=7.0.4+ac94792"
         }
       ]
     },
@@ -96,27 +62,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.2.2+94adc86"
-        }
-      ]
-    },
-    {
-      "v": "1",
-      "type": {
-        "name": "stream_title",
-        "version": "1"
-      },
-      "id": "7347d0b4-bd81-49a2-8748-4fc75d05a9bf",
-      "data": {
-        "title": {
-          "@type": "string",
-          "@value": "Evaluation: Self-Monitoring"
-        }
-      },
-      "constraints": [
-        {
-          "type": "server-version",
-          "version": ">=7.2.2+94adc86"
+          "version": ">=7.0.4+ac94792"
         }
       ]
     },
@@ -160,7 +106,7 @@
       "constraints": [
         {
           "type": "server-version",
-          "version": ">=7.2.2+94adc86"
+          "version": ">=7.0.4+ac94792"
         }
       ]
     }
