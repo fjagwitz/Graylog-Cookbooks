@@ -1072,7 +1072,6 @@ then
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
     function_prepareSidecarConfiguration ${GRAYLOG_SIDECAR_TOKEN}
     function_configurePlugins ${GRAYLOG_ADMIN_TOKEN}
-    function_configureWindowsSidecarMonitoring ${GRAYLOG_ADMIN_TOKEN}
 
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
