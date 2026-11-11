@@ -1,0 +1,106 @@
+{
+  "v": 1,
+  "id": "2f71ad9f-4bb3-4eda-a841-e5c58620f1b9",
+  "rev": 1,
+  "name": "Evaluation Self-Monitoring",
+  "summary": "Graylog Solution Engineering Team",
+  "description": "",
+  "vendor": "Graylog",
+  "url": "https://graylog.org",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "74844c3b-24c6-413a-83a7-7b62f6e2b300",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Evaluation: Graylog Sidecar Logs"
+        },
+        "stream_rules": [
+          {
+            "type": {
+              "@type": "string",
+              "@value": "CONTAINS"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "filebeat_tags"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "graylog-sidecar"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": "Sidecar Monitoring General"
+            }
+          }
+        ],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "AND"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "favorite_fields": null,
+        "description": {
+          "@type": "string",
+          "@value": "Logs sent from Graylog Sidecars"
+        },
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "72639cbf-209a-420e-92a3-98eb3ed67a5c",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "10 - Self-Monitoring - Parser Graylog"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"10 - Self-Monitoring - Parser Graylog\"\nwhen\n    to_string($message.filebeat_event_source_product) == \"self-monitoring-compose-stack\"\n    \nthen\n    set_field(\"container_name\", \"graylog\"); \n    \n    let this_log = multi_grok(\n        value: to_string($message.message), \n        patterns: [\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL}%{SPACE}\\\\[%{DATA}\\\\]%{SPACE}\\\\[%{TIMESTAMP_ISO8601:event_created}\\\\]%{SPACE}\\\\[%{LOGLEVEL:event_severity}%{SPACE}\\\\]%{SPACE}\\\\[%{DATA:application_component}\\\\]%{SPACE}\\\\[%{DATA:container_name}\\\\]%{DATA:message}$\", //DATANODE\n            \"^%{TIMESTAMP_ISO8601:event_received}%{SPACE}%{LOGLEVEL:event_severity}%{SPACE}:%{SPACE}%{DATA:application_component}%{SPACE}-%{SPACE}%{DATA:message}$\"\n        ], \n        only_named_captures: true\n    );\n    \n    set_fields(this_log); \n    \n    rename_fields(\n        fields: {\n            filebeat_event_source_product:  \"event_source_product\"\n            filebeat_log_flags:             \"log_flags\"\n        }\n    );\n    \n    remove_multiple_fields(\n        pattern: \"filebeat_.*\", \n        names: []\n    );\n    \n    set_field(\"event_received\", to_date(flex_parse_date(to_string($message.event_received))));\n    \nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    }
+  ]
+}
