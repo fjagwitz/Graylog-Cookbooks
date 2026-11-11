@@ -858,6 +858,15 @@ function_createInputs () {
     fi
 }
 
+function_startAllStreams () {
+    echo "[INFO] - START ALL STREAMS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+    for STREAM in $(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET | jq -r .streams.[].id)
+    do
+        curl -s http://localhost/api/streams/${STREAM}/resume -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost" -H 'Content-Type: application/json' 2>/dev/null >/dev/null
+    done
+}
+
 function_configureEvaluationSetup () {
 
     local ADMIN_TOKEN=${1}
@@ -1083,6 +1092,7 @@ then
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
     function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}    
     function_enableGraylogSidecar
+    function_startAllStreams
     function_addScriptRepositoryToPathVariable
 
     function_displayClusterId
