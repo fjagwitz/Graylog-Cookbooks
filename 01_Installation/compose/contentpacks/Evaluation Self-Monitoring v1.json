@@ -3,9 +3,9 @@
   "id": "2f71ad9f-4bb3-4eda-a841-e5c58620f1b9",
   "rev": 1,
   "name": "Evaluation Self-Monitoring",
-  "summary": "Graylog Solution Engineering Team",
+  "summary": "Self-Monitoring for Evaluation Graylog Systems",
   "description": "",
-  "vendor": "Graylog",
+  "vendor": "Graylog Solution Engineering Team",
   "url": "https://graylog.org",
   "parameters": [],
   "entities": [
