@@ -859,6 +859,8 @@ function_createInputs () {
 }
 
 function_startAllStreams () {
+    local ADMIN_TOKEN=${1}
+
     echo "[INFO] - START ALL STREAMS " | logger -p user.info -e -t GRAYLOG-INSTALLER
 
     for STREAM in $(curl -s http://localhost/api/streams -u ${ADMIN_TOKEN}:token -X GET | jq -r .streams.[].id)
@@ -1090,9 +1092,9 @@ then
     function_addEvaluationHostSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_addWindowsSidecarConfigurationTags ${GRAYLOG_ADMIN_TOKEN}
     function_enableGeoIpLocation ${GRAYLOG_ADMIN_TOKEN}
-    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}    
+    function_configureSelfMonitoring ${GRAYLOG_ADMIN_TOKEN}
+    function_startAllStreams ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
-    function_startAllStreams
     function_addScriptRepositoryToPathVariable
 
     function_displayClusterId
