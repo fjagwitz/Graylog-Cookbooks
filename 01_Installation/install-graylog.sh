@@ -1013,6 +1013,22 @@ function_configureSecurityFeatures () {
 
 }
 
+function_configureSecurityAlerts () {
+    local ADMIN_TOKEN=${1}
+    local EVENT_DEFINITIONS=$(curl -s "http://localhost/api/events/definitions/paginated/?page=1&per_page=500" -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq -r '.elements[].id ')
+    local DISABLED_EVENT_DEFINITIONS="6af49128391c1e6e28714f4b 6af49127391c1e6e28714ec9 6af49128391c1e6e28714ffd"
+
+    echo "[INFO] - ACTIVATE SECURITY CORE EVENT DEFINITIONS " | logger -p user.info -e -t GRAYLOG-INSTALLER
+    for EVENT in ${EVENT_DEFINITIONS}; do
+        if [[ " ${DISABLED_EVENT_DEFINITIONS} " != *" ${EVENT} "* ]]; then
+            curl -s "http://localhost/api/events/definitions/${EVENT}/schedule" -u "${ADMIN_TOKEN}:token" -X PUT -H "X-Requested-By: localhost" 
+        else
+            curl -s http://localhost/api/users/local:admin/tokens/${ADMIN_TOKEN_ID} -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 
+        fi
+    done  
+
+}
+
 function_restoreSystem () {
     exec /opt/graylog/scripts/Reset-GraylogInstallation
 }
