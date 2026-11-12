@@ -60,7 +60,7 @@ GRAYLOG_REPORT_DISABLE_SANDBOX = "true"
 #
 GRAYLOG_CONTENT_PACKS_LOADER_ENABLED = "true"
 GRAYLOG_CONTENT_PACKS_DIR = "/etc/graylog/server/contentpacks"
-GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Community Collector Templates v1.json, Evaluation Self-Monitoring v1.json"
+GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Community Collector Templates v2.json, Evaluation Self-Monitoring v1.json, Windows Server Information v2.json"
 
 ## Email Configurations
 #

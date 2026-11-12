@@ -1,0 +1,140 @@
+{
+  "v": "1",
+  "id": "70662945-1e0e-4ce5-af6c-2d0c05cb7c7b",
+  "rev": 2,
+  "name": "Community: Windows Server Compliance Information",
+  "summary": "Community: Windows Server Compliance Information",
+  "description": "Community: Windows Server Compliance Information",
+  "vendor": "Graylog Community",
+  "url": "https://community.graylog.org",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "461e2cb8-2a2f-4614-9555-164ae84c394e",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Windows Server Information"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Windows Server Information"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Windows Server Information\"\nstage 10 match either\nrule \"10 - Windows Server Information - Server Roles\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "73742583-40f9-4428-b80b-cc1340b204b4"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "b4a3c4cb-f9f3-489b-ae57-74df913e2fbe",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "10 - Windows Server Information - Server Roles"
+        },
+        "description": null,
+        "source": {
+          "@type": "string",
+          "@value": "rule \"10 - Windows Server Information - Server Roles\"\nwhen\n    to_string($message.nxlog_tag) == \"Compliance_WindowsServerRoles\"\n    \nthen\n    let mylog = to_map(parse_json(to_string($message.full_message)));\n    \n    set_fields(mylog);\n    \n    remove_multiple_fields(\n        names: [\n            \"AdditionalInfo\"\n            \"collector_node_id\"\n            \"DependsOn\"\n            \"Depth\"\n            \"EventReceivedTime\"\n            \"Description\"\n            \"InstallState\"\n            \"level\"\n            \"Notification\"\n            \"Path\"\n            \"ServerComponentDescriptor\"\n            \"SubFeatures\"\n            \"SystemService\"\n            \"full_message\"\n        ]\n    );\n    \n    rename_fields(\n        fields: {\n            DisplayName:    \"windows_server_displayname\"\n            FeatureType:    \"windows_server_featuretype\"\n            Installed:      \"windows_server_installstate\"\n            Name:           \"windows_server_name\"\n            PostConfigurationNeeded: \"windows_server_postconfiguration\"\n            SourceModuleName: \"windows_server_sourcemodule\"\n            SourceModuleType: \"agent_module_type\"\n        }\n    );\n\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "73742583-40f9-4428-b80b-cc1340b204b4",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": true
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Windows Server Information"
+        },
+        "stream_rules": [
+          {
+            "type": {
+              "@type": "string",
+              "@value": "EXACT"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "nxlog_tag"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "Compliance_WindowsServerRoles"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": ""
+            }
+          }
+        ],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "OR"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "favorite_fields": null,
+        "description": {
+          "@type": "string",
+          "@value": "Windows Server Information collected through NXLog and Powershell"
+        },
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=7.2.2+94adc86"
+        }
+      ]
+    }
+  ]
+}
