@@ -1021,9 +1021,9 @@ function_configureSecurityAlerts () {
     echo "[INFO] - ACTIVATE SECURITY CORE EVENT DEFINITIONS " | logger -p user.info -e -t GRAYLOG-INSTALLER
     for EVENT in ${EVENT_DEFINITIONS}; do
         if [[ " ${DISABLED_EVENT_DEFINITIONS} " != *" ${EVENT} "* ]]; then
-            curl -s "http://localhost/api/events/definitions/${EVENT}/schedule" -u "${ADMIN_TOKEN}:token" -X PUT -H "X-Requested-By: localhost" 
+            curl -s "http://localhost/api/events/definitions/${EVENT}/schedule" -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" 
         else
-            curl -s http://localhost/api/users/local:admin/tokens/${ADMIN_TOKEN_ID} -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 
+            curl -s "http://localhost/api/events/definitions/${EVENT}/unschedule" -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" 
         fi
     done  
 
