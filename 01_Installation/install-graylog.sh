@@ -1041,6 +1041,15 @@ function_removeAdminToken () {
            
 }
 
+function_configureTestSystem () {
+    SCRIPT="$HOME/graylog-cluster.sh"
+
+    if [[ -f "${SCRIPT}" ]]; then
+        bash "${SCRIPT}"
+    fi
+
+}
+
 
 ###############################################################################
 #
@@ -1112,6 +1121,7 @@ then
     function_startAllStreams ${GRAYLOG_ADMIN_TOKEN}
     function_enableGraylogSidecar
     function_addScriptRepositoryToPathVariable
+    function_configureTestSystem
 
     function_displayClusterId
 
