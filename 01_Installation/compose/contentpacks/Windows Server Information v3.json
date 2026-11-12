@@ -1,7 +1,7 @@
 {
   "v": "1",
   "id": "70662945-1e0e-4ce5-af6c-2d0c05cb7c7b",
-  "rev": 2,
+  "rev": 3,
   "name": "Community: Windows Server Compliance Information",
   "summary": "Community: Windows Server Compliance Information",
   "description": "Community: Windows Server Compliance Information",
@@ -15,7 +15,7 @@
         "name": "pipeline",
         "version": "1"
       },
-      "id": "461e2cb8-2a2f-4614-9555-164ae84c394e",
+      "id": "5f0632b9-1b94-4df8-af7b-cba7992c9f96",
       "data": {
         "title": {
           "@type": "string",
@@ -32,7 +32,7 @@
         "connected_streams": [
           {
             "@type": "string",
-            "@value": "73742583-40f9-4428-b80b-cc1340b204b4"
+            "@value": "34505dca-aad7-46b0-9b0a-1de396979ef8"
           }
         ]
       },
@@ -49,7 +49,7 @@
         "name": "pipeline_rule",
         "version": "1"
       },
-      "id": "b4a3c4cb-f9f3-489b-ae57-74df913e2fbe",
+      "id": "33c80617-cb51-4ba0-9fa2-6e5225060ac6",
       "data": {
         "title": {
           "@type": "string",
@@ -58,7 +58,7 @@
         "description": null,
         "source": {
           "@type": "string",
-          "@value": "rule \"10 - Windows Server Information - Server Roles\"\nwhen\n    to_string($message.nxlog_tag) == \"Compliance_WindowsServerRoles\"\n    \nthen\n    let mylog = to_map(parse_json(to_string($message.full_message)));\n    \n    set_fields(mylog);\n    \n    remove_multiple_fields(\n        names: [\n            \"AdditionalInfo\"\n            \"collector_node_id\"\n            \"DependsOn\"\n            \"Depth\"\n            \"EventReceivedTime\"\n            \"Description\"\n            \"InstallState\"\n            \"level\"\n            \"Notification\"\n            \"Path\"\n            \"ServerComponentDescriptor\"\n            \"SubFeatures\"\n            \"SystemService\"\n            \"full_message\"\n        ]\n    );\n    \n    rename_fields(\n        fields: {\n            DisplayName:    \"windows_server_displayname\"\n            FeatureType:    \"windows_server_featuretype\"\n            Installed:      \"windows_server_installstate\"\n            Name:           \"windows_server_name\"\n            PostConfigurationNeeded: \"windows_server_postconfiguration\"\n            SourceModuleName: \"windows_server_sourcemodule\"\n            SourceModuleType: \"agent_module_type\"\n        }\n    );\n\nend"
+          "@value": "rule \"10 - Windows Server Information - Server Roles\"\nwhen\n    to_string($message.nxlog_tag) == \"Compliance_WindowsServerRoles\"\n    \nthen\n    let mylog = to_map(parse_json(to_string($message.full_message)));\n    \n    set_fields(mylog);\n    \n    remove_multiple_fields(\n        names: [\n            \"AdditionalInfo\"\n            \"collector_node_id\"\n            \"DependsOn\"\n            \"Depth\"\n            \"EventReceivedTime\"\n            \"Description\"\n            \"InstallState\"\n            \"level\"\n            \"Notification\"\n            \"Path\"\n            \"ServerComponentDescriptor\"\n            \"SubFeatures\"\n            \"SystemService\"\n            \"full_message\"\n        ]\n    );\n    \n    rename_fields(\n        fields: {\n            DisplayName:            \"windows_feature_displayname\"\n            FeatureType:            \"windows_feature_featuretype\"\n            Installed:              \"windows_feature_installstate\"\n            Name:                   \"windows_feature_name\"\n            PostConfigurationNeeded: \"windows_feature_postconfiguration\"\n            SourceModuleName:       \"windows_feature_sourcemodule\"\n            SourceModuleType:       \"agent_module_type\"\n        }\n    );\n\nend"
         }
       },
       "constraints": [
@@ -74,7 +74,7 @@
         "name": "stream",
         "version": "1"
       },
-      "id": "73742583-40f9-4428-b80b-cc1340b204b4",
+      "id": "34505dca-aad7-46b0-9b0a-1de396979ef8",
       "data": {
         "alarm_callbacks": [],
         "outputs": [],
