@@ -1155,6 +1155,7 @@ then
 
     GRAYLOG_LICENSE_SECURITY=$(function_checkSecurityLicense ${GRAYLOG_ADMIN_TOKEN})
     function_configureSecurityFeatures ${GRAYLOG_ADMIN_TOKEN}
+    function_configureSecurityAlerts ${GRAYLOG_ADMIN_TOKEN}
 
     echo "[INFO] - GRAYLOG SECURITY INSTALLATION SUCCESSFULLY FINISHED" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
