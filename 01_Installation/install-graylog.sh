@@ -48,7 +48,7 @@ GRAYLOG_SIDECAR_VERSION="1.5.6"
 BEATS_COLLECTOR_VERSION="8.19.23"
 
 # Define required dependencies to run the script as well as the Graylog Stack
-SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dnsutils dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
+SCRIPT_DEPENDENCIES="apt-utils bash-completion bind9-dnsutils btop ca-certificates curl cron dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
 
 # Retry behaviour for API wait loops: 30 attempts x 10s = 5 minutes max
 RETRY_MAX_ATTEMPTS="30"
