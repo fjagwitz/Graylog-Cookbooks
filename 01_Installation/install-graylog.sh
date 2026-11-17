@@ -280,6 +280,7 @@ function_installScriptDependencies () {
     sudo apt-get -qq update -y 2>/dev/null >/dev/null
     sudo apt-get -qq autoremove -y 2>/dev/null >/dev/null
 
+    echo "[INFO] - ADD SYSTEM REQUIREMENTS" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -qq -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o DPkg::Lock::Timeout=300 install ${SCRIPT_DEPENDENCIES} >/dev/null 2>&1
 
     echo "[INFO] - ADD ${USER^^} TO TCPDUMP GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
