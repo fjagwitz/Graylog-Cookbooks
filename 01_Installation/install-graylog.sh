@@ -209,7 +209,7 @@ function_checkSystemRequirements () {
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
     local OPT_DISK_SPACE=$(df -h --output=avail /opt | tail -1 | xargs | grep -oE [0-9]*)
-    local VAR_DISK_SPACE=$(df -h --output=avail /var/lib/docker | tail -1 | xargs | grep -oE [0-9]*)
+    local VAR_DISK_SPACE=$(df -h --output=avail /var | tail -1 | xargs | grep -oE [0-9]*)
 
     
     if [[ "${SYSTEM_PROXY}" == "" ]]
