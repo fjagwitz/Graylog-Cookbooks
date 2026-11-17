@@ -28,6 +28,7 @@ GRAYLOG_FQDN=""
 GRAYLOG_API="http://localhost/api"
 GRAYLOG_SIDECAR="graylog-sidecar"
 GRAYLOG_SIDECAR_TAG="sidecar-self-monitoring"
+GRAYLOG_SELF_MONITORING_STREAM_TITLE="Evaluation: Self-Monitoring Logs"
 GRAYLOG_LICENSE_ENTERPRISE=""
 GRAYLOG_LICENSE_SECURITY=""
 
@@ -49,6 +50,9 @@ BEATS_COLLECTOR_VERSION="8.19.23"
 # Define required dependencies to run the script as well as the Graylog Stack
 SCRIPT_DEPENDENCIES="apt-utils bash-completion btop ca-certificates curl cron dnsutils dos2unix git iproute2 jq net-tools pwgen rsyslog tcpdump unzip vim" 
 
+# Retry behaviour for API wait loops: 30 attempts x 10s = 5 minutes max
+RETRY_MAX_ATTEMPTS="30"
+RETRY_INTERVAL="10"
 
 ###############################################################################
 #
@@ -150,7 +154,7 @@ function_getSystemFqdn () {
         if [[ ${VALID_FQDN} != "true" ]]
         then
             read -p "[INPUT] - The FQDN you provided does not seem to be resolvable; continue anyway? [no/yes]: " CHECK_IGNORE
-            local CHECK_IGNORE=${CHECK_IGNORE: no}
+            local CHECK_IGNORE=${CHECK_IGNORE:-no}
             
             if [[ ${CHECK_IGNORE} == "yes" ]]
             then
@@ -167,7 +171,7 @@ function_getSystemFqdn () {
 
 function_checkInternetConnectivity () {
     local INTERNET_CONNECTIVITY=$(curl -ILs https://github.com --connect-timeout 7 | head -n1 | cut -d " " -f2)
-    if [ $INTERNET_CONNECTIVITY != 200 ]
+    if [[ "${INTERNET_CONNECTIVITY}" != "200" ]]    
     then
         echo "[INFO] - INTERNET CONNECTION NOT AVAILABLE. EXIT."
         exit
@@ -178,14 +182,14 @@ function_checkInternetConnectivity () {
 
 function_checkPatchLevel () {
     echo "[INFO] - DOWNLOAD AND INSTALL LATEST UPDATES " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo apt -qq upgrade -y 2>/dev/null > /dev/null
+    sudo apt-get -qq update 2>/dev/null > /dev/null && sudo apt-get -qq upgrade -y 2>/dev/null > /dev/null
     
     local REBOOT_REQUIRED=$(cat /var/run/reboot-required 2>/dev/null)
 
     if [[ ${REBOOT_REQUIRED} != "" ]]
     then
         echo "[INFO] - THIS SYSTEM NEEDS A REBOOT BEFORE THE INSTALLATION "
-        echo "[INFO] - RESTART THE INSTALLATION PROCESS AFTER REBOOT "
+        echo "[INFO] - DOWNLOAD THE INSTALLATION SCRIPT AGAIN AND RESTART THE INSTALLATION PROCESS AFTER REBOOT "
         
         REBOOT=10
 
@@ -209,9 +213,8 @@ function_checkSystemRequirements () {
     local RANDOM_ACCESS_MEMORY=$(vmstat -s | grep "total memory" | grep -o [0-9]* | awk '{print int($0/1024/1024)+1}')
     local CPU_CORES_NUMBER=$(nproc)
     local CPU_REQUIRED_FLAGS=$(lscpu | grep -wio avx)
-    local OPT_DISK_SPACE=$(df -h --output=avail /opt | tail -1 | xargs | grep -oE [0-9]*)
-    local VAR_DISK_SPACE=$(df -h --output=avail /var/lib/docker | tail -1 | xargs | grep -oE [0-9]*)
-
+    local OPT_DISK_SPACE=$(df -BG --output=avail /opt | tail -1 | tr -dc '0-9')
+    local VAR_DISK_SPACE=$(df -BG --output=avail /var | tail -1 | tr -dc '0-9')    
     
     if [[ "${SYSTEM_PROXY}" == "" ]]
     then
@@ -219,13 +222,13 @@ function_checkSystemRequirements () {
     else
         if [[ "${SYSTEM_PROXY}" != "http"* ]]
         then 
-            SYSTEM_PROXY="https://${SYSTEM_PROXY}"
+            SYSTEM_PROXY="http://${SYSTEM_PROXY}"
             echo "[INFO] - SET SYSTEM PROXY TO ${SYSTEM_PROXY}" | logger -p user.info -e -t GRAYLOG-INSTALLER
         fi
         local INTERNET_CONNECTIVITY_TYPE="proxied: "
     fi 
 
-    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${OPT_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_OPT} ] && [ ${VAR_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_VAR} ] && [ ${INTERNET_CONNECTIVITY} -eq 200 ]
+    if [ ${OPERATING_SYSTEM,,} == ${SYSTEM_REQUIREMENTS_OS,,} ] && [ ${RANDOM_ACCESS_MEMORY} -ge ${SYSTEM_REQUIREMENTS_MEMORY} ] && [ ${CPU_CORES_NUMBER} -ge ${SYSTEM_REQUIREMENTS_CPU} ] && [[ ${CPU_REQUIRED_FLAGS,,} == ${SYSTEM_REQUIREMENTS_CPU_FLAGS,,} ]] && [ ${OPT_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_OPT} ] && [ ${VAR_DISK_SPACE} -ge ${SYSTEM_REQUIREMENTS_VAR} ] && [[ "${INTERNET_CONNECTIVITY}" != "200" ]]
     then
         echo "[INFO] - SYSTEM REQUIREMENTS CHECK SUCCESSFUL: 
         
@@ -238,7 +241,7 @@ function_checkSystemRequirements () {
          Internet        :  ${INTERNET_CONNECTIVITY_TYPE^}${SYSTEM_PROXY}
         "
     else
-        if [ ${INTERNET_CONNECTIVITY} -ne 200 ]
+        if [[ "${INTERNET_CONNECTIVITY}" != "200" ]]
         then
             echo "[ERROR] - INTERNET IS NOT AVAILABLE FROM THIS MACHINE "
         fi
@@ -274,15 +277,15 @@ function_checkSystemRequirements () {
 function_installScriptDependencies () {
 
     echo "[INFO] - VALIDATE SCRIPT DEPENDENCIES" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo apt -qq update -y 2>/dev/null >/dev/null
-    sudo apt -qq autoremove -y 2>/dev/null >/dev/null
+    sudo apt-get -qq update -y 2>/dev/null >/dev/null
+    sudo apt-get -qq autoremove -y 2>/dev/null >/dev/null
 
     for DEP in ${SCRIPT_DEPENDENCIES}
     do 
         if [[ ${DEP} != $(dpkg -l | grep -E "(^| )${DEP}($| )" | cut -d" " -f3) ]]
         then
             echo "[INFO] - INSTALL SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-            sudo apt -qq install -y ${DEP} 2>/dev/null >/dev/null
+            sudo apt-get -qq install -y ${DEP} 2>/dev/null >/dev/null
             wait
         else
             echo "[INFO] - SKIP SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -309,7 +312,7 @@ function_installDocker () {
 
         echo "[INFO] - REMOVE DOCKER LEFTOVERS" | logger -p user.info -e -t GRAYLOG-INSTALLER
     
-        sudo apt -qq remove ${DOCKER_OS_PACKAGES} 2>/dev/null >/dev/null
+        sudo apt-get -qq remove ${DOCKER_OS_PACKAGES} 2>/dev/null >/dev/null
         
         echo "[INFO] - ADD DOCKER REPOSITORY" | logger -p user.info -e -t GRAYLOG-INSTALLER
 
@@ -317,12 +320,12 @@ function_installDocker () {
         sudo curl -fsSL ${DOCKER_URL}/gpg -o ${DOCKER_KEY} 2>/dev/null >/dev/null 
         sudo chmod a+r ${DOCKER_KEY} 2>/dev/null >/dev/null 
         echo "deb [arch=$(dpkg --print-architecture) signed-by=${DOCKER_KEY}] ${DOCKER_URL}   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list 2>/dev/null >/dev/null 
-        sudo apt -qq update 2>/dev/null >/dev/null
+        sudo apt-get -qq update 2>/dev/null >/dev/null
 
         for PKG in ${DOCKER_CE_PACKAGES}
         do 
             echo "[INFO] - INSTALL DOCKER PACKAGE: ${PKG^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-            sudo apt -qq install -y ${PKG} 2>/dev/null >/dev/null
+            sudo apt-get -qq install -y ${PKG} 2>/dev/null >/dev/null
             wait
         done
     fi
@@ -331,7 +334,7 @@ function_installDocker () {
     sudo usermod -aG docker ${USER} 2>/dev/null >/dev/null
 
     echo "[INFO] - RESTART DOCKER SERVICE" | logger -p user.info -e -t GRAYLOG-INSTALLER
-    sudo systemctl docker.service restart 2>/dev/null >/dev/null
+    sudo systemctl restart docker.service 2>/dev/null >/dev/null
 
 }
 
@@ -350,8 +353,8 @@ function_installGraylogSidecarOnEvaluationHost () {
         sudo dpkg -i /tmp/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - INSTALL GRAYLOG SIDECAR " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        sudo apt -qq update -y 2>/dev/null >/dev/null
-        sudo apt -qq install -y graylog-sidecar 2>/dev/null >/dev/null
+        sudo apt-get -qq update -y 2>/dev/null >/dev/null
+        sudo apt-get -qq install -y graylog-sidecar 2>/dev/null >/dev/null
         sudo rm /tmp/graylog-sidecar-repository_1-5_all.deb 2>/dev/null >/dev/null
 
         echo "[INFO] - CONFIGURE GRAYLOG SIDECAR ON HOST" | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -377,7 +380,7 @@ function_installGraylogStack () {
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     echo "[INFO] - CONFIGURE FILESYSTEM FOR OPENSEARCH " | logger -p user.info -e -t GRAYLOG-INSTALLER   
-    echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf >/dev/null 
+    echo "vm.max_map_count=262144" | sudo tee /etc/sysctl.d/99-opensearch.conf >/dev/null 
     sudo sysctl -p >/dev/null 
 
     # Create required Folders in the Filesystem
@@ -437,6 +440,10 @@ function_installGraylogStack () {
 
     sudo sed -i "s\GRAYLOG_DATANODE_PASSWORD_SECRET = \"\"\GRAYLOG_DATANODE_PASSWORD_SECRET = \"${SYSTEM_PASSWORD_SECRET}\"\g" ${DATANODE_ENV}
 
+    # set system proxy for docker
+    #
+    # https://docs.docker.com/engine/cli/proxy/
+
 
     if [ "${SYSTEM_PROXY}" != "" ]
     then
@@ -475,7 +482,7 @@ function_addScriptRepositoryToPathVariable () {
     else
         echo "[INFO] - ADD SCRIPT FOLDER TO PATH VARIABLE IN /ETC/BASH.BASHRC " | logger -p user.info -e -t GRAYLOG-INSTALLER        
         echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
-        echo "export PATH=${PATH:+${PATH}:}${SCRIPTFOLDER}" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
+        echo 'export PATH="$PATH:${SCRIPTFOLDER}"' | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
 
         echo "[INFO] - SET AUTOCOMPLETION TO CASE-INSENSITIVE " | logger -p user.info -e -t GRAYLOG-INSTALLER
         echo "" | sudo tee -a /etc/bash.bashrc 2>/dev/null >/dev/null
@@ -486,27 +493,45 @@ function_addScriptRepositoryToPathVariable () {
 function_enableGeoIpLocation () {
     local ADMIN_TOKEN=${1}
     local MAXMIND_DB_TYPES="ASN City Country"
-    local DOWNLOAD_SUCCESS=""
+    local MAXMIND_URL="https://github.com/P3TERX/GeoLite.mmdb/raw/download"
+    local GEOIP_CONFIG_URL="${GRAYLOG_API}/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig"
+    local GEOIP_CONFIG='{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }'
+    local GEOIP_ENABLED=""
+    local ATTEMPT=1
 
-    while [[ ${DOWNLOAD_SUCCESS} != true ]]
+    # Step 1: download each database once; curl retries transient network errors itself
+    for DB_TYPE in ${MAXMIND_DB_TYPES}
     do
-        # Download Maxmind Files (https://github.com/P3TERX/GeoLite.mmdb)
-        for DB_TYPE in ${MAXMIND_DB_TYPES}
-        do
-            echo "[INFO] - DOWNLOAD MAXMIND DATABASE (${DB_TYPE^^}) " | logger -p user.info -e -t GRAYLOG-INSTALLER
-            sudo curl --output-dir ${GRAYLOG_PATH}/maxmind -LOs https://git.io/GeoLite2-${DB_TYPE}.mmdb           
-            
-            # Alternative Source: 
-            # https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-${DB_TYPE}.mmdb 
-        done
+        echo "[INFO] - DOWNLOAD MAXMIND DATABASE (${DB_TYPE^^}) " | logger -p user.info -e -t GRAYLOG-INSTALLER
 
-        echo "[INFO] - ACTIVATE GEOIP PLUGIN " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        curl -s ${GRAYLOG_API}/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d '{ "enabled":true,"enforce_graylog_schema":true,"db_vendor_type":"MAXMIND","city_db_path":"/etc/graylog/server/mmdb/GeoLite2-City.mmdb","asn_db_path":"/etc/graylog/server/mmdb/GeoLite2-ASN.mmdb","refresh_interval_unit":"DAYS","refresh_interval":14,"use_s3":false }' 2>/dev/null >/dev/null    
-
-        local DOWNLOAD_SUCCESS=$(curl -s -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' ${GRAYLOG_API}/system/cluster_config/org.graylog.plugins.map.config.GeoIpResolverConfig | jq .enabled)
-
+        if ! sudo curl -fsSL --retry 5 --retry-delay 10 --retry-connrefused -o ${GRAYLOG_PATH}/maxmind/GeoLite2-${DB_TYPE}.mmdb ${MAXMIND_URL}/GeoLite2-${DB_TYPE}.mmdb
+        then
+            echo "[ERROR] - DOWNLOAD OF MAXMIND DATABASE (${DB_TYPE^^}) FAILED, SKIPPING GEOIP ACTIVATION" | logger -p user.err -e -t GRAYLOG-INSTALLER
+            return 1
+        fi
     done
 
+    # Step 2: retry only the activation until Graylog reports it as enabled
+    while true
+    do
+        echo "[INFO] - ACTIVATE GEOIP PLUGIN (ATTEMPT ${ATTEMPT}/${RETRY_MAX_ATTEMPTS})" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
+        curl -s ${GEOIP_CONFIG_URL} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "${GEOIP_CONFIG}" 2>/dev/null >/dev/null
+        GEOIP_ENABLED=$(curl -s ${GEOIP_CONFIG_URL} -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq -r .enabled 2>/dev/null)
+
+        [[ ${GEOIP_ENABLED} == "true" ]] && break
+
+        if (( ATTEMPT >= RETRY_MAX_ATTEMPTS ))
+        then
+            echo "[ERROR] - GEOIP PLUGIN NOT ENABLED AFTER ${ATTEMPT} ATTEMPTS" | logger -p user.err -e -t GRAYLOG-INSTALLER
+            return 1
+        fi
+
+        (( ATTEMPT++ ))
+        sleep ${RETRY_INTERVAL}s
+    done
+
+    echo "[INFO] - GEOIP PLUGIN ACTIVATED " | logger -p user.info -e -t GRAYLOG-INSTALLER
 }
 
 function_downloadGraylogSidecarBinaries () {
@@ -701,7 +726,7 @@ function_configureSelfMonitoring () {
 
     local ADMIN_TOKEN=${1}
     local LOG_ITEM="evaluation-self-monitoring"
-    local ITEM_TITLE="Evaluation: Self-Monitoring Logs"
+    local ITEM_TITLE="${GRAYLOG_SELF_MONITORING_STREAM_TITLE}"
 
     echo "[INFO] - CREATE INPUT FOR ${LOG_ITEM^^} LOGS (BEATS TCP 5054)" | logger -p user.info -e -t GRAYLOG-INSTALLER
     local MONITORING_INPUT_BEATS=$(curl -s ${GRAYLOG_API}/system/inputs -u ${ADMIN_TOKEN}:token -X POST -H "X-Requested-By: localhost)" -H 'Content-Type: application/json' -d "{ \"global\": true, \"title\": \"Port 5054 Beats | ${ITEM_TITLE}\", \"type\": \"org.graylog.plugins.beats.Beats2Input\", \"configuration\": { \"port\": 5054, \"number_worker_threads\": 2, \"bind_address\": \"0.0.0.0\" }}" | jq '.id')  
@@ -743,7 +768,7 @@ function_displayClusterId () {
     echo -e "[INFO] - SYSTEM URL: \e[4;33mhttp(s)://${GRAYLOG_FQDN}\e[0m"
     echo -e "[INFO] - WINDOWS ACCESS: \e[1;32m\\\\\\\\${GRAYLOG_FQDN}\e[0m (SMB)"
     echo -e "[INFO] - CREDENTIALS STORED IN: \e[0;37m${GRAYLOG_PATH}/your_graylog_credentials.txt\e[0m"    
-    echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/${GRAYLOG_ENV}\e[0m"
+    echo -e "[INFO] - FOR ADDITIONAL CONFIGURATIONS PLEASE DO REVIEW: \e[0;37m${GRAYLOG_PATH}/${GRAYLOG_SERVER_ENV}\e[0m"
     echo ""
     echo "       *******************************************************"
     echo "       *                                                    *"
@@ -873,7 +898,8 @@ function_startAllStreams () {
 function_configureEvaluationSetup () {
 
     local ADMIN_TOKEN=${1}
-    local SELF_MONITORING_STREAM=$(curl -s ${GRAYLOG_API}/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "Evaluation: Self Monitoring Logs")' | jq -r .id)
+    local ITEM_TITLE=${GRAYLOG_SELF_MONITORING_STREAM_TITLE}
+    local SELF_MONITORING_STREAM=$(curl -s ${GRAYLOG_API}/streams -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" -H 'Content-Type: application/json' | jq .streams | jq '.[] | select(.title == "${$TEM_TITLE}")' | jq -r .id)
  
     if [ "${GRAYLOG_LICENSE_ENTERPRISE}" == "true" ]
     then        
@@ -918,24 +944,35 @@ function_configureEvaluationSetup () {
 function_addEvaluationHostSidecarConfigurationTags () {
     # needs to run after configuration variables have been created
     local ADMIN_TOKEN=${1}
-    local COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token ${GRAYLOG_API}/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-self-*"))' | jq -r .id | xargs)
+    local ATTEMPT=1
+    local COLLECTOR_CONFIGURATION_IDS=""
 
-    while [[ ${COLLECTOR_CONFIGURATION_IDS}  == "" ]]
+    while true
     do
-        COLLECTOR_CONFIGURATION_IDS=$(curl -s -u $ADMIN_TOKEN:token ${GRAYLOG_API}/sidecar/configurations | jq .configurations | jq '.[] | select(.name | test("my-self-*"))' | jq -r .id | xargs)
-        echo "[INFO] - WAIT FOR GRAYLOG SIDECAR COLLECTOR TEMPLATES TO BECOME CONFIGURABLE " | logger -p user.info -e -t GRAYLOG-INSTALLER
+        COLLECTOR_CONFIGURATION_IDS=$(curl -s -u ${ADMIN_TOKEN}:token ${GRAYLOG_API}/sidecar/configurations | jq -r '.configurations[] | select(.name | test("^my-self-")) | .id' 2>/dev/null | xargs)
 
+        [[ -n ${COLLECTOR_CONFIGURATION_IDS} ]] && break
+
+        if (( ATTEMPT >= RETRY_MAX_ATTEMPTS ))
+        then
+            echo "[ERROR] - SIDECAR COLLECTOR TEMPLATES NOT AVAILABLE AFTER ${ATTEMPT} ATTEMPTS, SKIPPING HOST TAG CONFIGURATION" | logger -p user.err -e -t GRAYLOG-INSTALLER
+            return 1
+        fi
+
+        echo "[INFO] - WAIT FOR GRAYLOG SIDECAR COLLECTOR TEMPLATES TO BECOME CONFIGURABLE (ATTEMPT ${ATTEMPT}/${RETRY_MAX_ATTEMPTS})" | logger -p user.info -e -t GRAYLOG-INSTALLER
+        (( ATTEMPT++ ))
+        sleep ${RETRY_INTERVAL}s
     done
 
     for COLLECTOR_CONFIGURATION_ID in ${COLLECTOR_CONFIGURATION_IDS}
     do
-        local COLLECTOR_ID=$(curl -s -u $ADMIN_TOKEN:token ${GRAYLOG_API}/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .collector_id)
-        local COLLECTOR_CONFIGURATION_NAME=$(curl -s -u $ADMIN_TOKEN:token ${GRAYLOG_API}/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .name)
-        local COLLECTOR_CONFIGURATION_COLOR=$(curl -s -u $ADMIN_TOKEN:token ${GRAYLOG_API}/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .color)
-        local COLLECTOR_CONFIGURATION_TEMPLATE=$(curl -s -u $ADMIN_TOKEN:token ${GRAYLOG_API}/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} | jq .template)
+        # One GET per configuration instead of four; jq builds the PUT body
+        local COLLECTOR_CONFIGURATION=$(curl -s -u ${ADMIN_TOKEN}:token ${GRAYLOG_API}/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID})
+        local COLLECTOR_CONFIGURATION_NAME=$(echo "${COLLECTOR_CONFIGURATION}" | jq -r .name)
+        local COLLECTOR_CONFIGURATION_PAYLOAD=$(echo "${COLLECTOR_CONFIGURATION}" | jq --arg TAG "${GRAYLOG_SIDECAR_TAG}" '{id, name, color, collector_id, template, tags: [$TAG]}')
 
         echo "[INFO] - CREATE HOST SIDECAR CONFIGURATION TAG ON ${COLLECTOR_CONFIGURATION_NAME^^}" | logger -p user.info -e -t GRAYLOG-INSTALLER
-        curl -s ${GRAYLOG_API}/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "{\"id\":\"${COLLECTOR_CONFIGURATION_ID}\",\"name\":${COLLECTOR_CONFIGURATION_NAME},\"color\":${COLLECTOR_CONFIGURATION_COLOR},\"collector_id\":${COLLECTOR_ID},\"template\":${COLLECTOR_CONFIGURATION_TEMPLATE},\"tags\":[\"${GRAYLOG_SIDECAR_TAG}\"]}" 2>/dev/null >/dev/null
+        curl -s ${GRAYLOG_API}/sidecar/configurations/${COLLECTOR_CONFIGURATION_ID} -u ${ADMIN_TOKEN}:token -X PUT -H "X-Requested-By: localhost" -H 'Content-Type: application/json' -d "${COLLECTOR_CONFIGURATION_PAYLOAD}" 2>/dev/null >/dev/null
     done
 }
 
@@ -988,19 +1025,32 @@ function_configureEnterpriseFeatures () {
 function_configureSecurityFeatures () {
 
     local ADMIN_TOKEN=${1}
-    
+
     if [[ "$GRAYLOG_LICENSE_SECURITY" == "true" ]]
     then
-        local ACTIVE_AI="" 
+        local ACTIVE_AI=""
+        local ATTEMPT=1
         local ILLUMINATE_SECURITY_PROCESSING_PACK_IDS='["05dc479f-9659-476b-b888-9fdaae3a7777","7b319ad0-352c-48b9-b7d9-877fc1720164"]'
         local ILLUMINATE_SECURITY_SPOTLIGHT_PACK_IDS='["10da1609-54b1-4e73-8757-a5326379ad26","5289b02d-ebb9-4c93-baf8-baf05e1c138b","0a9389f4-d3c0-4d8f-8025-0f29ff0355d7","90e37be0-d112-44f8-afe7-eadcafbe4ba3","fd45efec-c972-4616-a9e2-d68930ce9478"]'
-        
-        while [[ ${ACTIVE_AI} == "true" ]] || [[ ${ACTIVE_AI} == "" ]]
-        do 
-            echo "[INFO] - DISABLE INVESTIGATION AI REPORTS " | logger -p user.info -e -t GRAYLOG-INSTALLER
-            
+
+        while true
+        do
+            echo "[INFO] - DISABLE INVESTIGATION AI REPORTS (ATTEMPT ${ATTEMPT}/${RETRY_MAX_ATTEMPTS})" | logger -p user.info -e -t GRAYLOG-INSTALLER
+
             curl -s ${GRAYLOG_API}/plugins/org.graylog.plugins.securityapp.investigations/ai/config/ai_enabled -u ${ADMIN_TOKEN}:token -X DELETE -H "X-Requested-By: localhost" 2>/dev/null >/dev/null
-            ACTIVE_AI=$(curl -s ${GRAYLOG_API}/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq .investigations_ai_reports_enabled) 2>/dev/null >/dev/null
+            ACTIVE_AI=$(curl -s ${GRAYLOG_API}/plugins/org.graylog.plugins.securityapp.investigations/ai/config -u ${ADMIN_TOKEN}:token -X GET -H "X-Requested-By: localhost" | jq -r .investigations_ai_reports_enabled 2>/dev/null)
+
+            # Same exit condition as before: anything except "true" or an empty answer
+            [[ -n ${ACTIVE_AI} && ${ACTIVE_AI} != "true" ]] && break
+
+            if (( ATTEMPT >= RETRY_MAX_ATTEMPTS ))
+            then
+                echo "[WARN] - COULD NOT DISABLE INVESTIGATION AI REPORTS AFTER ${ATTEMPT} ATTEMPTS, CONTINUING" | logger -p user.warning -e -t GRAYLOG-INSTALLER
+                break
+            fi
+
+            (( ATTEMPT++ ))
+            sleep ${RETRY_INTERVAL}s
         done
 
         echo "[INFO] - ACTIVATE ILLUMINATE SECURITY PACKAGES " | logger -p user.info -e -t GRAYLOG-INSTALLER
@@ -1009,7 +1059,7 @@ function_configureSecurityFeatures () {
         echo "[INFO] - ILLUMINATE SECURITY PACKAGES ACTIVATED" | logger -p user.info -e -t GRAYLOG-INSTALLER
     else
         echo "[INFO] - NO SECURITY LICENSE AVAILABLE, SKIPPING ILLUMINATE ACTIVATION " | logger -p user.info -e -t GRAYLOG-INSTALLER
-    fi 
+    fi
 
 }
 
@@ -1075,7 +1125,7 @@ then
 elif [[ $(cat ${GRAYLOG_PATH}/.installation 2>/dev/null) == "" ]]
 then
     function_checkInstallUser
-    sudo date 2>/dev/null >/dev/null    
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &    
     function_checkInternetConnectivity
   
     clear
@@ -1099,6 +1149,7 @@ then
 
     echo "[INFO] - INSTALL GRAYLOG STACK, GIVE IT SOME TIME"
     function_installGraylogStack
+    wait
     function_startGraylogStack
     function_addDataNodesToCluster ${GRAYLOG_ADMIN}
 
@@ -1142,7 +1193,7 @@ then
     echo "${GRAYLOG_ADMIN_TOKEN}" | sudo tee ${GRAYLOG_PATH}/.admintoken 2>/dev/null >/dev/null 
 
     sudo cp ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump /etc/cron.daily/
-    sudo cp $0 /etc/cron.hourly/install-graylog
+    sudo install -m 0755 "$0" /etc/cron.hourly/install-graylog
     sudo rm -- $0
 
     echo "[INFO] - BASE INSTALLATION SUCCESSFULLY FINISHED, WAITING FOR LICENSE" | logger -p user.info -e -t GRAYLOG-INSTALLER
