@@ -280,17 +280,7 @@ function_installScriptDependencies () {
     sudo apt-get -qq update -y 2>/dev/null >/dev/null
     sudo apt-get -qq autoremove -y 2>/dev/null >/dev/null
 
-    for DEP in ${SCRIPT_DEPENDENCIES}
-    do 
-        if [[ ${DEP} != $(dpkg -l | grep -E "(^| )${DEP}($| )" | cut -d" " -f3) ]]
-        then
-            echo "[INFO] - INSTALL SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-            sudo apt-get -qq install -y ${DEP} 2>/dev/null >/dev/null
-            wait
-        else
-            echo "[INFO] - SKIP SCRIPT DEPENDENCY: ${DEP^^} " | logger -p user.info -e -t GRAYLOG-INSTALLER
-        fi
-    done
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -qq -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o DPkg::Lock::Timeout=300 install ${SCRIPT_DEPENDENCIES} >/dev/null 2>&1
 
     echo "[INFO] - ADD ${USER^^} TO TCPDUMP GROUP" | logger -p user.info -e -t GRAYLOG-INSTALLER
     sudo usermod -aG tcpdump ${USER} 2>/dev/null >/dev/null
