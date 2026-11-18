@@ -84,6 +84,7 @@ WAIT_PREFLIGHT_INTERVAL="5"
 # Runtime
 LOG_TAG="GRAYLOG-INSTALLER"
 LOG_FILE="${HOME:-/tmp}/graylog-installer.log"
+SYSLOG_FILE="/var/log/syslog"
 LOCK_FILE="/run/lock/graylog-installer.lock"
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null)"
 INSTALL_USER="$(id -un)"
@@ -116,8 +117,9 @@ fi
 _log () {
     local priority=${1} label=${2}
     shift 2
-    logger -p "user.${priority}" -t "${LOG_TAG}" -- "[${label}] - $*" -e -t GRAYLOG-INSTALLER # 2>/dev/null
+    logger -p "user.${priority}" -t "${LOG_TAG}" -- "[${label}] - $*" 2>/dev/null
     printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" >>"${LOG_FILE}" 2>/dev/null
+    printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" >>"${SYSLOG_FILE}" 2>/dev/null
     return 0
 }
 log_info ()  { _log info    INFO  "$@"; }
