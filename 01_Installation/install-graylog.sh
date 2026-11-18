@@ -118,7 +118,7 @@ _log () {
     local priority=${1} label=${2}
     shift 2
     logger -p "user.${priority}" -t "${LOG_TAG}" -- "[${label}] - $*" 2>/dev/null
-    printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" | sudo tee -a "${LOG_FILE}" 2>/dev/null >/dev/null
+    printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" | tee -a "${LOG_FILE}" 2>/dev/null >/dev/null
     printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" | sudo tee -a "${SYSLOG_FILE}" 2>/dev/null >/dev/null
     return 0
 }
