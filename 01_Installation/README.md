@@ -4,7 +4,7 @@ Create a virtual machine:
 
 - CPU Cores: at least 8
 - Memory: at least 32 GB
-- OS Storage: at least 300 GB available in [ **/var/lib/docker** ] as Docker Containers and Volumes usually require a significant amount of available space
+- OS Storage: at least 300 GB available in [ **/var** ] as Docker Containers and Volumes usually require a significant amount of available space
 - OPT Storage: at least 900 GB in [ **/opt** ] (depending on the amount of data you plan to Ingest over a defined timeframe)
 - Operating System: Ubuntu LTS, Standard Setup without additional packages
 - Configured IP-Address, DNS resolution and Access to the Internet
@@ -22,7 +22,7 @@ Depending on your setup, you might want to add hypervisor-specific guest tools a
 
 Get it from here:
 
-    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/Graylog-7.2/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && ./install-graylog.sh
+    curl -sO https://raw.githubusercontent.com/fjagwitz/Graylog-Cookbooks/refs/heads/Graylog-7.2.2/01_Installation/install-graylog.sh && chmod +x install-graylog.sh && ./install-graylog.sh
 
 The system is accessible via
 

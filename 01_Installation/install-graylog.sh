@@ -5,7 +5,7 @@
 # author:            Friedrich von Jagwitz
 # email:             fvj@graylog.com
 # date:              2026-11-11
-# version:           7.2.2
+# version:           7.2
 # usage:             bash install-graylog.sh
 # notes:             Must be saved to a file and run as a regular user with
 #                    sudo rights (do not pipe it into bash). After the base
@@ -19,7 +19,7 @@ set -o pipefail
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.2.2"
+GRAYLOG_VERSION="7.2"
 GRAYLOG_HOME="/opt"
 GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
@@ -60,7 +60,7 @@ SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
 SYSTEM_REQUIREMENTS_OPT="900"
-SYSTEM_REQUIREMENTS_VAR="100"
+SYSTEM_REQUIREMENTS_VAR="300"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Collector's Versions
@@ -93,6 +93,21 @@ KEEPALIVE_PID=""
 TMP_PATHS=()
 GL_AUTH=""
 GL_LAST_STATUS=""
+GL_LAST_RESPONSE=""
+GL_EXPECTED_STATUS=""
+FAILED_ACTIONS=()
+
+# Colours only on a terminal and only if NO_COLOR is not set (https://no-color.org)
+if [[ -t 2 && -z ${NO_COLOR:-} ]]
+then
+    C_YELLOW=$'\e[1;33m'
+    C_GREEN=$'\e[1;32m'
+    C_RESET=$'\e[0m'
+else
+    C_YELLOW=""
+    C_GREEN=""
+    C_RESET=""
+fi
 
 ###############################################################################
 #
@@ -110,8 +125,59 @@ log_warn ()  { _log warning WARN  "$@"; }
 log_error () { _log err     ERROR "$@"; }
 
 # Console + syslog
-warn () { echo "[WARN] - $*" >&2; log_warn "$@"; }
+warn () { printf '%s[WARN] - %s%s\n' "${C_YELLOW}" "$*" "${C_RESET}" >&2; log_warn "$@"; }
 die ()  { echo "[ERROR] - $*" >&2; log_error "$@"; exit 1; }
+
+# A non-fatal action failed: show it, log it and remember it for the final summary
+fail () {
+    warn "$@"
+    FAILED_ACTIONS+=("$*")
+}
+
+# Green [INPUT] prompt text for 'read -p'
+input_prompt () {
+    printf '%s[INPUT] - %s%s' "${C_GREEN}" "$*" "${C_RESET}"
+}
+
+# run_step DESCRIPTION COMMAND [ARGS...]
+#   Runs a non-fatal installation step. Records a failure if the step returns
+#   non-zero without having reported a more specific error itself.
+run_step () {
+    local description=${1} failures_before=${#FAILED_ACTIONS[@]} rc
+    shift
+
+    log_info "STEP: ${description}"
+    "$@"
+    rc=$?
+
+    if (( rc != 0 )) && (( ${#FAILED_ACTIONS[@]} == failures_before ))
+    then
+        fail "${description} FAILED (DETAILS: ${LOG_FILE})"
+    elif (( ${#FAILED_ACTIONS[@]} > failures_before ))
+    then
+        log_warn "STEP COMPLETED WITH ERRORS: ${description}"
+    fi
+
+    return "${rc}"
+}
+
+# Summary of all failed actions, shown when the script ends
+function_showFailureSummary () {
+    local action
+
+    if (( ${#FAILED_ACTIONS[@]} == 0 ))
+    then
+        return 0
+    fi
+
+    warn "${#FAILED_ACTIONS[@]} ACTION(S) FAILED - PLEASE REVIEW AND FIX THEM MANUALLY:"
+    for action in "${FAILED_ACTIONS[@]}"
+    do
+        printf '%s         - %s%s\n' "${C_YELLOW}" "${action}" "${C_RESET}" >&2
+        log_warn "  - ${action}"
+    done
+    warn "DETAILS: ${LOG_FILE} AND 'journalctl -t ${LOG_TAG}'"
+}
 
 # Progress output: console when interactive, syslog otherwise (cron)
 progress () {
@@ -140,13 +206,21 @@ compose () {
 }
 
 # download URL DESTINATION [MODE] - downloads as the current user (keeps proxy
-# settings), fails on HTTP errors and installs the file with sudo
+# settings) and fails on HTTP errors. The file is installed with sudo only if the
+# target folder is not writable by the current user, so temporary files stay
+# owned by the user and can be cleaned up without root privileges.
 download () {
     local url=${1} destination=${2} mode=${3:-0644} tmp_file
+    local -a install_cmd=(install)
+
+    if [[ ! -w $(dirname "${destination}") ]]
+    then
+        install_cmd=(sudo install)
+    fi
 
     tmp_file=$(mktemp) || return 1
     if curl -fsSL --retry 5 --retry-delay 5 --retry-connrefused --connect-timeout 15 -o "${tmp_file}" "${url}" >>"${LOG_FILE}" 2>&1 \
-        && sudo install -m "${mode}" "${tmp_file}" "${destination}"
+        && "${install_cmd[@]}" -m "${mode}" "${tmp_file}" "${destination}" 2>>"${LOG_FILE}"
     then
         rm -f "${tmp_file}"
         return 0
@@ -164,6 +238,10 @@ sed_escape () {
 
 # gl_api METHOD PATH_OR_URL [JSON]
 #   Prints the response body; returns non-zero on connection or HTTP errors.
+#   GL_LAST_STATUS / GL_LAST_RESPONSE hold status and body of the last call
+#   (only visible to the caller when gl_api does not run in a subshell).
+#   HTTP codes listed in GL_EXPECTED_STATUS (e.g. GL_EXPECTED_STATUS="400")
+#   still return non-zero but are logged as INFO instead of ERROR.
 #   Credentials come from GL_AUTH ("user:password" or "<token>:token") and are
 #   passed through a file descriptor, so they never show up in the process list.
 gl_api () {
@@ -171,6 +249,8 @@ gl_api () {
     local -a curl_args
 
     if [[ ${target} == http* ]]; then url=${target}; else url="${GRAYLOG_API}${target}"; fi
+    GL_LAST_STATUS=""
+    GL_LAST_RESPONSE=""
 
     auth=${GL_AUTH}
     auth=${auth//\\/\\\\}
@@ -203,10 +283,16 @@ gl_api () {
     status=${response##*$'\n'}
     response=${response%$'\n'*}
     GL_LAST_STATUS=${status}
+    GL_LAST_RESPONSE=${response}
 
     if [[ ${status} != 2?? ]]
     then
-        log_error "API ${method} ${url%%\?*} - HTTP ${status}: ${response:0:300}"
+        if [[ " ${GL_EXPECTED_STATUS} " == *" ${status} "* ]]
+        then
+            log_info "API ${method} ${url%%\?*} - HTTP ${status} (EXPECTED): ${response:0:300}"
+        else
+            log_error "API ${method} ${url%%\?*} - HTTP ${status}: ${response:0:300}"
+        fi
         return 1
     fi
 
@@ -221,13 +307,26 @@ gl_try () {
     log_info "${description}"
     if ! gl_api "$@" >/dev/null
     then
-        warn "${description} FAILED (DETAILS: ${LOG_FILE})"
+        fail "${description} FAILED (HTTP ${GL_LAST_STATUS:-000}, DETAILS: ${LOG_FILE})"
         return 1
     fi
 }
 
+function_removeScript () {
+    # The installer removes itself after use; a failure here is not fatal
+    [[ -f ${SCRIPT_PATH} ]] || return 0
+    rm -f -- "${SCRIPT_PATH}" 2>/dev/null \
+        || sudo -n rm -f -- "${SCRIPT_PATH}" 2>/dev/null \
+        || fail "COULD NOT REMOVE ${SCRIPT_PATH}, PLEASE DELETE IT MANUALLY"
+}
+
 function_writeState () {
-    echo "${1}" | sudo tee "${GRAYLOG_STATE_FILE}" >/dev/null
+    if ! echo "${1}" | sudo tee "${GRAYLOG_STATE_FILE}" >/dev/null
+    then
+        log_error "COULD NOT WRITE STATE '${1}' TO ${GRAYLOG_STATE_FILE}"
+        return 1
+    fi
+    log_info "INSTALLATION STATE: ${1^^}"
 }
 
 function_onExit () {
@@ -235,10 +334,17 @@ function_onExit () {
 
     if [[ -n ${KEEPALIVE_PID} ]]; then kill "${KEEPALIVE_PID}" 2>/dev/null; fi
 
+    # Temporary files may have been touched by root (sudo); fall back to sudo without prompting
     for tmp_path in "${TMP_PATHS[@]}"
     do
-        rm -rf -- "${tmp_path}"
+        [[ -e ${tmp_path} ]] || continue
+        rm -rf -- "${tmp_path}" 2>/dev/null \
+            || sudo -n rm -rf -- "${tmp_path}" 2>/dev/null \
+            || fail "COULD NOT REMOVE TEMPORARY PATH ${tmp_path}, PLEASE DELETE IT MANUALLY"
     done
+
+    # Everything that failed along the way, in one list
+    function_showFailureSummary
 
     if (( exit_code != 0 )) && [[ ${INSTALL_PHASE} == "install" ]]
     then
@@ -278,7 +384,7 @@ function_checkInstallUser () {
 function_checkSnapshot () {
     local snapshot_created
 
-    read -rp "[INPUT] - Please confirm that you created a Snapshot of the VM before running this Script [no/yes]: " snapshot_created
+    read -rp "$(input_prompt "Please confirm that you created a Snapshot of the VM before running this Script [no/yes]: ")" snapshot_created
 
     if [[ ${snapshot_created:-no} != "yes" ]]
     then
@@ -291,7 +397,7 @@ function_defineAdminName () {
 
     while true
     do
-        read -rp "[INPUT] - Please add the name of your central Administration User [eval-admin]: " admin_name
+        read -rp "$(input_prompt "Please add the name of your central Administration User [eval-admin]: ")" admin_name
         admin_name=${admin_name:-eval-admin}
 
         if [[ ! ${admin_name} =~ ^[A-Za-z0-9_-]{4,12}$ ]]
@@ -314,7 +420,7 @@ function_defineAdminPassword () {
 
     while true
     do
-        IFS= read -rsp "[INPUT] - Please add the central Administration Password [MyP@ssw0rd]: " password_1
+        IFS= read -rsp "$(input_prompt "Please add the central Administration Password [MyP@ssw0rd]: ")" password_1
         echo
         password_1=${password_1:-MyP@ssw0rd}
 
@@ -325,7 +431,7 @@ function_defineAdminPassword () {
             continue
         fi
 
-        IFS= read -rsp "[INPUT] - Please confirm the central Administration Password: " password_2
+        IFS= read -rsp "$(input_prompt "Please confirm the central Administration Password: ")" password_2
         echo
         password_2=${password_2:-MyP@ssw0rd}
 
@@ -339,15 +445,59 @@ function_defineAdminPassword () {
     GRAYLOG_PASSWORD=${password_1}
 }
 
+function_getDnsServers () {
+    # Prints the upstream DNS servers. On Ubuntu /etc/resolv.conf points to the local
+    # systemd-resolved stub (127.0.0.53), which also answers from /etc/hosts - so the
+    # real upstream servers are taken from /run/systemd/resolve/resolv.conf instead.
+    local resolv_conf
+
+    for resolv_conf in /run/systemd/resolve/resolv.conf /etc/resolv.conf
+    do
+        [[ -r ${resolv_conf} ]] || continue
+        awk '$1 == "nameserver" && $2 !~ /^127\./ && $2 != "::1" {print $2}' "${resolv_conf}" | grep . && return 0
+    done
+
+    return 1
+}
+
+function_resolveFqdn () {
+    # FQDN - prints the IPv4 addresses the FQDN has in DNS (as clients see it), without /etc/hosts
+    local fqdn=${1} dns_server answer
+
+    for dns_server in $(function_getDnsServers)
+    do
+        answer=$(dig +short +time=3 +tries=1 A "${fqdn}" "@${dns_server}" 2>/dev/null | grep -E '^[0-9]+(\.[0-9]+){3}$')
+        if [[ -n ${answer} ]]
+        then
+            log_info "DNS SERVER ${dns_server} RESOLVES ${fqdn^^} TO: ${answer//$'\n'/, }"
+            printf '%s\n' "${answer}"
+            return 0
+        fi
+        log_info "DNS SERVER ${dns_server} HAS NO A RECORD FOR ${fqdn^^}"
+    done
+
+    return 1
+}
+
 function_getSystemFqdn () {
-    local system_ips fqdn fqdn_ips ip valid_fqdn check_ignore
+    local system_ips fqdn fqdn_ips local_answer ip valid_fqdn check_ignore
     local fqdn_regex='^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$'
 
-    system_ips=$(ip -o -4 addr show | awk '{print $4}' | cut -d "/" -f1)
+    # Only addresses clients can reach (no loopback)
+    system_ips=$(ip -o -4 addr show scope global 2>/dev/null | awk '{print $4}' | cut -d "/" -f1)
+    if [[ -z ${system_ips} ]]
+    then
+        fail "COULD NOT DETERMINE THE IP ADDRESSES OF THIS SYSTEM"
+    fi
+
+    if ! function_getDnsServers >/dev/null
+    then
+        warn "NO UPSTREAM DNS SERVER CONFIGURED, THE FQDN CANNOT BE VALIDATED"
+    fi
 
     while true
     do
-        read -rp "[INPUT] - Please add the fqdn of your Graylog Instance [eval.graylog.local]: " fqdn
+        read -rp "$(input_prompt "Please add the fqdn of your Graylog Instance [eval.graylog.local]: ")" fqdn
         fqdn=${fqdn:-eval.graylog.local}
         fqdn=${fqdn,,}
 
@@ -358,7 +508,7 @@ function_getSystemFqdn () {
         fi
 
         valid_fqdn="false"
-        fqdn_ips=$(dig +short A "${fqdn}" 2>/dev/null | grep -E '^[0-9]+(\.[0-9]+){3}$')
+        fqdn_ips=$(function_resolveFqdn "${fqdn}")
 
         for ip in ${fqdn_ips}
         do
@@ -370,10 +520,29 @@ function_getSystemFqdn () {
 
         if [[ ${valid_fqdn} == "true" ]]
         then
+            log_info "FQDN ${fqdn^^} RESOLVES TO THIS SYSTEM"
             break
         fi
 
-        read -rp "[INPUT] - The FQDN you provided does not resolve to an IP address of this system; continue anyway? [no/yes]: " check_ignore
+        # Explain why the check failed
+        if [[ -n ${fqdn_ips} ]]
+        then
+            warn "${fqdn^^} RESOLVES TO ${fqdn_ips//$'\n'/, } IN DNS, BUT THIS SYSTEM HAS ${system_ips//$'\n'/, }"
+        else
+            local_answer=$(getent ahostsv4 "${fqdn}" 2>/dev/null | awk 'NR==1 {print $1}')
+            if [[ ${local_answer} == 127.* ]]
+            then
+                warn "${fqdn^^} HAS NO DNS RECORD; IT ONLY RESOLVES LOCALLY TO ${local_answer} (/etc/hosts), WHICH CLIENTS CANNOT USE"
+            elif [[ -n ${local_answer} ]]
+            then
+                warn "${fqdn^^} HAS NO DNS RECORD; IT ONLY RESOLVES LOCALLY (/etc/hosts) TO ${local_answer}"
+            else
+                warn "${fqdn^^} CANNOT BE RESOLVED"
+            fi
+            warn "PLEASE CREATE A DNS A RECORD: ${fqdn} -> $(head -n 1 <<<"${system_ips}")"
+        fi
+
+        read -rp "$(input_prompt "The FQDN you provided does not resolve to an IP address of this system; continue anyway? [no/yes]: ")" check_ignore
         if [[ ${check_ignore:-no} == "yes" ]]
         then
             warn "CONTINUE WITHOUT VALIDATED FQDN, EXPECTING PRODUCT ISSUES"
@@ -419,7 +588,7 @@ function_checkPatchLevel () {
         done
 
         log_info "SYSTEM REBOOT AFTER UPDATE INSTALLATION"
-        if [[ -f ${SCRIPT_PATH} ]]; then rm -f -- "${SCRIPT_PATH}"; fi
+        function_removeScript
         sudo reboot
         exit 0
     fi
@@ -496,7 +665,7 @@ function_installScriptDependencies () {
 
     # The package lists were refreshed by function_checkPatchLevel
     log_info "CLEAN UP EVALUATION SYSTEM"
-    apt_get autoremove || log_warn "APT AUTOREMOVE FAILED"
+    apt_get autoremove || fail "APT AUTOREMOVE FAILED"
 
     log_info "ADD SYSTEM REQUIREMENTS"
     # shellcheck disable=SC2086 # word splitting intended
@@ -505,7 +674,7 @@ function_installScriptDependencies () {
     if getent group tcpdump >/dev/null
     then
         log_info "ADD ${INSTALL_USER^^} TO TCPDUMP GROUP"
-        sudo usermod -aG tcpdump "${INSTALL_USER}" || log_warn "COULD NOT ADD ${INSTALL_USER^^} TO TCPDUMP GROUP"
+        sudo usermod -aG tcpdump "${INSTALL_USER}" || fail "COULD NOT ADD ${INSTALL_USER^^} TO TCPDUMP GROUP"
     fi
 }
 
@@ -557,7 +726,7 @@ function_installDocker () {
     fi
 
     log_info "ADD ${INSTALL_USER^^} TO DOCKER GROUP"
-    sudo usermod -aG docker "${INSTALL_USER}" || log_warn "COULD NOT ADD ${INSTALL_USER^^} TO DOCKER GROUP"
+    sudo usermod -aG docker "${INSTALL_USER}" || fail "COULD NOT ADD ${INSTALL_USER^^} TO DOCKER GROUP"
 
     log_info "RESTART DOCKER SERVICE"
     { sudo systemctl daemon-reload && sudo systemctl enable docker.service && sudo systemctl restart docker.service; } >>"${LOG_FILE}" 2>&1 \
@@ -568,7 +737,7 @@ function_installDocker () {
 function_installGraylogSidecarOnEvaluationHost () {
     local sidecar_token=${1}
     local sidecar_yaml="/etc/graylog/sidecar/sidecar.yml"
-    local repo_deb
+    local repo_dir repo_deb
 
     if dpkg-query -W -f='${Status}' graylog-sidecar 2>/dev/null | grep -q "install ok installed"
     then
@@ -577,8 +746,9 @@ function_installGraylogSidecarOnEvaluationHost () {
     fi
 
     log_info "ADD GRAYLOG SIDECAR REPOSITORY"
-    repo_deb=$(mktemp --suffix=.deb) || return 1
-    TMP_PATHS+=("${repo_deb}")
+    repo_dir=$(mktemp -d) || return 1
+    TMP_PATHS+=("${repo_dir}")
+    repo_deb="${repo_dir}/${GRAYLOG_SIDECAR_REPO_DEB}"
     download "https://packages.graylog2.org/repo/packages/${GRAYLOG_SIDECAR_REPO_DEB}" "${repo_deb}" 0644 || return 1
     run_logged sudo dpkg -i "${repo_deb}" || return 1
 
@@ -587,7 +757,17 @@ function_installGraylogSidecarOnEvaluationHost () {
     apt_get install graylog-sidecar || return 1
 
     log_info "CONFIGURE GRAYLOG SIDECAR ON HOST"
-    sudo cp -n "${sidecar_yaml}" "${sidecar_yaml}.bak"
+    # Keep the original configuration once. An explicit check instead of 'cp -n' / '--update=none':
+    # coreutils >= 9.2 warns about -n, and coreutils < 9.3 (Ubuntu 22.04) has no --update=none.
+    if ! sudo test -f "${sidecar_yaml}"
+    then
+        log_error "${sidecar_yaml} NOT FOUND AFTER SIDECAR INSTALLATION"
+        return 1
+    fi
+    if ! sudo test -e "${sidecar_yaml}.bak"
+    then
+        sudo cp -p "${sidecar_yaml}" "${sidecar_yaml}.bak" || fail "COULD NOT BACK UP ${sidecar_yaml}"
+    fi
     # Works whether the keys are commented out or not; only the first match of each key is changed
     sudo sed -E -i \
         -e "0,/^#?[[:space:]]*server_url:/ s|^#?[[:space:]]*server_url:.*|server_url: \"$(sed_escape "${GRAYLOG_API}")/\"|" \
@@ -610,7 +790,7 @@ function_setEnvValue () {
     sudo sed -i "s|${key} = \"\"|${key} = \"$(sed_escape "${value}")\"|g" "${file}" || return 1
     if ! sudo grep -qF "${key} = \"${value}\"" "${file}"
     then
-        warn "COULD NOT SET ${key} IN ${file}"
+        fail "COULD NOT SET ${key} IN ${file}"
         return 1
     fi
 }
@@ -630,8 +810,13 @@ function_installGraylogStack () {
 
     # Stop and disable ttyS0 Service
     log_info "STOP AND DISABLE SERVICE FOR TTYS0 TO AVOID UNNECESSARY LOGS"
-    sudo systemctl stop serial-getty@ttyS0.service >/dev/null 2>&1
-    sudo systemctl mask serial-getty@ttyS0.service >/dev/null 2>&1
+    if systemctl list-unit-files 'serial-getty@.service' >/dev/null 2>&1
+    then
+        run_logged sudo systemctl stop serial-getty@ttyS0.service \
+            || log_info "SERIAL-GETTY@TTYS0 WAS NOT RUNNING"
+        run_logged sudo systemctl mask serial-getty@ttyS0.service \
+            || fail "COULD NOT DISABLE SERIAL-GETTY@TTYS0 (MAY CAUSE ADDITIONAL LOG MESSAGES)"
+    fi
 
     # Configure vm.max_map_count for Opensearch (https://docs.opensearch.org/2.19/install-and-configure/install-opensearch/index)
     log_info "CONFIGURE FILESYSTEM FOR OPENSEARCH"
@@ -658,7 +843,7 @@ function_installGraylogStack () {
     # Reformat all Windows files to DOS format
     log_info "REFORMAT WINDOWS FILES TO DOS CRLF"
     sudo find "${GRAYLOG_PATH}/sources" "${GRAYLOG_PATH}/lookuptables" -type f -exec unix2dos -q -- {} + >>"${LOG_FILE}" 2>&1 \
-        || log_warn "SOME FILES COULD NOT BE CONVERTED TO CRLF"
+        || fail "SOME FILES COULD NOT BE CONVERTED TO CRLF"
 
     # Adapting Permissions for proper access by the Datanode Containers (999:999)
     log_info "SET PERMISSIONS FOR UID/GID 999 (DATANODE)"
@@ -688,6 +873,7 @@ function_installGraylogStack () {
     function_setEnvValue "${graylog_env}" GRAYLOG_ROOT_USERNAME "${GRAYLOG_ADMIN}"                       || die "COULD NOT CONFIGURE ${graylog_env}"
     function_setEnvValue "${graylog_env}" GRAYLOG_ROOT_PASSWORD_SHA2 "${system_root_password_sha2}"      || die "COULD NOT CONFIGURE ${graylog_env}"
     function_setEnvValue "${graylog_env}" GRAYLOG_PASSWORD_SECRET "${system_password_secret}"            || die "COULD NOT CONFIGURE ${graylog_env}"
+    # setEnvValue reports failures itself; these two settings are not fatal
     function_setEnvValue "${graylog_env}" GRAYLOG_HTTP_EXTERNAL_URI "https://${GRAYLOG_FQDN}/"
     function_setEnvValue "${graylog_env}" GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL "https://${GRAYLOG_FQDN}"
     function_setEnvValue "${datanode_env}" GRAYLOG_DATANODE_PASSWORD_SECRET "${system_password_secret}"  || die "COULD NOT CONFIGURE ${datanode_env}"
@@ -698,31 +884,35 @@ function_installGraylogStack () {
         sudo sed -i \
             -e "s|# GRAYLOG_HTTP_PROXY_URI = \"\"|GRAYLOG_HTTP_PROXY_URI = \"$(sed_escape "${SYSTEM_PROXY}")\"|g" \
             -e "s|# GRAYLOG_HTTP_NON_PROXY_HOSTS|GRAYLOG_HTTP_NON_PROXY_HOSTS|g" \
-            "${graylog_env}" || warn "COULD NOT CONFIGURE THE PROXY IN ${graylog_env}"
+            "${graylog_env}" || fail "COULD NOT CONFIGURE THE PROXY IN ${graylog_env}"
     fi
 
     sudo sed -i "s|GF_SERVER_ROOT_URL: \"https://eval.graylog.local/grafana\"|GF_SERVER_ROOT_URL: \"https://${GRAYLOG_FQDN}/grafana\"|g" "${GRAYLOG_COMPOSE_FILE}" \
-        || warn "COULD NOT SET THE GRAFANA ROOT URL"
+        || fail "COULD NOT SET THE GRAFANA ROOT URL"
 
     log_info "CONFIGURE SAMBA CONTAINER"
     for folder in ${shared_folders}
     do
-        sudo chmod -R 755 "${GRAYLOG_PATH}/${folder}"
-        sudo find "${GRAYLOG_PATH}/${folder}" -type f -exec chmod 644 {} +
+        if ! sudo chmod -R 755 "${GRAYLOG_PATH}/${folder}" \
+            || ! sudo find "${GRAYLOG_PATH}/${folder}" -type f -exec chmod 644 {} +
+        then
+            fail "COULD NOT SET PERMISSIONS ON ${GRAYLOG_PATH}/${folder} (SMB SHARE MAY NOT BE READABLE)"
+        fi
     done
 
     echo "${GRAYLOG_ADMIN}:1000:siem:1000:${GRAYLOG_PASSWORD}" | sudo tee -a "${GRAYLOG_PATH}/samba/users.conf" >/dev/null \
         || die "COULD NOT WRITE ${GRAYLOG_PATH}/samba/users.conf"
 
     log_info "SET PERMISSIONS FOR HELPER SCRIPTS"
-    sudo find "${GRAYLOG_PATH}/scripts" -maxdepth 1 -type f -exec chmod +x {} + || warn "COULD NOT MAKE THE HELPER SCRIPTS EXECUTABLE"
+    sudo find "${GRAYLOG_PATH}/scripts" -maxdepth 1 -type f -exec chmod +x {} + || fail "COULD NOT MAKE THE HELPER SCRIPTS EXECUTABLE"
 
     # Pull only now: compose needs the populated .env and env files
     log_info "PULL CONTAINERS FOR GRAYLOG STACK"
     run_logged compose pull --quiet || die "PULLING THE CONTAINER IMAGES FAILED (DETAILS: ${LOG_FILE})"
 
     log_info "REMOVE INSTALLATION FOLDER ${install_path^^}"
-    rm -rf -- "${install_path}"
+    rm -rf -- "${install_path}" 2>/dev/null \
+        || log_warn "COULD NOT REMOVE ${install_path} NOW, IT WILL BE REMOVED WHEN THE SCRIPT ENDS"
 }
 
 function_addScriptRepositoryToPathVariable () {
@@ -738,7 +928,7 @@ function_addScriptRepositoryToPathVariable () {
     log_info "ADD SCRIPT FOLDER TO PATH VARIABLE AND SET CASE-INSENSITIVE AUTOCOMPLETION IN /ETC/BASH.BASHRC"
     # shellcheck disable=SC2016 # $PATH must be written literally
     printf '\n%s\nexport PATH="$PATH:%s"\nbind "set completion-ignore-case on"\n' "${marker}" "${script_folder}" \
-        | sudo tee -a /etc/bash.bashrc >/dev/null || warn "COULD NOT UPDATE /etc/bash.bashrc"
+        | sudo tee -a /etc/bash.bashrc >/dev/null || fail "COULD NOT UPDATE /etc/bash.bashrc"
 }
 
 function_enableGeoIpLocation () {
@@ -754,7 +944,7 @@ function_enableGeoIpLocation () {
         log_info "DOWNLOAD MAXMIND DATABASE (${db_type^^})"
         if ! download "${maxmind_url}/GeoLite2-${db_type}.mmdb" "${GRAYLOG_PATH}/maxmind/GeoLite2-${db_type}.mmdb" 0644
         then
-            warn "DOWNLOAD OF MAXMIND DATABASE (${db_type^^}) FAILED, SKIPPING GEOIP ACTIVATION"
+            fail "DOWNLOAD OF MAXMIND DATABASE (${db_type^^}) FAILED, SKIPPING GEOIP ACTIVATION"
             return 1
         fi
     done
@@ -763,7 +953,8 @@ function_enableGeoIpLocation () {
     for (( attempt = 1; attempt <= RETRY_MAX_ATTEMPTS; attempt++ ))
     do
         log_info "ACTIVATE GEOIP PLUGIN (ATTEMPT ${attempt}/${RETRY_MAX_ATTEMPTS})"
-        gl_api PUT "${geoip_config_path}" "${geoip_config}" >/dev/null
+        gl_api PUT "${geoip_config_path}" "${geoip_config}" >/dev/null \
+            || log_warn "GEOIP CONFIGURATION ATTEMPT ${attempt} FAILED (HTTP ${GL_LAST_STATUS})"
         geoip_enabled=$(gl_api GET "${geoip_config_path}" | jq -r '.enabled' 2>/dev/null)
 
         if [[ ${geoip_enabled} == "true" ]]
@@ -774,7 +965,7 @@ function_enableGeoIpLocation () {
         sleep "${RETRY_INTERVAL}"
     done
 
-    warn "GEOIP PLUGIN NOT ENABLED AFTER ${RETRY_MAX_ATTEMPTS} ATTEMPTS"
+    fail "GEOIP PLUGIN NOT ENABLED AFTER ${RETRY_MAX_ATTEMPTS} ATTEMPTS"
     return 1
 }
 
@@ -786,7 +977,7 @@ function_downloadGraylogSidecarBinaries () {
     log_info "DOWNLOAD GRAYLOG SIDECAR FOR WINDOWS"
     download "https://github.com/Graylog2/collector-sidecar/releases/download/${GRAYLOG_SIDECAR_VERSION}/${sidecar_msi}" "${target}/${sidecar_msi}" \
         && download "https://raw.githubusercontent.com/Graylog2/collector-sidecar/refs/heads/master/${sidecar_yml}" "${target}/${sidecar_yml}" \
-        || { warn "DOWNLOAD OF GRAYLOG SIDECAR FOR WINDOWS FAILED"; return 1; }
+        || { fail "DOWNLOAD OF GRAYLOG SIDECAR FOR WINDOWS FAILED"; return 1; }
 }
 
 function_downloadGraylogCollectorBinaries () {
@@ -795,7 +986,7 @@ function_downloadGraylogCollectorBinaries () {
     log_info "DOWNLOAD GRAYLOG COLLECTOR FOR WINDOWS"
     download "https://github.com/Graylog2/collector/releases/download/${GRAYLOG_COLLECTOR_VERSION}/${collector_msi}" \
         "${GRAYLOG_PATH}/sources/Graylog_Collector/${collector_msi}" \
-        || { warn "DOWNLOAD OF GRAYLOG COLLECTOR FOR WINDOWS FAILED"; return 1; }
+        || { fail "DOWNLOAD OF GRAYLOG COLLECTOR FOR WINDOWS FAILED"; return 1; }
 }
 
 function_downloadBeatsBinaries () {
@@ -812,9 +1003,9 @@ function_downloadBeatsBinaries () {
             && run_logged sudo unzip -joq "${target}/${package}.zip" "*/${beat}.exe" -d "${target}" \
             && sudo cp "${target}/${beat}.exe" "${GRAYLOG_PATH}/sources/Graylog_Sidecar/"
         then
-            sudo rm -f "${target}/${package}.zip"
+            sudo rm -f "${target}/${package}.zip" || fail "COULD NOT REMOVE ${target}/${package}.zip"
         else
-            warn "DOWNLOAD OF ${beat^^} STANDALONE FOR WINDOWS FAILED"
+            fail "DOWNLOAD OF ${beat^^} STANDALONE FOR WINDOWS FAILED"
             result=1
         fi
     done
@@ -829,7 +1020,7 @@ function_downloadNxlogBinaries () {
         "DOWNLOAD LOCATION: https://nxlog.co/downloads/nxlog-ce#nxlog-community-edition" \
         "INTEGRATION INSTRUCTIONS: https://docs.nxlog.co/integrate/graylog.html" \
         | sudo tee "${GRAYLOG_PATH}/sources/NXLog_CommunityEdition/README.txt" >/dev/null \
-        || warn "COULD NOT WRITE THE NXLOG README FILE"
+        || fail "COULD NOT WRITE THE NXLOG README FILE"
 }
 
 function_prepareSidecarConfiguration () {
@@ -840,7 +1031,7 @@ function_prepareSidecarConfiguration () {
     log_info "CONFIGURE GRAYLOG SIDECAR FOR WINDOWS (MSI)"
     if [[ ! -f ${sidecar_template} ]]
     then
-        warn "SIDECAR TEMPLATE NOT FOUND, SKIPPING WINDOWS SIDECAR CONFIGURATION"
+        fail "SIDECAR TEMPLATE NOT FOUND, SKIPPING WINDOWS SIDECAR CONFIGURATION"
         return 1
     fi
 
@@ -853,10 +1044,10 @@ function_prepareSidecarConfiguration () {
         -e "s|%%BRAND_VENDOR_NAME%%|Graylog|g" \
         -e "s|tls_skip_verify: false|tls_skip_verify: true|g" \
         -e 's/tags: \[\]/tags:\n  - evaluation\n  - windows\n  - applocker\n  - powershell\n  - defender\n  - rds\n  - forwarded\n  - ssh\n  - bpa\n  - bits\n  #- sysmon # Sysmon from Sysinternals\n  #- nxlog # Use nxlog instead of Beats\n  #- adds # Active Directory Domain Controller\n  #- dns # Domain Name Server/g' \
-        "${sidecar_yml}" || { warn "COULD NOT CONFIGURE ${sidecar_yml}"; return 1; }
+        "${sidecar_yml}" || { fail "COULD NOT CONFIGURE ${sidecar_yml}"; return 1; }
 
     # Change LF to CRLF as this is a Windows Configuration File
-    run_logged sudo unix2dos "${sidecar_yml}" || log_warn "COULD NOT CONVERT ${sidecar_yml} TO CRLF"
+    run_logged sudo unix2dos "${sidecar_yml}" || fail "COULD NOT CONVERT ${sidecar_yml} TO CRLF"
 }
 
 function_checkSystemAvailability () {
@@ -900,8 +1091,8 @@ function_addDataNodesToCluster () {
         gl_api POST /ca/create '{"organization": "Evaluation CA"}' >/dev/null && break
         sleep "${RETRY_INTERVAL}"
     done
-    gl_api POST /renewal_policy '{"mode":"Automatic","certificate_lifetime":"P90D"}' >/dev/null || log_warn "CA RENEWAL POLICY COULD NOT BE SET"
-    gl_api POST /generate >/dev/null || log_warn "CERTIFICATE PROVISIONING REQUEST FAILED"
+    gl_api POST /renewal_policy '{"mode":"Automatic","certificate_lifetime":"P90D"}' >/dev/null || fail "CA RENEWAL POLICY COULD NOT BE SET"
+    gl_api POST /generate >/dev/null || fail "CERTIFICATE PROVISIONING REQUEST FAILED"
     finish_result=$(gl_api POST /status/finish-config | jq -r '.result // empty' 2>/dev/null)
 
     if [[ ${finish_result} != "FINISHED" ]]
@@ -1005,7 +1196,7 @@ function_configureSelfMonitoring () {
     payload=$(jq -nc --arg title "Port 5054 Beats | ${title}" \
         '{global: true, title: $title, type: "org.graylog.plugins.beats.Beats2Input", configuration: {port: 5054, number_worker_threads: 2, bind_address: "0.0.0.0"}}')
     input_id=$(gl_api POST /system/inputs "${payload}" | jq -r '.id // empty' 2>/dev/null)
-    [[ -n ${input_id} ]] || { warn "COULD NOT CREATE THE SELF-MONITORING INPUT, SKIPPING SELF-MONITORING"; return 1; }
+    [[ -n ${input_id} ]] || { fail "COULD NOT CREATE THE SELF-MONITORING INPUT, SKIPPING SELF-MONITORING"; return 1; }
 
     log_info "CREATE FIELD TYPE PROFILE FOR ${log_item^^} LOGS"
     payload=$(jq -nc --arg title "${title}" '{
@@ -1017,7 +1208,7 @@ function_configureSelfMonitoring () {
             {field: "event_source_product", type: "string"}],
         name: $title, description: $title}')
     profile_id=$(gl_api POST /system/indices/index_sets/profiles "${payload}" | jq -r '.id // empty' 2>/dev/null)
-    [[ -n ${profile_id} ]] || warn "COULD NOT CREATE THE FIELD TYPE PROFILE, CONTINUING WITHOUT IT"
+    [[ -n ${profile_id} ]] || fail "COULD NOT CREATE THE FIELD TYPE PROFILE, CONTINUING WITHOUT IT"
 
     log_info "CREATE INDEX FOR ${log_item^^} LOGS"
     payload=$(jq -nc --arg title "${title}" --arg prefix "${log_item}" --arg profile "${profile_id}" '{
@@ -1033,13 +1224,13 @@ function_configureSelfMonitoring () {
         field_type_profile: (if $profile == "" then null else $profile end),
         use_legacy_rotation: false, writable: true}')
     index_id=$(gl_api POST /system/indices/index_sets "${payload}" | jq -r '.id // empty' 2>/dev/null)
-    [[ -n ${index_id} ]] || { warn "COULD NOT CREATE THE SELF-MONITORING INDEX SET, SKIPPING SELF-MONITORING"; return 1; }
+    [[ -n ${index_id} ]] || { fail "COULD NOT CREATE THE SELF-MONITORING INDEX SET, SKIPPING SELF-MONITORING"; return 1; }
 
     log_info "CREATE STREAM FOR ${log_item^^} LOGS"
     payload=$(jq -nc --arg title "${title}" --arg index "${index_id}" \
         '{entity: {description: "Stream containing messages created by Graylog Stack", title: $title, remove_matches_from_default_stream: true, matching_type: "OR", index_set_id: $index}}')
     stream_id=$(gl_api POST /streams "${payload}" | jq -r '.stream_id // empty' 2>/dev/null)
-    [[ -n ${stream_id} ]] || { warn "COULD NOT CREATE THE SELF-MONITORING STREAM, SKIPPING SELF-MONITORING"; return 1; }
+    [[ -n ${stream_id} ]] || { fail "COULD NOT CREATE THE SELF-MONITORING STREAM, SKIPPING SELF-MONITORING"; return 1; }
 
     payload=$(jq -nc --arg description "${log_item}-beats" --arg input "${input_id}" \
         '{field: "gl2_source_input", description: $description, type: 1, inverted: false, value: $input}')
@@ -1060,22 +1251,31 @@ function_configureSelfMonitoring () {
             '{id: $id, _scope: "DEFAULT", title: $title, description: $title, source: $source, stages: [{stage: 10, match: "EITHER", rules: [$rule]}], errors: null, has_deprecated_functions: null}')
         gl_try "CONNECT PIPELINE RULES FOR ${log_item^^} LOGS (BEATS)" PUT "/system/pipelines/pipeline/${pipeline_id}" "${payload}"
     else
-        warn "COULD NOT CREATE THE SELF-MONITORING PIPELINE"
+        fail "COULD NOT CREATE THE SELF-MONITORING PIPELINE"
     fi
 
-    gl_try "START STREAM FOR ${log_item^^} LOGS" POST "/streams/${stream_id}/resume"
+    log_info "START STREAM FOR ${log_item^^} LOGS"
+    function_resumeStream "${stream_id}" "${title}"
 }
 
 function_displayClusterId () {
     local cluster_id
 
-    printf '  ADMINUSER: "%s"\n  PASSWORD: "%s"\n' "${GRAYLOG_ADMIN}" "${GRAYLOG_PASSWORD}" \
+    if ! printf '  ADMINUSER: "%s"\n  PASSWORD: "%s"\n' "${GRAYLOG_ADMIN}" "${GRAYLOG_PASSWORD}" \
         | sudo tee "${GRAYLOG_CREDENTIALS_FILE}" >/dev/null
-    sudo chown "root:${INSTALL_GROUP}" "${GRAYLOG_CREDENTIALS_FILE}"
-    sudo chmod 0640 "${GRAYLOG_CREDENTIALS_FILE}"
+    then
+        fail "COULD NOT WRITE ${GRAYLOG_CREDENTIALS_FILE} - NOTE YOUR CREDENTIALS (ADMIN USER: ${GRAYLOG_ADMIN})"
+    elif ! sudo chown "root:${INSTALL_GROUP}" "${GRAYLOG_CREDENTIALS_FILE}" || ! sudo chmod 0640 "${GRAYLOG_CREDENTIALS_FILE}"
+    then
+        fail "COULD NOT RESTRICT THE PERMISSIONS OF ${GRAYLOG_CREDENTIALS_FILE}"
+    fi
 
     cluster_id=$(curl -s --noproxy '*' --max-time 10 "${GRAYLOG_API}" | jq -r '.cluster_id // "UNKNOWN"' 2>/dev/null)
     cluster_id=${cluster_id:-UNKNOWN}
+    if [[ ${cluster_id} == "UNKNOWN" ]]
+    then
+        fail "COULD NOT READ THE CLUSTER-ID FROM ${GRAYLOG_API} - CHECK IT UNDER System > Overview"
+    fi
 
     echo ""
     echo -e "[INFO] - \e[5;34mGRAYLOG IS NOW READY FOR TESTING\e[0m"
@@ -1096,9 +1296,31 @@ function_displayClusterId () {
 }
 
 function_hasLicense () {
-    # enterprise|security - returns 0 if such a license is active
-    gl_api GET /plugins/org.graylog.plugins.license/licenses/status \
-        | jq -e --arg subject "/license/${1}" '[.[] | .[]? | objects] | any(.active == true and .license.subject == $subject)' >/dev/null 2>&1
+    # enterprise|security - returns 0 if active, 1 if not (yet) active, 2 if the status could not be read
+    local license_status
+
+    if ! license_status=$(gl_api GET /plugins/org.graylog.plugins.license/licenses/status)
+    then
+        log_error "COULD NOT READ THE LICENSE STATUS"
+        return 2
+    fi
+
+    jq -e --arg subject "/license/${1}" '[.[] | .[]? | objects] | any(.active == true and .license.subject == $subject)' \
+        <<<"${license_status}" >/dev/null 2>&1
+}
+
+function_waitForLicense () {
+    # enterprise|security - exits (to retry with the next cron run) unless the license is active
+    local rc
+
+    function_hasLicense "${1}"
+    rc=$?
+
+    case ${rc} in
+        0) log_info "${1^^} LICENSE IS ACTIVE" ;;
+        1) log_info "WAIT FOR ${1^^} LICENSE TO BE AVAILABLE"; exit 0 ;;
+        *) log_warn "COULD NOT CHECK THE ${1^^} LICENSE, RETRYING WITH THE NEXT RUN"; exit 0 ;;
+    esac
 }
 
 function_restartGraylogContainer () {
@@ -1123,7 +1345,7 @@ function_startGraylogStack () {
 }
 
 function_createInputs () {
-    local input input_id
+    local input input_id input_list
     local -a inputs=(
         # Port 5140 Syslog UDP Input for Network Devices
         '{ "global": true, "title": "Port 5140 UDP Syslog | Evaluation Input", "type": "org.graylog2.inputs.syslog.udp.SyslogUDPInput", "configuration": { "port": 5140, "number_worker_threads": 2, "bind_address": "0.0.0.0" }}'
@@ -1162,20 +1384,95 @@ function_createInputs () {
     done
 
     log_info "START ALL EVALUATION INPUTS"
-    for input_id in $(gl_api GET /system/inputs | jq -r '.inputs[].id' 2>/dev/null)
+    if ! input_list=$(gl_api GET /system/inputs)
+    then
+        fail "COULD NOT READ THE LIST OF INPUTS - START THE INPUTS MANUALLY (System > Inputs)"
+        return 1
+    fi
+
+    for input_id in $(jq -r '.inputs[].id' <<<"${input_list}" 2>/dev/null)
     do
         gl_try "START INPUT ${input_id}" PUT "/cluster/inputstates/${input_id}"
     done
 }
 
+function_isStreamRunning () {
+    # STREAM_ID - returns 0 if running, 1 if paused, 2 if the state is unknown
+    local disabled
+    disabled=$(gl_api GET "/streams/${1}" | jq -r '.disabled' 2>/dev/null)
+    case "${disabled}" in
+        false) return 0 ;;
+        true)  return 1 ;;
+        *)     return 2 ;;
+    esac
+}
+
+function_resumeStream () {
+    # STREAM_ID [TITLE] - starts a paused stream; a running stream is not an error
+    local stream_id=${1} title=${2:-${1}} message
+
+    if function_isStreamRunning "${stream_id}"
+    then
+        log_info "STREAM ${title^^} IS ALREADY RUNNING"
+        return 0
+    fi
+
+    if GL_EXPECTED_STATUS="400" gl_api POST "/streams/${stream_id}/resume" >/dev/null
+    then
+        log_info "STREAM ${title^^} STARTED"
+        return 0
+    fi
+
+    # Graylog answers 400 "The stream cannot be resumed." for streams that are
+    # already running or cannot be paused at all (default/system streams)
+    if [[ ${GL_LAST_STATUS} == "400" ]]
+    then
+        if function_isStreamRunning "${stream_id}"
+        then
+            log_info "STREAM ${title^^} IS RUNNING (RESUME NOT REQUIRED)"
+            return 0
+        fi
+        message=$(jq -r '.message // empty' <<<"${GL_LAST_RESPONSE}" 2>/dev/null)
+        fail "STREAM ${title^^} COULD NOT BE STARTED: ${message:-HTTP 400}"
+        return 1
+    fi
+
+    fail "STREAM ${title^^} COULD NOT BE STARTED (HTTP ${GL_LAST_STATUS}, DETAILS: ${LOG_FILE})"
+    return 1
+}
+
 function_startAllStreams () {
-    local stream_id
+    local streams stream_id disabled title started=0 running=0 failed=0
 
     log_info "START ALL STREAMS"
-    for stream_id in $(gl_api GET /streams | jq -r '.streams[].id' 2>/dev/null)
+    if ! streams=$(gl_api GET /streams)
+    then
+        fail "COULD NOT READ THE LIST OF STREAMS, SKIPPING STREAM START"
+        return 1
+    fi
+
+    while IFS=$'\t' read -r stream_id disabled title
     do
-        gl_try "START STREAM ${stream_id}" POST "/streams/${stream_id}/resume"
-    done
+        [[ -n ${stream_id} ]] || continue
+
+        # Only paused streams need (and accept) a resume call
+        if [[ ${disabled} != "true" ]]
+        then
+            log_info "STREAM ${title^^} IS ALREADY RUNNING"
+            (( running++ ))
+            continue
+        fi
+
+        if function_resumeStream "${stream_id}" "${title}"
+        then
+            (( started++ ))
+        else
+            (( failed++ ))
+        fi
+    done < <(jq -r '.streams[] | [.id, (.disabled | tostring), .title] | @tsv' <<<"${streams}" 2>/dev/null)
+
+    log_info "STREAMS: ${started} STARTED, ${running} ALREADY RUNNING, ${failed} FAILED"
+    (( failed == 0 ))
 }
 
 function_configureEvaluationSetup () {
@@ -1207,7 +1504,7 @@ function_configureEvaluationSetup () {
             restrict_to_leader: true, parallelize_archive_creation: true}')
         gl_try "CONFIGURE ARCHIVE" PUT /plugins/org.graylog.plugins.archive/config "${payload}"
     else
-        warn "NO ARCHIVE BACKEND FOUND, SKIPPING ARCHIVE CONFIGURATION"
+        fail "NO ARCHIVE BACKEND FOUND, SKIPPING ARCHIVE CONFIGURATION"
     fi
 
     log_info "ACTIVATE WARM TIER (LOCAL FILESTORE OR MOUNTPOINT)"
@@ -1232,10 +1529,10 @@ function_configureEvaluationSetup () {
             gl_try "CONFIGURE INDEX SET TEMPLATE FOR EVALUATION AS DEFAULT" PUT /system/indices/index_set_defaults \
                 "{\"id\":\"${index_set_template}\"}"
         else
-            warn "COULD NOT CREATE THE EVALUATION INDEX SET TEMPLATE"
+            fail "COULD NOT CREATE THE EVALUATION INDEX SET TEMPLATE"
         fi
     else
-        warn "COULD NOT CREATE THE WARM TIER, SKIPPING THE EVALUATION INDEX SET TEMPLATE"
+        fail "COULD NOT CREATE THE WARM TIER, SKIPPING THE EVALUATION INDEX SET TEMPLATE"
     fi
 
     log_info "ACTIVATE DATALAKE (LOCAL FILESTORE OR MOUNTPOINT)"
@@ -1257,7 +1554,7 @@ function_configureEvaluationSetup () {
             gl_try "CONFIGURE DATALAKE (RETENTION: ${retention//\"/})" PUT /plugins/org.graylog.plugins.datalake/data_lake/config "${payload}"
         done
     else
-        warn "COULD NOT CREATE THE DATALAKE BACKEND"
+        fail "COULD NOT CREATE THE DATALAKE BACKEND"
     fi
 
     # Datalake for the Self-Monitoring stream (disabled):
@@ -1279,7 +1576,7 @@ function_addSidecarConfigurationTags () {
 
         if [[ ${wait_for_templates} != "wait" ]] || (( attempt >= RETRY_MAX_ATTEMPTS ))
         then
-            warn "NO SIDECAR CONFIGURATIONS MATCHING '${name_regex}' FOUND, SKIPPING TAG ${tag^^}"
+            fail "NO SIDECAR CONFIGURATIONS MATCHING '${name_regex}' FOUND, SKIPPING TAG ${tag^^}"
             return 1
         fi
 
@@ -1293,7 +1590,7 @@ function_addSidecarConfigurationTags () {
         # One GET per configuration; jq builds the PUT body
         if ! configuration=$(gl_api GET "/sidecar/configurations/${configuration_id}")
         then
-            warn "COULD NOT READ SIDECAR CONFIGURATION ${configuration_id}"
+            fail "COULD NOT READ SIDECAR CONFIGURATION ${configuration_id}"
             continue
         fi
         name=$(jq -r '.name' <<<"${configuration}")
@@ -1308,13 +1605,23 @@ function_enableGraylogSidecar () {
     log_info "ACTIVATE AND START GRAYLOG SIDECAR ON HOST"
     if ! command -v graylog-sidecar >/dev/null 2>&1
     then
-        warn "GRAYLOG SIDECAR IS NOT INSTALLED ON THIS HOST, SKIPPING"
+        fail "GRAYLOG SIDECAR IS NOT INSTALLED ON THIS HOST, SKIPPING SERVICE ACTIVATION"
         return 1
     fi
 
-    # 'service install' fails if the unit already exists - not an error
-    run_logged sudo graylog-sidecar -service install
-    run_logged sudo systemctl enable --now graylog-sidecar || { warn "GRAYLOG SIDECAR COULD NOT BE STARTED"; return 1; }
+    # Only install the service if the unit does not exist yet
+    if ! systemctl cat graylog-sidecar.service >/dev/null 2>&1
+    then
+        run_logged sudo graylog-sidecar -service install \
+            || { fail "COULD NOT INSTALL THE GRAYLOG SIDECAR SERVICE"; return 1; }
+    fi
+    run_logged sudo systemctl enable --now graylog-sidecar || { fail "GRAYLOG SIDECAR COULD NOT BE STARTED"; return 1; }
+
+    if ! systemctl is-active --quiet graylog-sidecar
+    then
+        fail "GRAYLOG SIDECAR IS NOT RUNNING (CHECK: sudo journalctl -u graylog-sidecar)"
+        return 1
+    fi
 }
 
 function_configureEnterpriseFeatures () {
@@ -1352,7 +1659,8 @@ function_configureSecurityFeatures () {
     for (( attempt = 1; attempt <= RETRY_MAX_ATTEMPTS; attempt++ ))
     do
         log_info "DISABLE INVESTIGATION AI REPORTS (ATTEMPT ${attempt}/${RETRY_MAX_ATTEMPTS})"
-        gl_api DELETE /plugins/org.graylog.plugins.securityapp.investigations/ai/config/ai_enabled >/dev/null
+        gl_api DELETE /plugins/org.graylog.plugins.securityapp.investigations/ai/config/ai_enabled >/dev/null \
+            || log_warn "DISABLING INVESTIGATION AI REPORTS FAILED IN ATTEMPT ${attempt} (HTTP ${GL_LAST_STATUS})"
         active_ai=$(gl_api GET /plugins/org.graylog.plugins.securityapp.investigations/ai/config | jq -r '.investigations_ai_reports_enabled' 2>/dev/null)
 
         # Done as soon as Graylog answers with anything except "true"
@@ -1362,7 +1670,7 @@ function_configureSecurityFeatures () {
 
     if [[ -z ${active_ai} || ${active_ai} == "true" ]]
     then
-        warn "COULD NOT DISABLE INVESTIGATION AI REPORTS AFTER ${RETRY_MAX_ATTEMPTS} ATTEMPTS, CONTINUING"
+        fail "COULD NOT DISABLE INVESTIGATION AI REPORTS AFTER ${RETRY_MAX_ATTEMPTS} ATTEMPTS, CONTINUING"
     fi
 
     payload="{\"entity\":{\"processing_pack_ids\":${illuminate_security_processing_pack_ids},\"spotlight_pack_ids\":${illuminate_security_spotlight_pack_ids}}}"
@@ -1374,7 +1682,7 @@ function_configureSecurityFeatures () {
 }
 
 function_configureSecurityAlerts () {
-    local skip_json definitions id title
+    local skip_json definitions id title enabled=0 failed=0
     local -a disabled_events=(
         "DNS traffic to unapproved DNS Server (Security Core: Perimeter)"
         "Excessive Outbound Connections from Single Host (Security Core: Endpoint)"
@@ -1385,7 +1693,13 @@ function_configureSecurityAlerts () {
 
     if ! definitions=$(gl_api GET "/events/definitions/paginated?page=1&per_page=500")
     then
-        warn "COULD NOT READ EVENT DEFINITIONS, SKIPPING SECURITY ALERTS"
+        fail "COULD NOT READ EVENT DEFINITIONS, SKIPPING SECURITY ALERTS"
+        return 1
+    fi
+
+    if ! jq -e '.elements | type == "array"' <<<"${definitions}" >/dev/null 2>&1
+    then
+        fail "UNEXPECTED RESPONSE WHEN READING EVENT DEFINITIONS, SKIPPING SECURITY ALERTS"
         return 1
     fi
 
@@ -1395,14 +1709,19 @@ function_configureSecurityAlerts () {
         if gl_api PUT "/events/definitions/${id}/schedule" >/dev/null
         then
             log_info "ENABLED EVENT DEFINITION: ${id} - ${title}"
+            (( enabled++ ))
         else
-            log_warn "FAILED TO ENABLE EVENT DEFINITION: ${id} - ${title}"
+            fail "FAILED TO ENABLE EVENT DEFINITION \"${title}\" (HTTP ${GL_LAST_STATUS})"
+            (( failed++ ))
         fi
     done < <(jq -r --argjson skip "${skip_json}" '
         .elements[]
         | select(.state == "DISABLED")
         | select(.title | IN($skip[]) | not)
         | [.id, .title] | @tsv' <<<"${definitions}" 2>/dev/null)
+
+    log_info "EVENT DEFINITIONS: ${enabled} ENABLED, ${failed} FAILED"
+    (( failed == 0 ))
 }
 
 function_restoreSystem () {
@@ -1411,19 +1730,53 @@ function_restoreSystem () {
     log_info "GRAYLOG INSTALLATION FAILED - DELETING TRACES"
 
     [[ -t 0 ]] || die "THE RESET MUST BE CONFIRMED INTERACTIVELY - RUN THIS SCRIPT FROM A TERMINAL"
-    read -rp "[INFO] - PRESS ENTER TO CONTINUE..."
+    read -rp "$(input_prompt "PRESS ENTER TO CONTINUE...")"
 
     [[ -x ${GRAYLOG_RESET_SCRIPT} ]] || die "RESET SCRIPT ${GRAYLOG_RESET_SCRIPT} NOT FOUND - PLEASE RESTORE YOUR VM SNAPSHOT"
     exec "${GRAYLOG_RESET_SCRIPT}"
 }
 
 function_removeAdminToken () {
-    local token_id
+    local tokens token_ids token_id removed=0 failed=0
+    local manual_hint="REMOVE THE 'evaluation-*' TOKEN OF THE ADMIN USER MANUALLY (System > Users and Teams > Edit Tokens)"
 
-    for token_id in $(gl_api GET /users/local:admin/tokens | jq -r '.tokens[] | select(.name | test("^evaluation-")) | .id' 2>/dev/null)
+    log_info "REMOVE TEMPORARY ADMIN TOKEN(S)"
+
+    # Called directly (not in $(...)) so that GL_LAST_STATUS reflects this request
+    if ! gl_api GET /users/local:admin/tokens >/dev/null
+    then
+        fail "COULD NOT LIST THE ADMIN TOKENS (HTTP ${GL_LAST_STATUS:-000}) - ${manual_hint}"
+        return 1
+    fi
+    tokens=${GL_LAST_RESPONSE}
+
+    if ! token_ids=$(jq -r '.tokens[] | select(.name | test("^evaluation-")) | .id' <<<"${tokens}" 2>/dev/null)
+    then
+        fail "UNEXPECTED RESPONSE WHEN LISTING THE ADMIN TOKENS - ${manual_hint}"
+        return 1
+    fi
+
+    if [[ -z ${token_ids} ]]
+    then
+        warn "NO TEMPORARY ADMIN TOKEN FOUND (ALREADY REMOVED?)"
+        return 0
+    fi
+
+    # The token in use is one of these: once it is deleted, further calls return 401
+    for token_id in ${token_ids}
     do
-        gl_try "REMOVE TEMPORARY ADMIN TOKEN ${token_id}" DELETE "/users/local:admin/tokens/${token_id}"
+        if gl_api DELETE "/users/local:admin/tokens/${token_id}" >/dev/null
+        then
+            log_info "REMOVED TEMPORARY ADMIN TOKEN ${token_id}"
+            (( removed++ ))
+        else
+            fail "COULD NOT REMOVE ADMIN TOKEN ${token_id} (HTTP ${GL_LAST_STATUS:-000}) - ${manual_hint}"
+            (( failed++ ))
+        fi
     done
+
+    log_info "ADMIN TOKENS: ${removed} REMOVED, ${failed} FAILED"
+    (( failed == 0 ))
 }
 
 function_configureTestSystem () {
@@ -1432,7 +1785,7 @@ function_configureTestSystem () {
     if [[ -f ${script} ]]
     then
         log_info "RUN ${script}"
-        bash "${script}" || warn "${script} FAILED"
+        bash "${script}" || fail "${script} FAILED"
     fi
 }
 
@@ -1448,16 +1801,16 @@ function_runInstallation () {
     ( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) >/dev/null 2>&1 &
     KEEPALIVE_PID=$!
 
-    function_checkInternetConnectivity
-
     clear
+
+    echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
+
+    function_checkInternetConnectivity
+    function_checkPatchLevel
+    function_installScriptDependencies
 
     function_checkSystemRequirements
     function_checkSnapshot
-
-    echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
-    function_checkPatchLevel
-    function_installScriptDependencies
 
     function_defineAdminName
     function_defineAdminPassword
@@ -1476,10 +1829,10 @@ function_runInstallation () {
     function_addDataNodesToCluster
 
     echo "[INFO] - DOWNLOAD SIDECAR AND COLLECTOR BINARIES"
-    function_downloadGraylogCollectorBinaries
-    function_downloadGraylogSidecarBinaries
-    function_downloadBeatsBinaries
-    function_downloadNxlogBinaries
+    run_step "DOWNLOAD GRAYLOG COLLECTOR" function_downloadGraylogCollectorBinaries
+    run_step "DOWNLOAD GRAYLOG SIDECAR" function_downloadGraylogSidecarBinaries
+    run_step "DOWNLOAD BEATS" function_downloadBeatsBinaries
+    run_step "PREPARE NXLOG README" function_downloadNxlogBinaries
     function_checkSystemAvailability || die "GRAYLOG DID NOT BECOME AVAILABLE"
 
     GRAYLOG_ADMIN_TOKEN=$(function_createUserToken "${GRAYLOG_ADMIN}" 14)        || die "COULD NOT CREATE AN API TOKEN FOR ${GRAYLOG_ADMIN^^}"
@@ -1487,29 +1840,29 @@ function_runInstallation () {
     GL_AUTH="${GRAYLOG_ADMIN_TOKEN}:token"
 
     echo "[INFO] - INSTALL SIDECAR ON HOST"
-    function_installGraylogSidecarOnEvaluationHost "${GRAYLOG_SIDECAR_TOKEN}" || warn "GRAYLOG SIDECAR INSTALLATION ON HOST FAILED (DETAILS: ${LOG_FILE})"
+    run_step "INSTALL GRAYLOG SIDECAR ON HOST" function_installGraylogSidecarOnEvaluationHost "${GRAYLOG_SIDECAR_TOKEN}"
 
     echo "[INFO] - PREPARE SYSTEM PLUGINS AND FUNCTIONS"
-    function_prepareSidecarConfiguration "${GRAYLOG_SIDECAR_TOKEN}"
-    function_configurePlugins
+    run_step "PREPARE WINDOWS SIDECAR CONFIGURATION" function_prepareSidecarConfiguration "${GRAYLOG_SIDECAR_TOKEN}"
+    run_step "CONFIGURE PLUGINS" function_configurePlugins
 
     # Make sure the Container being restarted is the LEADER node, as the automatic Content Pack installation is executed by the LEADER
     function_restartGraylogContainer "graylog1" || die "COULD NOT RESTART GRAYLOG1 (DETAILS: ${LOG_FILE})"
     function_checkSystemAvailability || die "GRAYLOG DID NOT BECOME AVAILABLE AFTER RESTART"
 
-    function_addSidecarConfigurationVariables
+    run_step "CREATE SIDECAR CONFIGURATION VARIABLES" function_addSidecarConfigurationVariables
     # needs to run after configuration variables have been created
-    function_addSidecarConfigurationTags "^my-self-" "${GRAYLOG_SIDECAR_TAG}" wait
+    run_step "TAG HOST SIDECAR CONFIGURATIONS" function_addSidecarConfigurationTags "^my-self-" "${GRAYLOG_SIDECAR_TAG}" wait
     # only required until https://github.com/Graylog2/graylog2-server/issues/24398 is resolved
-    function_addSidecarConfigurationTags "my-windows" "evaluation"
-    function_enableGeoIpLocation
-    function_configureSelfMonitoring
-    function_startAllStreams
-    function_enableGraylogSidecar
-    function_addScriptRepositoryToPathVariable
-    function_configureTestSystem
+    run_step "TAG WINDOWS SIDECAR CONFIGURATIONS" function_addSidecarConfigurationTags "my-windows" "evaluation"
+    run_step "ENABLE GEOIP LOCATION" function_enableGeoIpLocation
+    run_step "CONFIGURE SELF-MONITORING" function_configureSelfMonitoring
+    run_step "START ALL STREAMS" function_startAllStreams
+    run_step "ENABLE GRAYLOG SIDECAR ON HOST" function_enableGraylogSidecar
+    run_step "ADD SCRIPT FOLDER TO PATH" function_addScriptRepositoryToPathVariable
+    run_step "CONFIGURE TEST SYSTEM" function_configureTestSystem
 
-    function_displayClusterId
+    run_step "DISPLAY CLUSTER INFORMATION" function_displayClusterId
 
     echo "[INFO] - NOW IT'S UP TO YOU PREPARING YOUR LOG SOURCES"
 
@@ -1519,14 +1872,14 @@ function_runInstallation () {
 
     if [[ -f ${GRAYLOG_PATH}/scripts/Create-ConfigurationDump ]]
     then
-        sudo install -m 0755 "${GRAYLOG_PATH}/scripts/Create-ConfigurationDump" /etc/cron.daily/ || warn "COULD NOT REGISTER THE DAILY CONFIGURATION DUMP"
+        sudo install -m 0755 "${GRAYLOG_PATH}/scripts/Create-ConfigurationDump" /etc/cron.daily/ || fail "COULD NOT REGISTER THE DAILY CONFIGURATION DUMP"
     fi
 
     sudo install -m 0755 "${SCRIPT_PATH}" "${GRAYLOG_CRON_SCRIPT}" || die "COULD NOT REGISTER THE POST-INSTALLATION TASK"
     function_writeState "completed" || die "COULD NOT WRITE ${GRAYLOG_STATE_FILE}"
     INSTALL_PHASE=""
 
-    rm -f -- "${SCRIPT_PATH}"
+    function_removeScript
 
     log_info "BASE INSTALLATION SUCCESSFULLY FINISHED, WAITING FOR LICENSE"
 }
@@ -1536,8 +1889,18 @@ function_runInstallation () {
 # Post-Installation Tasks (run hourly by cron until the licenses are in place)
 
 function_finishPostInstallation () {
-    function_writeState "finished"
-    sudo rm -f "${GRAYLOG_TOKEN_FILE}" "${GRAYLOG_CRON_SCRIPT}"
+    function_writeState "finished" \
+        || fail "COULD NOT MARK THE INSTALLATION AS FINISHED IN ${GRAYLOG_STATE_FILE}"
+
+    if ! sudo rm -f "${GRAYLOG_TOKEN_FILE}"
+    then
+        fail "COULD NOT REMOVE ${GRAYLOG_TOKEN_FILE} - PLEASE DELETE IT MANUALLY (CONTAINS AN API TOKEN)"
+    fi
+
+    if ! sudo rm -f "${GRAYLOG_CRON_SCRIPT}"
+    then
+        fail "COULD NOT REMOVE ${GRAYLOG_CRON_SCRIPT} - PLEASE DELETE IT MANUALLY"
+    fi
 }
 
 function_runPostInstallation () {
@@ -1579,11 +1942,7 @@ function_runPostInstallation () {
 
     if [[ ${state} == "completed" ]]
     then
-        if ! function_hasLicense enterprise
-        then
-            log_info "WAIT FOR ENTERPRISE LICENSE TO BE AVAILABLE"
-            exit 0
-        fi
+        function_waitForLicense enterprise
         GRAYLOG_LICENSE_ENTERPRISE="true"
 
         log_info "RESTARTING GRAYLOG STACK FOR MAINTENANCE PURPOSES"
@@ -1591,34 +1950,30 @@ function_runPostInstallation () {
         function_checkSystemAvailability || die "GRAYLOG DID NOT COME BACK AFTER THE RESTART, RETRYING WITH THE NEXT RUN"
 
         # Advance the state before the (non-idempotent) configuration steps
-        function_writeState "enterprise"
+        function_writeState "enterprise" || die "COULD NOT WRITE ${GRAYLOG_STATE_FILE}, RETRYING WITH THE NEXT RUN"
         state="enterprise"
 
-        function_createInputs
-        function_configureEvaluationSetup
-        function_configureEnterpriseFeatures
+        run_step "CREATE EVALUATION INPUTS" function_createInputs
+        run_step "CONFIGURE EVALUATION SETUP" function_configureEvaluationSetup
+        run_step "CONFIGURE ENTERPRISE FEATURES" function_configureEnterpriseFeatures
 
-        log_info "GRAYLOG ENTERPRISE INSTALLATION SUCCESSFULLY FINISHED"
+        log_info "GRAYLOG ENTERPRISE INSTALLATION FINISHED WITH ${#FAILED_ACTIONS[@]} FAILED ACTION(S)"
     fi
 
     if [[ ${state} == "enterprise" ]]
     then
-        if ! function_hasLicense security
-        then
-            log_info "WAIT FOR SECURITY LICENSE TO BE AVAILABLE"
-            exit 0
-        fi
+        function_waitForLicense security
         GRAYLOG_LICENSE_SECURITY="true"
 
-        function_configureSecurityFeatures
-        function_configureSecurityAlerts
+        run_step "CONFIGURE SECURITY FEATURES" function_configureSecurityFeatures
+        run_step "CONFIGURE SECURITY ALERTS" function_configureSecurityAlerts
 
-        log_info "GRAYLOG SECURITY INSTALLATION SUCCESSFULLY FINISHED"
+        log_info "GRAYLOG SECURITY INSTALLATION FINISHED WITH ${#FAILED_ACTIONS[@]} FAILED ACTION(S)"
 
-        function_removeAdminToken
+        run_step "REMOVE TEMPORARY ADMIN TOKEN" function_removeAdminToken
         function_finishPostInstallation
 
-        log_info "GRAYLOG INSTALLATION COMPLETELY FINISHED"
+        log_info "GRAYLOG INSTALLATION COMPLETELY FINISHED WITH ${#FAILED_ACTIONS[@]} FAILED ACTION(S)"
     fi
 }
 
