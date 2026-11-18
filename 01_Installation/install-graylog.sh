@@ -83,7 +83,8 @@ WAIT_PREFLIGHT_INTERVAL="5"
 
 # Runtime
 LOG_TAG="GRAYLOG-INSTALLER"
-LOG_FILE="${HOME:-/tmp}/graylog-installer.log"
+# LOG_FILE="${HOME:-/tmp}/graylog-installer.log"
+LOG_FILE="/var/log/syslog"
 LOCK_FILE="/run/lock/graylog-installer.lock"
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null)"
 INSTALL_USER="$(id -un)"
