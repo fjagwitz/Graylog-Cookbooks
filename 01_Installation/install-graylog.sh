@@ -1070,12 +1070,12 @@ function_checkSystemAvailability () {
 }
 
 function_addDataNodesToCluster () {
-    local credentials="" attempt finish_result
+    local credentials="" attempt finish_result rc
     local GL_AUTH
 
     log_info "WAIT FOR GRAYLOG TO BECOME CONFIGURABLE"
 
-    # The preflight interface logs "Try clicking on http://<user>:<password>@..."
+    # Step 1: the preflight interface logs "Try clicking on http://<user>:<password>@..."
     for (( attempt = 1; attempt <= WAIT_PREFLIGHT_ATTEMPTS; attempt++ ))
     do
         credentials=$(compose logs --no-color graylog1 2>/dev/null | grep -oP 'clicking on https?://\K[^@\s]+(?=@)' | tail -n 1)
@@ -1087,19 +1087,51 @@ function_addDataNodesToCluster () {
 
     GL_AUTH=${credentials}
 
+    # Step 2: the log line appears before the API is reachable through nginx - wait for it
+    function_waitForPreflightApi
+    rc=$?
+    case ${rc} in
+        0) ;;
+        2) die "THE PREFLIGHT API REJECTED THE CREDENTIALS FROM THE GRAYLOG LOG (CHECK: sudo docker compose -f ${GRAYLOG_COMPOSE_FILE} logs graylog1)" ;;
+        *) die "THE PREFLIGHT API DID NOT BECOME AVAILABLE (DETAILS: ${LOG_FILE})" ;;
+    esac
+
+    # Step 3: create the CA once; a few retries only for transient errors
     log_info "TRY TO ACTIVATE LOCAL EVALUATION CA FOR DATANODE"
-    for (( attempt = 1; attempt <= RETRY_MAX_ATTEMPTS; attempt++ ))
+    for (( attempt = 1; attempt <= 3; attempt++ ))
     do
-        gl_api POST /ca/create '{"organization": "Evaluation CA"}' >/dev/null && break
+        if function_caExists
+        then
+            log_info "LOCAL EVALUATION CA EXISTS"
+            break
+        fi
+
+        if gl_api POST /ca/create '{"organization": "Evaluation CA"}' >/dev/null
+        then
+            log_info "LOCAL EVALUATION CA CREATED"
+            break
+        fi
+
+        log_warn "CA CREATION ATTEMPT ${attempt} FAILED (HTTP ${GL_LAST_STATUS:-000})"
         sleep "${RETRY_INTERVAL}"
     done
-    gl_api POST /renewal_policy '{"mode":"Automatic","certificate_lifetime":"P90D"}' >/dev/null || fail "CA RENEWAL POLICY COULD NOT BE SET"
-    gl_api POST /generate >/dev/null || fail "CERTIFICATE PROVISIONING REQUEST FAILED"
+
+    function_caExists || die "THE LOCAL EVALUATION CA COULD NOT BE CREATED (DETAILS: ${LOG_FILE})"
+
+    gl_api POST /renewal_policy '{"mode":"Automatic","certificate_lifetime":"P90D"}' >/dev/null \
+        || fail "CA RENEWAL POLICY COULD NOT BE SET (HTTP ${GL_LAST_STATUS:-000})"
+
+    # Step 4: provision certificates only once the data nodes are known
+    function_waitForDataNodes
+
+    gl_api POST /generate >/dev/null \
+        || fail "CERTIFICATE PROVISIONING REQUEST FAILED (HTTP ${GL_LAST_STATUS:-000})"
+
     finish_result=$(gl_api POST /status/finish-config | jq -r '.result // empty' 2>/dev/null)
 
     if [[ ${finish_result} != "FINISHED" ]]
     then
-        die "FAILED TO ACTIVATE LOCAL EVALUATION CA, EXIT"
+        die "FAILED TO ACTIVATE LOCAL EVALUATION CA (RESULT: ${finish_result:-NONE}), EXIT"
     fi
 
     log_info "SUCCESSFULLY ACTIVATED LOCAL EVALUATION CA FOR DATANODE"
