@@ -5,7 +5,7 @@
 # author:            Friedrich von Jagwitz
 # email:             fvj@graylog.com
 # date:              2026-11-11
-# version:           7.2
+# version:           7.2.2
 # usage:             bash install-graylog.sh
 # notes:             Must be saved to a file and run as a regular user with
 #                    sudo rights (do not pipe it into bash). After the base
@@ -19,7 +19,7 @@ set -o pipefail
 #
 # Static Variables Definition
 
-GRAYLOG_VERSION="7.2"
+GRAYLOG_VERSION="7.2.2"
 GRAYLOG_HOME="/opt"
 GRAYLOG_PATH="${GRAYLOG_HOME}/graylog"
 GRAYLOG_COMPOSE="docker-compose.yaml"
