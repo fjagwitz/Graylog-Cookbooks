@@ -83,8 +83,7 @@ WAIT_PREFLIGHT_INTERVAL="5"
 
 # Runtime
 LOG_TAG="GRAYLOG-INSTALLER"
-# LOG_FILE="${HOME:-/tmp}/graylog-installer.log"
-LOG_FILE="/var/log/syslog"
+LOG_FILE="${HOME:-/tmp}/graylog-installer.log"
 LOCK_FILE="/run/lock/graylog-installer.lock"
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null)"
 INSTALL_USER="$(id -un)"
@@ -117,7 +116,7 @@ fi
 _log () {
     local priority=${1} label=${2}
     shift 2
-    logger -p "user.${priority}" -t "${LOG_TAG}" -- "[${label}] - $*" 2>/dev/null
+    logger -p "user.${priority}" -t "${LOG_TAG}" -- "[${label}] - $*" -e -t GRAYLOG-INSTALLER # 2>/dev/null
     printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" >>"${LOG_FILE}" 2>/dev/null
     return 0
 }
@@ -1707,7 +1706,7 @@ function_configureSecurityAlerts () {
         [[ -n ${id} ]] || continue
         if gl_api PUT "/events/definitions/${id}/schedule" >/dev/null
         then
-            log_info "ENABLED EVENT DEFINITION: ${id} - ${title}"
+            # log_info "ENABLED EVENT DEFINITION: ${id} - ${title}"
             (( enabled++ ))
         else
             fail "FAILED TO ENABLE EVENT DEFINITION \"${title}\" (HTTP ${GL_LAST_STATUS})"
