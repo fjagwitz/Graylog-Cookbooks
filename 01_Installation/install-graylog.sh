@@ -60,7 +60,7 @@ SYSTEM_REQUIREMENTS_CPU="8"
 SYSTEM_REQUIREMENTS_CPU_FLAGS="avx"
 SYSTEM_REQUIREMENTS_MEMORY="32"
 SYSTEM_REQUIREMENTS_OPT="900"
-SYSTEM_REQUIREMENTS_VAR="300"
+SYSTEM_REQUIREMENTS_VAR="100"
 SYSTEM_REQUIREMENTS_OS="Ubuntu"
 
 # Collector's Versions
@@ -84,7 +84,6 @@ WAIT_PREFLIGHT_INTERVAL="5"
 # Runtime
 LOG_TAG="GRAYLOG-INSTALLER"
 LOG_FILE="${HOME:-/tmp}/graylog-installer.log"
-SYSLOG_FILE="/var/log/syslog"
 LOCK_FILE="/run/lock/graylog-installer.lock"
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null)"
 INSTALL_USER="$(id -un)"
@@ -118,8 +117,7 @@ _log () {
     local priority=${1} label=${2}
     shift 2
     logger -p "user.${priority}" -t "${LOG_TAG}" -- "[${label}] - $*" 2>/dev/null
-    printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" | tee -a "${LOG_FILE}" 2>/dev/null >/dev/null
-    printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" | sudo tee -a "${SYSLOG_FILE}" 2>/dev/null >/dev/null
+    printf '%(%F %T)T [%s] - %s\n' -1 "${label}" "$*" >>"${LOG_FILE}" 2>/dev/null
     return 0
 }
 log_info ()  { _log info    INFO  "$@"; }
@@ -278,7 +276,12 @@ gl_api () {
     if (( rc != 0 )) || [[ -z ${response} ]]
     then
         GL_LAST_STATUS="000"
-        log_error "API ${method} ${url%%\?*} - CONNECTION FAILED"
+        if [[ " ${GL_EXPECTED_STATUS} " == *" 000 "* ]]
+        then
+            log_info "API ${method} ${url%%\?*} - NOT REACHABLE YET"
+        else
+            log_error "API ${method} ${url%%\?*} - CONNECTION FAILED"
+        fi
         return 1
     fi
 
@@ -1069,6 +1072,80 @@ function_checkSystemAvailability () {
     return 1
 }
 
+function_waitForPreflightApi () {
+    # Polls the preflight API with the preflight credentials (GL_AUTH of the caller)
+    # until it answers successfully. Returns 1 on timeout, 2 if the credentials are rejected.
+    local attempt
+
+    for (( attempt = 1; attempt <= WAIT_PREFLIGHT_ATTEMPTS; attempt++ ))
+    do
+        # 000 = connection refused, 404/5xx = nginx up but Graylog not (yet) behind it
+        if GL_EXPECTED_STATUS="000 404 500 502 503 504" gl_api GET /ca >/dev/null
+        then
+            log_info "PREFLIGHT API IS AVAILABLE (ATTEMPT ${attempt})"
+            return 0
+        fi
+
+        case ${GL_LAST_STATUS} in
+            401|403)
+                log_error "PREFLIGHT API REJECTED THE CREDENTIALS (HTTP ${GL_LAST_STATUS})"
+                return 2
+                ;;
+        esac
+
+        progress "WAIT FOR THE PREFLIGHT API (HTTP ${GL_LAST_STATUS:-000}, ${attempt}/${WAIT_PREFLIGHT_ATTEMPTS})"
+        sleep "${WAIT_PREFLIGHT_INTERVAL}"
+    done
+
+    log_error "PREFLIGHT API NOT AVAILABLE AFTER $(( WAIT_PREFLIGHT_ATTEMPTS * WAIT_PREFLIGHT_INTERVAL )) SECONDS (LAST HTTP ${GL_LAST_STATUS:-000})"
+    return 1
+}
+
+function_caExists () {
+    # Returns 0 if the preflight API reports an existing CA. An empty answer
+    # (HTTP 204) means "no CA yet" - checked explicitly, as 'jq -e' on empty
+    # input succeeds with jq 1.6.
+    local ca_info
+
+    ca_info=$(gl_api GET /ca 2>/dev/null) || return 1
+    [[ -n ${ca_info} ]] || return 1
+    jq -e 'type == "object" and (.id // "") != ""' <<<"${ca_info}" >/dev/null 2>&1
+}
+
+function_waitForDataNodes () {
+    # Waits until all data nodes of the compose file are registered, so that the
+    # certificate provisioning covers every node. A timeout is not fatal.
+    local expected registered attempt
+
+    expected=$(compose config --services 2>/dev/null | grep -c '^datanode')
+    if (( expected == 0 ))
+    then
+        log_warn "COULD NOT DETERMINE THE NUMBER OF DATA NODES, NOT WAITING FOR THEIR REGISTRATION"
+        return 0
+    fi
+
+    for (( attempt = 1; attempt <= WAIT_PREFLIGHT_ATTEMPTS; attempt++ ))
+    do
+        registered=$(gl_api GET /data_nodes 2>/dev/null \
+            | jq -r 'if type == "array" then length
+                     elif type == "object" then ((.elements // .nodes // .data_nodes // []) | length)
+                     else 0 end' 2>/dev/null)
+        registered=${registered:-0}
+
+        if (( registered >= expected ))
+        then
+            log_info "ALL ${expected} DATA NODES ARE REGISTERED"
+            return 0
+        fi
+
+        progress "WAIT FOR DATA NODES TO REGISTER (${registered}/${expected}, ATTEMPT ${attempt}/${WAIT_PREFLIGHT_ATTEMPTS})"
+        sleep "${WAIT_PREFLIGHT_INTERVAL}"
+    done
+
+    fail "ONLY ${registered} OF ${expected} DATA NODES REGISTERED - THE REMAINING NODES MAY NEED TO BE PROVISIONED MANUALLY"
+    return 1
+}
+
 function_addDataNodesToCluster () {
     local credentials="" attempt finish_result rc
     local GL_AUTH
@@ -1661,7 +1738,9 @@ function_enableGraylogSidecar () {
 function_configureEnterpriseFeatures () {
     local payload
     local illuminate_processing_pack_ids='["7b319ad0-352c-48b9-b7d9-877fc1720164","core-gim-enforcement","fortigate-content-pack","illuminate-linux-auditbeat","0137f1f8-1a6e-449b-a46c-6bb37f2f0c53","3f3c1eea-200a-4381-83ae-aadd5d6a0d6e","illuminate-o365","5551b8a8-6459-446f-9ea8-63368bb39414","illuminate-defender","b1f235ed-f185-43af-b5d1-d3fb37f217a1","2e6cedfb-21f9-485f-8bdc-326349651b0f","windows-security","c3c902ad-9113-439e-b92b-5cd4bfa26696","d1aea731-2b18-4e47-9366-c526641f6dbd"]'
-    local illuminate_spotlight_pack_ids='["cbfc3ae6-6a59-4841-a691-ea6db41b62d0","d01d7647-99a5-4914-b417-ca5cd1e37196","085d8f0e-2bee-44b2-b040-d7a11a1da2fe","90e37be0-d112-44f8-afe7-eadcafbe4ba3","557d2945-8d6d-445b-ae5e-9388ee89f128","61d75c3e-3551-4b97-bbb5-ea8181472cb0","a2750c63-fb7c-4ff6-b10b-32171a2c96e9","4e3ba1a6-7400-40d1-b7f8-efa44bc5bfeb","3e40d288-5794-44e9-88b4-b590de3514b8","977b3617-be58-4f6c-9db6-06f72dbab306","e1629dcb-6419-4d73-b4a8-577f01278f35","f39f9b0d-c24b-42f2-982b-839441ef3c27","237e73a4-678b-4b9a-87ac-ff2f86e34563","a60c3607-a25a-4b5c-a565-94b6944f850b","b95c89b7-36e1-43b6-9714-b6b25e7cec04","9f195288-9709-4f87-b2ec-e53cf94965dd"]'
+    # FIXME: "b95c89b7-36e1-43b6-9714-b6b25e7cec04e" is not a valid UUID (13 characters in the
+    #        last group) - please verify this pack id against the Illuminate bundle.
+    local illuminate_spotlight_pack_ids='["cbfc3ae6-6a59-4841-a691-ea6db41b62d0","d01d7647-99a5-4914-b417-ca5cd1e37196","085d8f0e-2bee-44b2-b040-d7a11a1da2fe","90e37be0-d112-44f8-afe7-eadcafbe4ba3","557d2945-8d6d-445b-ae5e-9388ee89f128","61d75c3e-3551-4b97-bbb5-ea8181472cb0","a2750c63-fb7c-4ff6-b10b-32171a2c96e9","4e3ba1a6-7400-40d1-b7f8-efa44bc5bfeb","3e40d288-5794-44e9-88b4-b590de3514b8","977b3617-be58-4f6c-9db6-06f72dbab306","e1629dcb-6419-4d73-b4a8-577f01278f35","f39f9b0d-c24b-42f2-982b-839441ef3c27","237e73a4-678b-4b9a-87ac-ff2f86e34563","a60c3607-a25a-4b5c-a565-94b6944f850b","b95c89b7-36e1-43b6-9714-b6b25e7cec04e","9f195288-9709-4f87-b2ec-e53cf94965dd"]'
 
     if [[ ${GRAYLOG_LICENSE_ENTERPRISE} != "true" ]]
     then
@@ -1740,7 +1819,7 @@ function_configureSecurityAlerts () {
         [[ -n ${id} ]] || continue
         if gl_api PUT "/events/definitions/${id}/schedule" >/dev/null
         then
-            # log_info "ENABLED EVENT DEFINITION: ${id} - ${title}"
+            log_info "ENABLED EVENT DEFINITION: ${id} - ${title}"
             (( enabled++ ))
         else
             fail "FAILED TO ENABLE EVENT DEFINITION \"${title}\" (HTTP ${GL_LAST_STATUS})"
@@ -1833,16 +1912,16 @@ function_runInstallation () {
     ( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) >/dev/null 2>&1 &
     KEEPALIVE_PID=$!
 
-    clear
-
-    echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
-
     function_checkInternetConnectivity
-    function_checkPatchLevel
-    function_installScriptDependencies
+
+    clear
 
     function_checkSystemRequirements
     function_checkSnapshot
+
+    echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
+    function_checkPatchLevel
+    function_installScriptDependencies
 
     function_defineAdminName
     function_defineAdminPassword
