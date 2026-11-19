@@ -1906,6 +1906,8 @@ function_configureTestSystem () {
 
 function_runInstallation () {
 
+    clear
+
     function_checkInstallUser
 
     # Keep the sudo timestamp alive while the script runs
@@ -1914,15 +1916,13 @@ function_runInstallation () {
 
     function_checkInternetConnectivity
 
-    clear
-
     function_checkSystemRequirements
-    function_checkSnapshot
 
     echo "[INFO] - GET SYSTEM PREPARED FOR INSTALLATION, HANG ON"
     function_checkPatchLevel
     function_installScriptDependencies
 
+    function_checkSnapshot
     function_defineAdminName
     function_defineAdminPassword
     function_getSystemFqdn
