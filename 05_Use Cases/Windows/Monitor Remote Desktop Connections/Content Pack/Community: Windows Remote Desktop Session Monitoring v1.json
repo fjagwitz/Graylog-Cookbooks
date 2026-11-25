@@ -2,9 +2,9 @@
   "v": 1,
   "id": "36d84035-b7e7-4f6e-9823-36a723689fa4",
   "rev": 1,
-  "name": "Professionals: Remote Desktop Session Monitoring",
-  "summary": "Professionals: Remote Desktop Session Monitoring",
-  "description": "Professionals: Remote Desktop Session Monitoring",
+  "name": "Community: Remote Desktop Session Monitoring",
+  "summary": "Community: Remote Desktop Session Monitoring",
+  "description": "Community: Remote Desktop Session Monitoring",
   "vendor": "Graylog Community",
   "url": "https://community.graylog.org",
   "parameters": [],
@@ -183,7 +183,7 @@
       "data": {
         "summary": {
           "@type": "string",
-          "@value": "Professionals: Remote Desktop Session Monitoring"
+          "@value": "Community: Remote Desktop Session Monitoring"
         },
         "search": {
           "queries": [
@@ -1279,12 +1279,12 @@
         "owner": "Professionals",
         "title": {
           "@type": "string",
-          "@value": "Professionals: Remote Desktop Session Monitoring"
+          "@value": "Community: Remote Desktop Session Monitoring"
         },
         "type": "DASHBOARD",
         "description": {
           "@type": "string",
-          "@value": "Professionals: Remote Desktop Session Monitoring"
+          "@value": "Community: Remote Desktop Session Monitoring"
         }
       },
       "constraints": [
@@ -1747,7 +1747,7 @@
         "updated_at": "2026-09-28T10:31:55.290Z",
         "title": {
           "@type": "string",
-          "@value": "Professionals: Remote Desktop Session Logs Issue"
+          "@value": "Community: Remote Desktop Session Logs Issue"
         },
         "is_scheduled": {
           "@type": "boolean",
@@ -2073,7 +2073,7 @@
         "updated_at": "2026-09-28T09:29:44.917Z",
         "title": {
           "@type": "string",
-          "@value": "Professionals: Disconnected Remote Desktop Session"
+          "@value": "Community: Disconnected Remote Desktop Session"
         },
         "is_scheduled": {
           "@type": "boolean",
