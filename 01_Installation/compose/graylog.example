@@ -60,7 +60,7 @@ GRAYLOG_REPORT_DISABLE_SANDBOX = "true"
 #
 GRAYLOG_CONTENT_PACKS_LOADER_ENABLED = "true"
 GRAYLOG_CONTENT_PACKS_DIR = "/etc/graylog/server/contentpacks"
-GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Community Collector Templates v2.json, Evaluation Self-Monitoring v1.json, Windows Server Information v3.json"
+GRAYLOG_CONTENT_PACKS_AUTO_INSTALL = "Community Collector Templates v3.json, Evaluation Self-Monitoring v1.json"
 
 ## Email Configurations
 #
@@ -78,10 +78,10 @@ GRAYLOG_TRANSPORT_EMAIL_WEB_INTERFACE_URL = ""
 
 ## Journal Configurations - System is intended to process 10GB logs per day
 GRAYLOG_MESSAGE_JOURNAL_MAX_AGE = 24h
-GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 5gb
+GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE = 20gb
 
 ## Datalake Journal Configurations
-GRAYLOG_DATA_LAKE_JOURNAL_MAX_SIZE = 5gb
+GRAYLOG_DATA_LAKE_JOURNAL_MAX_SIZE = 20gb
 
 ## Grafana Metrics Monitoring
 #
