@@ -1,33 +1,52 @@
-# Graylog Professionals: Windows - RDP Monitoring
+# Professionals: Remote Desktop Session Monitoring
 
-## Requirements
+### Download
+- [View Content Pack for Download](./Content%20Pack/Professionals:%20Windows%20Remote%20Desktop%20Session%20Monitoring%20v1.json)
 
-- Graylog 6.0.2 or higher
-- Graylog Enterprise or Security License
-- Illuminate 5.1 or higher
 
-## How to install
+### Requirements
+- Graylog 7.0+
+- Illuminate 7.0+
+- Windows Logs documenting Remote Desktop Authentications
 
-- Upload and [Install](https://graylog.org/videos/content-packs/) the Content Pack in Graylog (the video is for Graylog v3.0 but it does still work the same way)
-- Go to _"SYSTEM" / "CONTENT PACKS"_, filter for "pro" and klick on "Install":
-  
-  ![1](./images/1.png)
-- Go to _"SYSTEM" / "PIPELINES"_, filter for "pro" and klick on "Edit":
 
-  ![2](./images/2.png)
-- Klick on "Edit connections":
-  
-  ![3](./images/3.png)
-- Choose "Illuminate: Windows Security Event Log Messages" and "Update connections":
+### Getting Started
+- Go to **System/Content Packs** 
 
-  ![4](./images/4.png)
-- Validate your settings and ensure the UI shows "This pipeline is processing messages from the stream "Illuminate:Windows Security Event Log Messages":
-  
-  ![5](./images/5.png)
-- Go to _"DASHBOARDS"_, filter for "pro" and choose __"Graylog Professionals: Windows - RDP Monitoring"__:
+![System/Content Packs](./.Images/PIC1.png)
 
-  ![6](./images/6.png)
-- Review your Dashboard for RDP Monitoring:
-  
-  ![7](./images/7.png)
-  
+- Go to **Upload** 
+
+![Upload](./.Images/PIC2.png)
+
+- **Choose File** 
+
+![File](./.Images/PIC3.png)
+
+- Use **Professionals: Remote Desktop Session Monitoring.json** 
+
+![Content Pack](./.Images/PIC4.png)
+
+- **Choose Upload** 
+
+![Upload](./.Images/PIC5.png)
+
+- Confirm with **Install** 
+
+![Install](./.Images/PIC6.png)
+
+- Go to **Streams**
+
+![Streams](./.Images/PIC7.png)
+
+- Filter for Stream **Remote Desktop Authentications** and change its Status from **Paused** to **Running**
+
+![Install](./.Images/PIC8.png)
+
+- Go to **Dashboards** and search for **Professional** 
+
+![Dashboard](./.Images/PIC9.png)
+
+- Work with the Dashboard 
+
+![Work](./.Images/PIC10.png)

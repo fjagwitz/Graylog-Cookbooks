@@ -380,9 +380,6 @@ function_checkInstallUser () {
         die "THIS SCRIPT MUST BE SAVED TO A FILE AND STARTED WITH 'bash install-graylog.sh' (PIPING IT INTO BASH IS NOT SUPPORTED)"
     fi
 
-    command -v sudo >/dev/null 2>&1 || die "SUDO IS REQUIRED TO RUN THIS SCRIPT"
-    sudo -v || die "USER ${INSTALL_USER^^} NEEDS SUDO PRIVILEGES"
-
     log_info "RUNNING THIS SCRIPT AS USER ${INSTALL_USER^^}"
 }
 
